@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { PlusCircle, Settings, X } from "lucide-react";
 import { useState } from "react";
@@ -300,14 +299,12 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     });
   };
 
-  const sections = {
-    initialize: schema.properties?.initialize,
-    timestamps: schema.properties?.timestamps,
-    stimuli: schema.properties?.stimuli,
-    recordings: schema.properties?.recordings,
-    neuron_sets: schema.properties?.neuron_sets,
-    synapse_sets: schema.properties?.synapse_sets,
-  };
+  // Get sections dynamically from schema
+  const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
+    if (key === 'type') return acc;
+    acc[key] = value;
+    return acc;
+  }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
 
   const handleFormSubmit = (data: any) => {
     // Convert array fields from object format to array format
