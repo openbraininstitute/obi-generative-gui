@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { resolveSchemaRef } from "@/lib/api-client";
-import { PlusCircle, Settings } from "lucide-react";
+import { PlusCircle, Settings, X } from "lucide-react";
 import { useState } from "react";
 
 interface SchemaFormProps {
@@ -20,9 +20,11 @@ interface SchemaFormProps {
 }
 
 export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
-  const { register, handleSubmit, setValue, watch, getValues } = useForm();
+  const { register, handleSubmit, setValue, watch } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
-  const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
+  const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
+  const [formData, setFormData] = useState<any>({});
+  const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): OpenAPIV3.SchemaObject => {
     if ('$ref' in schema) {
@@ -31,51 +33,184 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return schema;
   };
 
-  const renderField = (name: string, property: OpenAPIV3.SchemaObject, path: string, required: boolean = false) => {
+  const isArrayType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
+    const resolvedProperty = resolveSchema(property);
+    if ('anyOf' in resolvedProperty) {
+      return resolvedProperty.anyOf?.some(schema => 
+        resolveSchema(schema as OpenAPIV3.SchemaObject).type === 'array'
+      ) || false;
+    }
+    return resolvedProperty.type === 'array';
+  };
+
+  const getPropertyType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string => {
+    const resolvedProperty = resolveSchema(property);
+    if ('anyOf' in resolvedProperty) {
+      const types = resolvedProperty.anyOf?.map(schema => 
+        resolveSchema(schema as OpenAPIV3.SchemaObject).type
+      );
+      return types?.find(type => type !== 'array') || 'string';
+    }
+    if (resolvedProperty.type === 'array') {
+      const itemSchema = resolveSchema(resolvedProperty.items as OpenAPIV3.SchemaObject);
+      return itemSchema.type || 'string';
+    }
+    return resolvedProperty.type || 'string';
+  };
+
+  const renderArrayField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject, required: boolean = false) => {
+    const fieldCount = arrayFields[name] || 1;
+    const type = getPropertyType(property);
     const label = `${name}${required ? ' *' : ''}`;
 
-    if (property.const) {
+    return (
+      <div key={name} className="mb-4">
+        <Label>{label}</Label>
+        <div className="space-y-2">
+          {Array.from({ length: fieldCount }).map((_, index) => (
+            <div key={`${name}-${index}`} className="flex gap-2">
+              {type === 'number' || type === 'integer' ? (
+                <Input
+                  type="number"
+                  {...register(`${name}.${index}`, { valueAsNumber: true })}
+                  className="flex-1"
+                  onChange={(e) => {
+                    const value = e.target.value ? Number(e.target.value) : null;
+                    setValue(`${name}.${index}`, value);
+                    const values = watch(name) || [];
+                    values[index] = value;
+                    setFormData(prev => ({ ...prev, [name]: values }));
+                  }}
+                />
+              ) : (
+                <Input
+                  {...register(`${name}.${index}`)}
+                  className="flex-1"
+                  onChange={(e) => {
+                    setValue(`${name}.${index}`, e.target.value);
+                    const values = watch(name) || [];
+                    values[index] = e.target.value;
+                    setFormData(prev => ({ ...prev, [name]: values }));
+                  }}
+                />
+              )}
+              {index === fieldCount - 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
+                >
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
+              )}
+              {fieldCount > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const values = watch(name) || [];
+                    values.splice(index, 1);
+                    setValue(name, values);
+                    setFormData(prev => ({ ...prev, [name]: values }));
+                    if (index === fieldCount - 1) {
+                      setArrayFields(prev => ({ ...prev, [name]: prev[name] - 1 }));
+                    }
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject, required: boolean = false) => {
+    const resolvedProperty = resolveSchema(property);
+    const label = `${name}${required ? ' *' : ''}`;
+
+    if (isArrayType(property)) {
+      return renderArrayField(name, property, required);
+    }
+
+    if (resolvedProperty.const) {
       return (
-        <div className="mb-4">
+        <div key={name} className="mb-4">
           <Label>{label}</Label>
-          <Input value={property.const} disabled />
-          {property.description && (
-            <p className="text-sm text-muted-foreground mt-1">{property.description}</p>
+          <Input 
+            value={resolvedProperty.const} 
+            disabled 
+            {...register(name)}
+          />
+          {resolvedProperty.description && (
+            <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
           )}
         </div>
       );
     }
 
-    switch (property.type) {
+    if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
+      return (
+        <div key={name} className="mb-6 p-4 border rounded-lg">
+          <Label className="text-lg font-semibold mb-3">{label}</Label>
+          {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => {
+            const isRequired = resolvedProperty.required?.includes(propName) || false;
+            return renderField(
+              `${name}.${propName}`,
+              propSchema as OpenAPIV3.SchemaObject,
+              isRequired
+            );
+          })}
+        </div>
+      );
+    }
+
+    switch (resolvedProperty.type) {
       case 'string':
-        if (property.enum) {
+        if (resolvedProperty.enum) {
           return (
-            <div className="mb-4">
+            <div key={name} className="mb-4">
               <Label>{label}</Label>
-              <Select onValueChange={(value) => setValue(path, value)}>
+              <Select 
+                onValueChange={(value) => {
+                  setValue(name, value);
+                  setFormData(prev => ({ ...prev, [name]: value }));
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
-                  {property.enum.map((option) => (
+                  {resolvedProperty.enum.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {property.description && (
-                <p className="text-sm text-muted-foreground mt-1">{property.description}</p>
+              {resolvedProperty.description && (
+                <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
               )}
             </div>
           );
         }
         return (
-          <div className="mb-4">
+          <div key={name} className="mb-4">
             <Label>{label}</Label>
-            <Input {...register(path)} placeholder={property.description} />
-            {property.description && (
-              <p className="text-sm text-muted-foreground mt-1">{property.description}</p>
+            <Input 
+              {...register(name)}
+              onChange={(e) => {
+                setValue(name, e.target.value);
+                setFormData(prev => ({ ...prev, [name]: e.target.value }));
+              }}
+              placeholder={resolvedProperty.description}
+            />
+            {resolvedProperty.description && (
+              <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
             )}
           </div>
         );
@@ -83,50 +218,42 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'number':
       case 'integer':
         return (
-          <div className="mb-4">
+          <div key={name} className="mb-4">
             <Label>{label}</Label>
             <Input
               type="number"
-              {...register(path, { 
+              {...register(name, { 
                 valueAsNumber: true,
-                min: property.minimum,
-                max: property.maximum
+                min: resolvedProperty.minimum,
+                max: resolvedProperty.maximum
               })}
-              placeholder={property.description}
+              onChange={(e) => {
+                const value = e.target.value ? Number(e.target.value) : null;
+                setValue(name, value);
+                setFormData(prev => ({ ...prev, [name]: value }));
+              }}
+              placeholder={resolvedProperty.description}
             />
-            {property.description && (
-              <p className="text-sm text-muted-foreground mt-1">{property.description}</p>
+            {resolvedProperty.description && (
+              <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
             )}
           </div>
         );
       
       case 'boolean':
         return (
-          <div className="mb-4 flex items-center space-x-2">
+          <div key={name} className="mb-4 flex items-center space-x-2">
             <Checkbox
-              id={path}
-              onCheckedChange={(checked) => setValue(path, checked)}
-            />
-            <Label htmlFor={path}>{label}</Label>
-            {property.description && (
-              <p className="text-sm text-muted-foreground ml-2">{property.description}</p>
-            )}
-          </div>
-        );
-
-      case 'array':
-        return (
-          <div className="mb-4">
-            <Label>{label}</Label>
-            <Textarea
-              {...register(path)}
-              placeholder="Enter values, one per line"
-              className="mt-1"
-              onChange={(e) => {
-                const values = e.target.value.split('\n').filter(Boolean);
-                setValue(path, values);
+              id={name}
+              onCheckedChange={(checked) => {
+                setValue(name, checked);
+                setFormData(prev => ({ ...prev, [name]: checked }));
               }}
             />
+            <Label htmlFor={name}>{label}</Label>
+            {resolvedProperty.description && (
+              <p className="text-sm text-muted-foreground ml-2">{resolvedProperty.description}</p>
+            )}
           </div>
         );
 
@@ -135,53 +262,14 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     }
   };
 
-  const renderBlockParameters = (blockSchema: OpenAPIV3.SchemaObject) => {
-    if (!blockSchema.properties) return null;
-
-    return Object.entries(blockSchema.properties).map(([name, property]) => {
-      const resolvedProperty = resolveSchema(property as OpenAPIV3.SchemaObject);
-      const isRequired = blockSchema.required?.includes(name) || false;
-      return renderField(name, resolvedProperty, `${selectedSection}.${selectedBlock}.${name}`, isRequired);
-    });
-  };
-
-  const resolvedSchema = resolveSchema(schema);
-  if (!resolvedSchema.properties) return <div>No schema available</div>;
-
-  const sections = {
-    initialize: resolvedSchema.properties.initialize,
-    timestamps: resolvedSchema.properties.timestamps,
-    stimuli: resolvedSchema.properties.stimuli,
-    recordings: resolvedSchema.properties.recordings,
-    neuron_sets: resolvedSchema.properties.neuron_sets,
-    synapse_sets: resolvedSchema.properties.synapse_sets,
-  };
-
-  const getAvailableBlocks = (section: string) => {
-    if (section === 'initialize') {
-      return ['Initialize'];
-    }
-
-    const sectionSchema = resolveSchema(sections[section as keyof typeof sections]);
-    if (!sectionSchema.additionalProperties) return [];
-
-    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
-                        [sectionSchema.additionalProperties];
-    
-    return blockSchemas.map(schema => {
-      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      return resolved.title || resolved.const || 'Unnamed Block';
-    });
-  };
-
   const getBlockSchema = () => {
     if (!selectedSection || !selectedBlock) return null;
     
     if (selectedSection === 'initialize') {
-      return resolveSchema(sections.initialize);
+      return resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
     }
 
-    const sectionSchema = resolveSchema(sections[selectedSection as keyof typeof sections]);
+    const sectionSchema = resolveSchema(schema.properties?.[selectedSection] as OpenAPIV3.SchemaObject);
     if (!sectionSchema.additionalProperties) return null;
 
     const blockSchemas = sectionSchema.additionalProperties.anyOf || 
@@ -193,6 +281,53 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     });
 
     return blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null;
+  };
+
+  const getAvailableBlocks = (section: string) => {
+    if (section === 'initialize') {
+      return ['Initialize'];
+    }
+
+    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
+    if (!sectionSchema.additionalProperties) return [];
+
+    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                        [sectionSchema.additionalProperties];
+    
+    return blockSchemas.map(schema => {
+      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+      return resolved.title || resolved.const || 'Unnamed Block';
+    });
+  };
+
+  const sections = {
+    initialize: schema.properties?.initialize,
+    timestamps: schema.properties?.timestamps,
+    stimuli: schema.properties?.stimuli,
+    recordings: schema.properties?.recordings,
+    neuron_sets: schema.properties?.neuron_sets,
+    synapse_sets: schema.properties?.synapse_sets,
+  };
+
+  const handleFormSubmit = (data: any) => {
+    // Convert array fields from object format to array format
+    const processedData = Object.entries(data).reduce((acc, [key, value]) => {
+      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+        // Check if it's an array field (has numeric keys)
+        const values = Object.entries(value)
+          .sort(([a], [b]) => parseInt(a) - parseInt(b))
+          .map(([_, v]) => v);
+        acc[key] = values;
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
+    onSubmit({
+      ...processedData,
+      type: selectedBlock
+    });
   };
 
   return (
@@ -254,8 +389,16 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         {selectedSection && selectedBlock && (
           <Card className="p-6">
             <h2 className="text-2xl font-bold mb-6">{selectedBlock}</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {renderBlockParameters(getBlockSchema()!)}
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+              {(() => {
+                const blockSchema = getBlockSchema();
+                if (!blockSchema?.properties) return null;
+                
+                return Object.entries(blockSchema.properties).map(([name, property]) => {
+                  const isRequired = blockSchema.required?.includes(name) || false;
+                  return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
+                });
+              })()}
               <Button type="submit" className="w-full">Save Changes</Button>
             </form>
           </Card>
