@@ -1,1 +1,1 @@
-# obi_generative_gui
+npm run dev
