@@ -45,7 +45,7 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
     return data;
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to the server. Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8000)\n3. Your network connection');
+      throw new Error('Cannot connect to the server (1). Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8000)\n3. Your network connection');
     }
     if (error instanceof Error) {
       throw error;
@@ -86,7 +86,8 @@ export async function callEndpoint(url: string, method: string, path: string, da
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         status: 500,
-        data: { detail: 'Cannot connect to the server. Please check:\n1. The server is running\n2. The URL is correct\n3. Your network connection' },
+        // data: { detail: 'Cannot connect to the server (2). Please check:\n1. The server is running\n2. The URL is correct\n3. Your network connection' },
+        data: { detail: error.message },
         ok: false,
       };
     }

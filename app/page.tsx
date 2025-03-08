@@ -114,7 +114,7 @@ export default function Home() {
                 <div className="space-y-4">
                   {Object.entries(spec.paths).map(([path, pathItem]) => (
                     <Card key={path} className="p-4">
-                      <h3 className="text-lg font-semibold mb-4">{path}</h3>
+                      <h3 className="text-lg font-semibold mb-4 break-words font-mono text-[0.7em]">{path}</h3>
                       <div className="space-y-2">
                         {Object.entries(pathItem as OpenAPIV3.PathItemObject).map(
                           ([method, operation]) => {
