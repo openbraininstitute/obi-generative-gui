@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { ServerIcon, SendIcon, FileJson, AlertCircle } from "lucide-react";
+import { SendIcon, FileJson, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -72,11 +72,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-none px-6 py-4 border-b">
-          <div className="flex items-center justify-between max-w-[1400px] mx-auto">
-            <div className="flex items-center space-x-4">
-              <ServerIcon className="w-8 h-8" />
-              <h1 className="text-3xl font-bold">FastAPI Client</h1>
-            </div>
+          <div className="flex items-center justify-end max-w-[1400px] mx-auto">
             <ThemeToggle />
           </div>
         </div>
@@ -90,11 +86,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-none px-6 py-4 border-b">
-        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
-          <div className="flex items-center space-x-4">
-            <ServerIcon className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">FastAPI Client</h1>
-          </div>
+        <div className="flex items-center justify-end max-w-[1400px] mx-auto">
           <ThemeToggle />
         </div>
       </div>
