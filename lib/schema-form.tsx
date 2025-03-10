@@ -8,6 +8,13 @@ import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "@/lib/components/block-list";
 import { FormField } from "@/lib/components/form-field";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -29,6 +36,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const { theme } = useTheme();
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -159,52 +167,78 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   };
 
   return (
-    <div className="flex flex-grow">
-      <BlockList
-        sections={sections}
-        blocks={blocks}
-        selectedSection={selectedSection}
-        selectedBlock={selectedBlock}
-        onSectionSelect={(section, block) => {
-          setSelectedSection(section);
-          setSelectedBlock(block);
-        }}
-        onAddBlock={handleAddBlock}
-        onUpdateBlockName={handleUpdateBlockName}
-      />
-
-      <div className="flex-1 overflow-y-auto">
-        {selectedSection && selectedBlock && (
-          <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">{selectedBlock}</h2>
-            </div>
-            <form className="flex-1 overflow-y-auto">
-              <div className="divide-y">
-                {(() => {
-                  const blockSchema = getBlockSchema();
-                  if (!blockSchema?.properties) return null;
-                  
-                  return Object.entries(blockSchema.properties).map(([name, property]) => (
-                    <FormField
-                      key={name}
-                      name={name}
-                      property={property as OpenAPIV3.SchemaObject}
-                      register={register}
-                      setValue={setValue}
-                      watch={watch}
-                      resolveSchema={resolveSchema}
-                      arrayFields={arrayFields}
-                      setArrayFields={setArrayFields}
-                      setFormData={setFormData}
-                    />
-                  ));
-                })()}
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="flex-grow rounded-lg"
+    >
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <BlockList
+          sections={sections}
+          blocks={blocks}
+          selectedSection={selectedSection}
+          selectedBlock={selectedBlock}
+          onSectionSelect={(section, block) => {
+            setSelectedSection(section);
+            setSelectedBlock(block);
+          }}
+          onAddBlock={handleAddBlock}
+          onUpdateBlockName={handleUpdateBlockName}
+        />
+      </ResizablePanel>
+      
+      <ResizableHandle withHandle className="bg-border" />
+      
+      <ResizablePanel defaultSize={50} minSize={30}>
+        <div className="h-full overflow-y-auto">
+          {selectedSection && selectedBlock && (
+            <div className="h-full flex flex-col">
+              <div className="flex items-center justify-between px-6 py-4 border-b">
+                <h2 className="text-lg font-semibold">{selectedBlock}</h2>
               </div>
-            </form>
+              <form className="flex-1 overflow-y-auto">
+                <div className="divide-y">
+                  {(() => {
+                    const blockSchema = getBlockSchema();
+                    if (!blockSchema?.properties) return null;
+                    
+                    return Object.entries(blockSchema.properties).map(([name, property]) => (
+                      <FormField
+                        key={name}
+                        name={name}
+                        property={property as OpenAPIV3.SchemaObject}
+                        register={register}
+                        setValue={setValue}
+                        watch={watch}
+                        resolveSchema={resolveSchema}
+                        arrayFields={arrayFields}
+                        setArrayFields={setArrayFields}
+                        setFormData={setFormData}
+                      />
+                    ));
+                  })()}
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      </ResizablePanel>
+      
+      <ResizableHandle withHandle className="bg-border" />
+      
+      <ResizablePanel defaultSize={30} minSize={20}>
+        <div className={cn(
+          "w-full h-full flex items-center justify-center transition-colors duration-300",
+          theme === 'dark' ? 'bg-black' : 'bg-white'
+        )}>
+          <div className="w-1/2 h-1/2 relative flex items-center justify-center">
+            <img 
+              src="/images/Microcircuits.png" 
+              alt="Microcircuits visualization"
+              className="max-w-full max-h-full object-contain"
+            />
           </div>
-        )}
-      </div>
+        </div>
+      </ResizablePanel>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
@@ -225,6 +259,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </ResizablePanelGroup>
   );
 }
