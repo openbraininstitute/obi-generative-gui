@@ -77,8 +77,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     const type = getPropertyType(property);
 
     return (
-      <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-        <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+      <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+        <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
         <div className="flex-1 space-y-2">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-2">
@@ -112,7 +112,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 flex-shrink-0"
                   onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -123,7 +123,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 flex-shrink-0"
                   onClick={() => {
                     const values = watch(name) || [];
                     values.splice(index, 1);
@@ -155,8 +155,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
 
     if (resolvedProperty.const) {
       return (
-        <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-          <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+        <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+          <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
           <Input 
             value={resolvedProperty.const} 
             disabled 
@@ -187,8 +187,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'string':
         if (resolvedProperty.enum) {
           return (
-            <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-              <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+            <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+              <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue(name, value);
@@ -210,8 +210,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           );
         }
         return (
-          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
             <Input 
               {...register(name)}
               className="flex-1 h-8"
@@ -227,8 +227,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'number':
       case 'integer':
         return (
-          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
             <Input
               type="number"
               {...register(name, { 
@@ -249,8 +249,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       
       case 'boolean':
         return (
-          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
+          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
             <div className="flex-1">
               <Checkbox
                 id={name}

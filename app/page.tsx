@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -23,11 +23,18 @@ export default function Home() {
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showTopBar, setShowTopBar] = useState(true);
   const { theme } = useTheme();
 
   useEffect(() => {
     loadSpec();
   }, []);
+
+  useEffect(() => {
+    if (selectedPath && selectedMethod) {
+      setShowTopBar(false);
+    }
+  }, [selectedPath, selectedMethod]);
 
   const loadSpec = async () => {
     setLoading(true);
@@ -109,7 +116,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-none px-6 py-4 border-b">
+      <div 
+        className={cn(
+          "flex-none px-6 py-4 border-b transition-all duration-300 ease-in-out",
+          showTopBar ? "opacity-100" : "opacity-0 h-0 py-0 overflow-hidden"
+        )}
+      >
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <Label>Lab:</Label>
@@ -143,6 +155,17 @@ export default function Home() {
           <ThemeToggle />
         </div>
       </div>
+
+      {!showTopBar && selectedPath && selectedMethod && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200"
+          onClick={() => setShowTopBar(true)}
+        >
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      )}
 
       {error && (
         <div className="flex-none px-6 py-4">
