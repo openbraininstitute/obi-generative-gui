@@ -72,14 +72,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return resolvedProperty.type || 'string';
   };
 
-  const renderArrayField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject, required: boolean = false) => {
+  const renderArrayField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
     const fieldCount = arrayFields[name] || 1;
     const type = getPropertyType(property);
-    const label = `${name}${required ? ' *' : ''}`;
 
     return (
       <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-        <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+        <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
         <div className="flex-1 space-y-2">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-2">
@@ -145,18 +144,17 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     );
   };
 
-  const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject, required: boolean = false) => {
+  const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
     const resolvedProperty = resolveSchema(property);
-    const label = `${name}${required ? ' *' : ''}`;
 
     if (isArrayType(property)) {
-      return renderArrayField(name, property, required);
+      return renderArrayField(name, property);
     }
 
     if (resolvedProperty.const) {
       return (
         <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-          <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+          <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
           <Input 
             value={resolvedProperty.const} 
             disabled 
@@ -171,14 +169,12 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       return (
         <div key={name} className="border-t border-b">
           <div className="px-3 py-1.5">
-            <Label className="text-sm font-medium">{label}</Label>
+            <Label className="text-sm font-medium">{name}</Label>
           </div>
           {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => {
-            const isRequired = resolvedProperty.required?.includes(propName) || false;
             return renderField(
               `${name}.${propName}`,
-              propSchema as OpenAPIV3.SchemaObject,
-              isRequired
+              propSchema as OpenAPIV3.SchemaObject
             );
           })}
         </div>
@@ -190,7 +186,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         if (resolvedProperty.enum) {
           return (
             <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-              <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+              <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue(name, value);
@@ -213,7 +209,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         }
         return (
           <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
             <Input 
               {...register(name)}
               className="flex-1 h-8"
@@ -230,7 +226,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'integer':
         return (
           <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
             <Input
               type="number"
               {...register(name, { 
@@ -252,7 +248,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'boolean':
         return (
           <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+            <Label className="w-1/3 text-sm text-muted-foreground">{name}</Label>
             <div className="flex-1">
               <Checkbox
                 id={name}
@@ -497,8 +493,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   if (!blockSchema?.properties) return null;
                   
                   return Object.entries(blockSchema.properties).map(([name, property]) => {
-                    const isRequired = blockSchema.required?.includes(name) || false;
-                    return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
+                    return renderField(name, property as OpenAPIV3.SchemaObject);
                   });
                 })()}
               </div>
