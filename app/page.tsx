@@ -10,7 +10,6 @@ import { AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
@@ -24,7 +23,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
-  const { theme } = useTheme();
 
   useEffect(() => {
     loadSpec();
@@ -179,21 +177,7 @@ export default function Home() {
       {spec && (
         <div className="flex-1 overflow-hidden">
           {selectedOperation && schema ? (
-            <div className="flex h-[calc(100vh-4.125rem)]">
-              <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
-              <div className={cn(
-                "w-1/3 flex items-center justify-center transition-colors duration-300",
-                theme === 'dark' ? 'bg-black' : 'bg-white'
-              )}>
-                <div className="w-1/2 h-1/2 relative flex items-center justify-center">
-                  <img 
-                    src="/images/Microcircuits.png" 
-                    alt="Microcircuits visualization"
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
-              </div>
-            </div>
+            <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-lg text-muted-foreground">Select a lab to begin</p>
