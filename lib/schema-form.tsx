@@ -389,7 +389,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   return (
     <div className="flex flex-grow">
       <div className="w-[240px] border-r">
-        <div className="p-6">
+        <div className="space-y-1 p-6">
           <button
             className={cn(
               "w-full text-left px-3 py-1.5 text-sm transition-colors",
@@ -406,24 +406,26 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           </button>
           {Object.entries(sections).map(([sectionName, sectionSchema]) => (
             sectionName !== 'initialize' && (
-              <div key={sectionName} className="mb-4">
-                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-1 px-3">
-                  <span>{sectionName.toUpperCase().replace(/_/g, ' ')}</span>
+              <div key={sectionName} className="mt-4">
+                <div className="flex items-center justify-between px-3 mb-1">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {sectionName.toUpperCase().replace(/_/g, ' ')}
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4"
+                    className="h-5 w-5 -mr-1.5"
                     onClick={() => handleAddBlock(sectionName)}
                   >
                     <PlusCircle className="h-3 w-3" />
                   </Button>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 pl-4">
                   {(blocks[sectionName] || []).map(({ type, displayName }) => (
                     <button
                       key={type}
                       className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors",
+                        "w-full text-left px-3 py-1.5 text-sm transition-colors rounded-sm",
                         selectedSection === sectionName && selectedBlock === type
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-muted"
