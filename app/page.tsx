@@ -197,9 +197,7 @@ export default function Home() {
           {selectedOperation && schema ? (
             <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-lg text-muted-foreground">Select a lab to begin</p>
-            </div>
+            <div className="flex-1" />
           )}
 
           {response && (
