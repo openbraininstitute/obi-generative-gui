@@ -20,21 +20,33 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
     }
 
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+    
+    console.log('\n=== Fetching OpenAPI Spec ===');
+    console.log('URL:', `${cleanUrl}/openapi.json`);
+    
     const response = await fetch(`${cleanUrl}/openapi.json`, {
+      method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       },
-      mode: 'cors',
+      credentials: 'include'
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAPI Spec Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
+      
       if (response.status === 404) {
         throw new Error('OpenAPI specification not found. Please check if this is a FastAPI server and the URL is correct.');
       }
       if (response.status === 0 || !response.status) {
         throw new Error('Cannot connect to the server. Please check:\n1. The server is running\n2. CORS is enabled\n3. The URL is correct');
       }
-      throw new Error(`Server error (${response.status}). Please check if the FastAPI server is running correctly.`);
+      throw new Error(`Server error (${response.status}): ${errorText}`);
     }
     
     const data = await response.json();
@@ -42,10 +54,12 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
       throw new Error('Invalid OpenAPI specification received. Please check if the server is a FastAPI server.');
     }
     
+    console.log('OpenAPI Spec fetched successfully');
     return data;
   } catch (error) {
+    console.error('Error fetching OpenAPI spec:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to the server (1). Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8000)\n3. Your network connection');
+      throw new Error('Cannot connect to the server. Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8000)\n3. Your network connection');
     }
     if (error instanceof Error) {
       throw error;
@@ -65,42 +79,68 @@ export async function callEndpoint(url: string, method: string, path: string, da
     }
 
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-    const response = await fetch(`${cleanUrl}${path}`, {
+    const fullUrl = `${cleanUrl}${path}`;
+    
+    console.log('\n=== API Request ===');
+    console.log('URL:', fullUrl);
+    console.log('Method:', method.toUpperCase());
+    console.log('Request Body:', JSON.stringify(data, null, 2));
+    console.log('================\n');
+    
+    const response = await fetch(fullUrl, {
       method: method.toUpperCase(),
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       },
-      mode: 'cors',
-      body: data ? JSON.stringify(data) : undefined,
+      credentials: 'include',
+      body: data ? JSON.stringify(data) : undefined
     });
 
-    const responseData = await response.json().catch(() => null);
-    
+    let responseData;
+    try {
+      const textResponse = await response.text();
+      console.log('\n=== API Response ===');
+      console.log('Status:', response.status);
+      console.log('Response Body:', textResponse);
+      console.log('=================\n');
+      
+      responseData = textResponse ? JSON.parse(textResponse) : null;
+    } catch (e) {
+      console.error('Error parsing response:', e);
+      responseData = { detail: 'Invalid JSON response from server' };
+    }
+
+    if (!response.ok) {
+      return {
+        status: response.status,
+        data: responseData || { detail: `Server error: ${response.statusText}` },
+        ok: false,
+      };
+    }
+
     return {
       status: response.status,
       data: responseData,
-      ok: response.ok,
+      ok: true,
     };
   } catch (error) {
+    console.error('API call error:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         status: 500,
-        // data: { detail: 'Cannot connect to the server (2). Please check:\n1. The server is running\n2. The URL is correct\n3. Your network connection' },
-        data: { detail: error.message },
+        data: { 
+          detail: 'Cannot connect to the server. Please check:\n1. The server is running\n2. CORS is enabled\n3. The URL is correct'
+        },
         ok: false,
       };
     }
-    if (error instanceof Error) {
-      return {
-        status: 500,
-        data: { detail: error.message },
-        ok: false,
-      };
-    }
+    
     return {
       status: 500,
-      data: { detail: 'An unknown error occurred' },
+      data: { 
+        detail: error instanceof Error ? error.message : 'An unknown error occurred'
+      },
       ok: false,
     };
   }

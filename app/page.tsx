@@ -10,6 +10,7 @@ import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
 import { ServerIcon, SendIcon, FileJson, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000");
@@ -71,9 +72,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 max-w-[1400px]">
-        <div className="flex items-center space-x-4 mb-8">
-          <ServerIcon className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">FastAPI Client</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <ServerIcon className="w-8 h-8" />
+            <h1 className="text-3xl font-bold">FastAPI Client</h1>
+          </div>
+          <ThemeToggle />
         </div>
 
         <Card className="p-6 mb-8">
