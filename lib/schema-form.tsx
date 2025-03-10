@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { PlusCircle, Settings, X } from "lucide-react";
 import { useState } from "react";
@@ -24,8 +25,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
   const [formData, setFormData] = useState<any>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogSection, setDialogSection] = useState<string>("");
 
-  const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): OpenAPIV3.SchemaObject => {
+  const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
+    if (!schema) {
+      return { type: 'object', properties: {} };
+    }
     if ('$ref' in schema) {
       return resolveSchemaRef(spec, schema.$ref);
     }
@@ -327,80 +333,111 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     });
   };
 
+  const handleAddBlock = (section: string) => {
+    setDialogSection(section);
+    setIsDialogOpen(true);
+  };
+
+  const handleSelectBlock = (blockName: string) => {
+    setSelectedSection(dialogSection);
+    setSelectedBlock(blockName);
+    setIsDialogOpen(false);
+  };
+
   return (
-    <div className="grid grid-cols-[300px,1fr] gap-6">
-      {/* Left sidebar */}
-      <div className="space-y-4">
-        {Object.entries(sections).map(([sectionName, sectionSchema]) => (
-          <Card key={sectionName} className="p-4">
-            <h3 className="font-medium mb-3 flex items-center">
-              <Settings className="w-4 h-4 mr-2" />
-              {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-            </h3>
-            <div className="space-y-2">
-              {sectionName === 'initialize' ? (
-                <Button
-                  variant={selectedSection === sectionName ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSelectedSection(sectionName);
-                    setSelectedBlock('Initialize');
-                  }}
-                >
-                  Initialize
-                </Button>
-              ) : (
-                <>
-                  {getAvailableBlocks(sectionName).map((blockName) => (
-                    <Button
-                      key={blockName}
-                      variant={selectedSection === sectionName && selectedBlock === blockName ? "default" : "outline"}
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setSelectedSection(sectionName);
-                        setSelectedBlock(blockName);
-                      }}
-                    >
-                      {blockName}
-                    </Button>
-                  ))}
+    <>
+      <div className="grid grid-cols-[300px,1fr] gap-6">
+        {/* Left sidebar */}
+        <div className="space-y-4">
+          {Object.entries(sections).map(([sectionName, sectionSchema]) => (
+            <Card key={sectionName} className="p-4">
+              <h3 className="font-medium mb-3 flex items-center">
+                <Settings className="w-4 h-4 mr-2" />
+                {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+              </h3>
+              <div className="space-y-2">
+                {sectionName === 'initialize' ? (
                   <Button
-                    variant="ghost"
-                    className="w-full justify-start text-muted-foreground"
+                    variant={selectedSection === sectionName ? "default" : "outline"}
+                    className="w-full justify-start"
                     onClick={() => {
-                      // Handle adding new block
+                      setSelectedSection(sectionName);
+                      setSelectedBlock('Initialize');
                     }}
                   >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add {sectionName.slice(0, -1)}
+                    Initialize
                   </Button>
-                </>
-              )}
-            </div>
-          </Card>
-        ))}
+                ) : (
+                  <>
+                    {getAvailableBlocks(sectionName).map((blockName) => (
+                      <Button
+                        key={blockName}
+                        variant={selectedSection === sectionName && selectedBlock === blockName ? "default" : "outline"}
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setSelectedSection(sectionName);
+                          setSelectedBlock(blockName);
+                        }}
+                      >
+                        {blockName}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-muted-foreground"
+                      onClick={() => handleAddBlock(sectionName)}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add {sectionName.slice(0, -1)}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Right content */}
+        <div>
+          {selectedSection && selectedBlock && (
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-6">{selectedBlock}</h2>
+              <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+                {(() => {
+                  const blockSchema = getBlockSchema();
+                  if (!blockSchema?.properties) return null;
+                  
+                  return Object.entries(blockSchema.properties).map(([name, property]) => {
+                    const isRequired = blockSchema.required?.includes(name) || false;
+                    return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
+                  });
+                })()}
+                <Button type="submit" className="w-full">Save Changes</Button>
+              </form>
+            </Card>
+          )}
+        </div>
       </div>
 
-      {/* Right content */}
-      <div>
-        {selectedSection && selectedBlock && (
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6">{selectedBlock}</h2>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-              {(() => {
-                const blockSchema = getBlockSchema();
-                if (!blockSchema?.properties) return null;
-                
-                return Object.entries(blockSchema.properties).map(([name, property]) => {
-                  const isRequired = blockSchema.required?.includes(name) || false;
-                  return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
-                });
-              })()}
-              <Button type="submit" className="w-full">Save Changes</Button>
-            </form>
-          </Card>
-        )}
-      </div>
-    </div>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select {dialogSection.slice(0, -1)} Type</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {getAvailableBlocks(dialogSection).map((blockName) => (
+              <Button
+                key={blockName}
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => handleSelectBlock(blockName)}
+              >
+                {blockName}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
