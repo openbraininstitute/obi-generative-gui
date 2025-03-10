@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
@@ -12,8 +11,9 @@ import { ServerIcon, SendIcon, FileJson, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+const API_URL = "http://127.0.0.1:8000";
+
 export default function Home() {
-  const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000");
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
@@ -21,18 +21,17 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const loadSpec = async () => {
-    if (!apiUrl) {
-      setError("Please enter a FastAPI URL");
-      return;
-    }
+  useEffect(() => {
+    loadSpec();
+  }, []);
 
+  const loadSpec = async () => {
     setLoading(true);
     setError(null);
     setSpec(null);
 
     try {
-      const spec = await fetchOpenAPISpec(apiUrl);
+      const spec = await fetchOpenAPISpec(API_URL);
       setSpec(spec);
       setError(null);
     } catch (error) {
@@ -48,7 +47,7 @@ export default function Home() {
     setError(null);
     
     try {
-      const result = await callEndpoint(apiUrl, selectedMethod, selectedPath, data);
+      const result = await callEndpoint(API_URL, selectedMethod, selectedPath, data);
       setResponse(result);
       
       if (!result.ok) {
@@ -69,6 +68,25 @@ export default function Home() {
     ? getSchemaFromPath(spec, selectedPath, selectedMethod)
     : null;
 
+  if (loading && !spec) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <div className="flex-none px-6 py-4 border-b">
+          <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+            <div className="flex items-center space-x-4">
+              <ServerIcon className="w-8 h-8" />
+              <h1 className="text-3xl font-bold">FastAPI Client</h1>
+            </div>
+            <ThemeToggle />
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-lg text-muted-foreground">Loading API specification...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-none px-6 py-4 border-b">
@@ -81,29 +99,14 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex-none px-6 py-4 border-b">
-        <div className="max-w-[1400px] mx-auto">
-          <Card className="p-6">
-            <div className="flex space-x-4">
-              <Input
-                placeholder="Enter FastAPI URL (e.g., http://localhost:8000)"
-                value={apiUrl}
-                onChange={(e) => setApiUrl(e.target.value)}
-              />
-              <Button onClick={loadSpec} disabled={loading}>
-                {loading ? "Loading..." : "Load API"}
-              </Button>
-            </div>
-            
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </Card>
+      {error && (
+        <div className="flex-none px-6 py-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         </div>
-      </div>
+      )}
 
       {spec && (
         <div className="flex-1 overflow-hidden">
