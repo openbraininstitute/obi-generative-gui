@@ -154,59 +154,41 @@ export default function Home() {
       )}
 
       {spec && (
-        <div className="flex-1 overflow-hidden flex">
-          {/* Main content */}
-          <div className={cn(
-            "min-h-full overflow-y-auto px-6",
-            selectedOperation ? "w-1/2" : "w-full"
-          )}>
-            <div className="py-6">
-              {selectedOperation && (
-                <Card className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">
-                    {selectedOperation.summary || selectedOperation.operationId || selectedPath}
-                  </h2>
-                  {selectedOperation.description && (
-                    <p className="text-muted-foreground mb-4">{selectedOperation.description}</p>
-                  )}
-                  {schema ? (
-                    <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
-                  ) : (
-                    <p className="text-muted-foreground">This endpoint doesn't require a request body.</p>
-                  )}
-                </Card>
-              )}
-
-              {response && (
-                <Card className="p-6 mt-6">
-                  <h2 className="text-2xl font-bold mb-4">Response</h2>
-                  <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
-                    <div className="font-semibold mb-2">
-                      Status: {response.status}
-                    </div>
-                    <pre className="overflow-auto">
-                      {JSON.stringify(response.data, null, 2)}
-                    </pre>
-                  </div>
-                </Card>
-              )}
-            </div>
-          </div>
-
-          {/* Right image column - only shown when a lab is selected */}
-          {selectedOperation && (
-            <div className={cn(
-              "w-1/2 fixed right-0 top-[4.125rem] bottom-0 flex items-center justify-center transition-colors duration-300",
-              theme === 'dark' ? 'bg-black' : 'bg-white'
-            )}>
-              <div className="w-1/2 h-1/2 relative flex items-center justify-center">
-                <img 
-                  src="/images/Microcircuits.png" 
-                  alt="Microcircuits visualization"
-                  className="max-w-full max-h-full object-contain"
-                />
+        <div className="flex-1 overflow-hidden">
+          {selectedOperation && schema ? (
+            <div className="flex h-[calc(100vh-4.125rem)]">
+              <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
+              <div className={cn(
+                "w-1/3 flex items-center justify-center transition-colors duration-300",
+                theme === 'dark' ? 'bg-black' : 'bg-white'
+              )}>
+                <div className="w-1/2 h-1/2 relative flex items-center justify-center">
+                  <img 
+                    src="/images/Microcircuits.png" 
+                    alt="Microcircuits visualization"
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
               </div>
             </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-lg text-muted-foreground">Select a lab to begin</p>
+            </div>
+          )}
+
+          {response && (
+            <Card className="p-6 mt-6">
+              <h2 className="text-2xl font-bold mb-4">Response</h2>
+              <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
+                <div className="font-semibold mb-2">
+                  Status: {response.status}
+                </div>
+                <pre className="overflow-auto">
+                  {JSON.stringify(response.data, null, 2)}
+                </pre>
+              </div>
+            </Card>
           )}
         </div>
       )}

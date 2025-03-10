@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { resolveSchemaRef } from "@/lib/api-client";
 import { PlusCircle, X, Edit2 } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -320,11 +321,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return block?.displayName || blockType;
   };
 
-  // Get sections dynamically from schema and ensure initialize is first
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
     if (key === 'type') return acc;
     if (key === 'initialize') {
-      // Add initialize first
       acc = { initialize: value, ...acc };
     } else {
       acc[key] = value;
@@ -333,10 +332,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
 
   const handleFormSubmit = (data: any) => {
-    // Convert array fields from object format to array format
     const processedData = Object.entries(data).reduce((acc, [key, value]) => {
       if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-        // Check if it's an array field (has numeric keys)
         const values = Object.entries(value)
           .sort(([a], [b]) => parseInt(a) - parseInt(b))
           .map(([_, v]) => v);
@@ -390,121 +387,126 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   };
 
   return (
-    <>
-      <div className="grid grid-cols-[300px,1fr] gap-6">
-        {/* Left sidebar */}
-        <div className="space-y-4">
+    <div className="flex flex-grow">
+      <div className="w-[240px] border-r">
+        <div className="space-y-1 font-mono p-6">
           {Object.entries(sections).map(([sectionName, sectionSchema]) => (
-            <Card key={sectionName} className="p-4">
-              <h3 className="font-medium mb-3">
+            <div key={sectionName} className="mb-4">
+              <div className="text-sm font-medium text-muted-foreground mb-1 px-3">
                 {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-              </h3>
-              <div className="space-y-2">
+              </div>
+              <div className="space-y-1">
                 {sectionName === 'initialize' ? (
-                  <Button
-                    variant={selectedSection === sectionName ? "default" : "outline"}
-                    className="w-full justify-start"
+                  <button
+                    className={cn(
+                      "w-full text-left px-3 py-1.5 text-sm transition-colors",
+                      selectedSection === sectionName
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}
                     onClick={() => {
                       setSelectedSection(sectionName);
                       setSelectedBlock('Initialize');
                     }}
                   >
                     Initialize
-                  </Button>
+                  </button>
                 ) : (
                   <>
                     {(blocks[sectionName] || []).map(({ type, displayName }) => (
-                      <Button
+                      <button
                         key={type}
-                        variant={selectedSection === sectionName && selectedBlock === type ? "default" : "outline"}
-                        className="w-full justify-start"
+                        className={cn(
+                          "w-full text-left px-3 py-1.5 text-sm transition-colors",
+                          selectedSection === sectionName && selectedBlock === type
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-muted"
+                        )}
                         onClick={() => {
                           setSelectedSection(sectionName);
                           setSelectedBlock(type);
                         }}
                       >
                         {displayName}
-                      </Button>
+                      </button>
                     ))}
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-muted-foreground"
+                    <button
+                      className="w-full text-left px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
                       onClick={() => handleAddBlock(sectionName)}
                     >
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Add {sectionName.slice(0, -1)}
-                    </Button>
+                      <PlusCircle className="w-4 h-4" />
+                      <span>Add {sectionName.slice(0, -1)}</span>
+                    </button>
                   </>
                 )}
               </div>
-            </Card>
+            </div>
           ))}
         </div>
+      </div>
 
-        {/* Right content */}
-        <div>
-          {selectedSection && selectedBlock && (
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                {selectedSection === 'initialize' || isEditingName ? (
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    {isEditingName ? (
-                      <>
-                        <Input
-                          value={editedName}
-                          onChange={(e) => setEditedName(e.target.value)}
-                          className="text-2xl font-bold h-auto py-0 max-w-[200px]"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleUpdateBlockName}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingName(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      'Initialize'
-                    )}
-                  </h2>
-                ) : (
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    {getBlockDisplayName(selectedSection, selectedBlock)}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
-                        setIsEditingName(true);
-                      }}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </h2>
-                )}
-              </div>
-              <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-                {(() => {
-                  const blockSchema = getBlockSchema();
-                  if (!blockSchema?.properties) return null;
-                  
-                  return Object.entries(blockSchema.properties).map(([name, property]) => {
-                    const isRequired = blockSchema.required?.includes(name) || false;
-                    return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
-                  });
-                })()}
-                <Button type="submit" className="w-full">Save Changes</Button>
-              </form>
-            </Card>
-          )}
-        </div>
+      <div className="flex-1 p-6 overflow-y-auto">
+        {selectedSection && selectedBlock && (
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              {selectedSection === 'initialize' || isEditingName ? (
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  {isEditingName ? (
+                    <>
+                      <Input
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        className="text-2xl font-bold h-auto py-0 max-w-[200px]"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleUpdateBlockName}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingName(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    'Initialize'
+                  )}
+                </h2>
+              ) : (
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  {getBlockDisplayName(selectedSection, selectedBlock)}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
+                      setIsEditingName(true);
+                    }}
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                </h2>
+              )}
+            </div>
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+              {(() => {
+                const blockSchema = getBlockSchema();
+                if (!blockSchema?.properties) return null;
+                
+                return Object.entries(blockSchema.properties).map(([name, property]) => {
+                  const isRequired = blockSchema.required?.includes(name) || false;
+                  return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
+                });
+              })()}
+              <Button type="submit" className="w-full">Save Changes</Button>
+            </form>
+          </Card>
+        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -526,6 +528,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
