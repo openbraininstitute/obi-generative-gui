@@ -392,7 +392,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         <div className="space-y-1 p-6">
           <button
             className={cn(
-              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted truncate",
+              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted text-ellipsis overflow-hidden whitespace-nowrap",
               selectedSection === 'initialize'
                 ? "text-primary"
                 : "text-muted-foreground"
@@ -408,7 +408,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
             sectionName !== 'initialize' && (
               <div key={sectionName} className="mt-4">
                 <div className="flex items-center justify-between px-3 mb-1">
-                  <span className="text-sm font-medium text-muted-foreground truncate pr-2">
+                  <span className="text-sm font-medium text-muted-foreground text-ellipsis overflow-hidden whitespace-nowrap pr-2">
                     {sectionName.toUpperCase().replace(/_/g, ' ')}
                   </span>
                   <Button
@@ -425,7 +425,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                     <button
                       key={type}
                       className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm truncate",
+                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
                         selectedSection === sectionName && selectedBlock === type
                           ? "text-primary"
                           : "text-muted-foreground"
