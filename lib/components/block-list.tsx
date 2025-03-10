@@ -2,9 +2,11 @@
 
 import { OpenAPIV3 } from "openapi-types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit2, PlusCircle } from "lucide-react";
+import { Edit2, PlusCircle, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface BlockData {
   type: string;
@@ -18,7 +20,7 @@ interface BlockListProps {
   selectedBlock: string | null;
   onSectionSelect: (section: string, block: string) => void;
   onAddBlock: (section: string) => void;
-  onEditBlock: (displayName: string) => void;
+  onUpdateBlockName: (section: string, blockType: string, newName: string) => void;
 }
 
 export function BlockList({
@@ -28,8 +30,28 @@ export function BlockList({
   selectedBlock,
   onSectionSelect,
   onAddBlock,
-  onEditBlock,
+  onUpdateBlockName,
 }: BlockListProps) {
+  const [editingBlock, setEditingBlock] = useState<{ section: string; type: string } | null>(null);
+  const [editedName, setEditedName] = useState("");
+
+  const handleStartEdit = (e: React.MouseEvent, section: string, block: BlockData) => {
+    e.stopPropagation();
+    setEditingBlock({ section, type: block.type });
+    setEditedName(block.displayName);
+  };
+
+  const handleSaveEdit = (e: React.MouseEvent, section: string, type: string) => {
+    e.stopPropagation();
+    onUpdateBlockName(section, type, editedName);
+    setEditingBlock(null);
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingBlock(null);
+  };
+
   return (
     <div className="w-[240px] border-r overflow-y-auto overflow-x-hidden">
       <div className="space-y-1 p-6">
@@ -61,32 +83,61 @@ export function BlockList({
                 </Button>
               </div>
               <div className="space-y-1 pl-4">
-                {(blocks[sectionName] || []).map(({ type, displayName }) => (
-                  <div key={type} className="group relative">
-                    <button
-                      className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
-                        selectedSection === sectionName && selectedBlock === type
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                      onClick={() => onSectionSelect(sectionName, type)}
-                      title={displayName}
-                    >
-                      {displayName}
-                    </button>
-                    {selectedSection === sectionName && selectedBlock === type && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditBlock(displayName);
-                        }}
-                      >
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
+                {(blocks[sectionName] || []).map((block) => (
+                  <div key={block.type} className="group relative">
+                    {editingBlock?.section === sectionName && editingBlock?.type === block.type ? (
+                      <div className="flex items-center gap-1 px-3 py-1">
+                        <Input
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          className="h-6 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                          autoFocus
+                        />
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => handleSaveEdit(e, sectionName, block.type)}
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={handleCancelEdit}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <button
+                          className={cn(
+                            "flex-1 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
+                            selectedSection === sectionName && selectedBlock === block.type
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          )}
+                          onClick={() => onSectionSelect(sectionName, block.type)}
+                          title={block.displayName}
+                        >
+                          {block.displayName}
+                        </button>
+                        {selectedSection === sectionName && selectedBlock === block.type && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleStartEdit(e, sectionName, block)}
+                          >
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

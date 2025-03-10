@@ -3,8 +3,7 @@
 import { useForm } from "react-hook-form";
 import { OpenAPIV3 } from "openapi-types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "@/lib/components/block-list";
@@ -28,10 +27,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [formData, setFormData] = useState<any>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
-  const [editedName, setEditedName] = useState("");
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -144,19 +141,17 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(false);
   };
 
-  const handleUpdateBlockName = () => {
-    if (!selectedSection || !selectedBlock || selectedSection === 'initialize') return;
+  const handleUpdateBlockName = (section: string, blockType: string, newName: string) => {
+    if (section === 'initialize') return;
     
     setBlocks(prev => ({
       ...prev,
-      [selectedSection]: prev[selectedSection]?.map(block => 
-        block.type === selectedBlock 
-          ? { ...block, displayName: editedName }
+      [section]: prev[section]?.map(block => 
+        block.type === blockType 
+          ? { ...block, displayName: newName }
           : block
       ) || []
     }));
-    
-    setIsEditDialogOpen(false);
   };
 
   return (
@@ -171,10 +166,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           setSelectedBlock(block);
         }}
         onAddBlock={handleAddBlock}
-        onEditBlock={(displayName) => {
-          setEditedName(displayName);
-          setIsEditDialogOpen(true);
-        }}
+        onUpdateBlockName={handleUpdateBlockName}
       />
 
       <div className="flex-1 overflow-y-auto">
@@ -232,30 +224,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               </Button>
             ))}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Block Name</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              placeholder="Enter block name"
-              className="w-full"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateBlockName}>
-              Save
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
