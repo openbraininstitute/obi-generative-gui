@@ -10,13 +10,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
-import { PlusCircle, Settings, X } from "lucide-react";
+import { PlusCircle, Settings, X, Edit2 } from "lucide-react";
 import { useState } from "react";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
   onSubmit: (data: any) => void;
+}
+
+interface BlockData {
+  type: string;
+  displayName: string;
 }
 
 export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
@@ -27,6 +32,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
+  const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -305,6 +313,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     });
   };
 
+  const getBlockDisplayName = (section: string, blockType: string) => {
+    if (section === 'initialize') return 'Initialize';
+    const sectionBlocks = blocks[section] || [];
+    const block = sectionBlocks.find(b => b.type === blockType);
+    return block?.displayName || blockType;
+  };
+
   // Get sections dynamically from schema
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
     if (key === 'type') return acc;
@@ -338,10 +353,35 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(true);
   };
 
-  const handleSelectBlock = (blockName: string) => {
+  const handleSelectBlock = (blockType: string) => {
+    const newBlock = {
+      type: blockType,
+      displayName: blockType
+    };
+    
+    setBlocks(prev => ({
+      ...prev,
+      [dialogSection]: [...(prev[dialogSection] || []), newBlock]
+    }));
+    
     setSelectedSection(dialogSection);
-    setSelectedBlock(blockName);
+    setSelectedBlock(blockType);
     setIsDialogOpen(false);
+  };
+
+  const handleUpdateBlockName = () => {
+    if (!selectedSection || !selectedBlock || selectedSection === 'initialize') return;
+    
+    setBlocks(prev => ({
+      ...prev,
+      [selectedSection]: prev[selectedSection]?.map(block => 
+        block.type === selectedBlock 
+          ? { ...block, displayName: editedName }
+          : block
+      ) || []
+    }));
+    
+    setIsEditingName(false);
   };
 
   return (
@@ -369,17 +409,17 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   </Button>
                 ) : (
                   <>
-                    {getAvailableBlocks(sectionName).map((blockName) => (
+                    {(blocks[sectionName] || []).map(({ type, displayName }) => (
                       <Button
-                        key={blockName}
-                        variant={selectedSection === sectionName && selectedBlock === blockName ? "default" : "outline"}
+                        key={type}
+                        variant={selectedSection === sectionName && selectedBlock === type ? "default" : "outline"}
                         className="w-full justify-start"
                         onClick={() => {
                           setSelectedSection(sectionName);
-                          setSelectedBlock(blockName);
+                          setSelectedBlock(type);
                         }}
                       >
-                        {blockName}
+                        {displayName}
                       </Button>
                     ))}
                     <Button
@@ -401,7 +441,51 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         <div>
           {selectedSection && selectedBlock && (
             <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-6">{selectedBlock}</h2>
+              <div className="flex items-center justify-between mb-6">
+                {selectedSection === 'initialize' || isEditingName ? (
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    {isEditingName ? (
+                      <>
+                        <Input
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          className="text-2xl font-bold h-auto py-0 max-w-[200px]"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleUpdateBlockName}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsEditingName(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      'Initialize'
+                    )}
+                  </h2>
+                ) : (
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    {getBlockDisplayName(selectedSection, selectedBlock)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
+                        setIsEditingName(true);
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </h2>
+                )}
+              </div>
               <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
                 {(() => {
                   const blockSchema = getBlockSchema();
