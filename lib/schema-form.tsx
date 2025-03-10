@@ -78,16 +78,16 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     const label = `${name}${required ? ' *' : ''}`;
 
     return (
-      <div key={name} className="mb-4">
-        <Label>{label}</Label>
-        <div className="space-y-2">
+      <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+        <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+        <div className="flex-1 space-y-2">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-2">
               {type === 'number' || type === 'integer' ? (
                 <Input
                   type="number"
                   {...register(`${name}.${index}`, { valueAsNumber: true })}
-                  className="flex-1"
+                  className="flex-1 h-8"
                   onChange={(e) => {
                     const value = e.target.value ? Number(e.target.value) : null;
                     setValue(`${name}.${index}`, value);
@@ -99,7 +99,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               ) : (
                 <Input
                   {...register(`${name}.${index}`)}
-                  className="flex-1"
+                  className="flex-1 h-8"
                   onChange={(e) => {
                     setValue(`${name}.${index}`, e.target.value);
                     const values = watch(name) || [];
@@ -111,8 +111,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               {index === fieldCount - 1 && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="h-8 w-8"
                   onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -121,8 +122,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               {fieldCount > 1 && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="h-8 w-8"
                   onClick={() => {
                     const values = watch(name) || [];
                     values.splice(index, 1);
@@ -153,24 +155,24 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
 
     if (resolvedProperty.const) {
       return (
-        <div key={name} className="mb-4">
-          <Label>{label}</Label>
+        <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+          <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
           <Input 
             value={resolvedProperty.const} 
             disabled 
             {...register(name)}
+            className="flex-1 h-8"
           />
-          {resolvedProperty.description && (
-            <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
-          )}
         </div>
       );
     }
 
     if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
       return (
-        <div key={name} className="mb-6 p-4 border rounded-lg">
-          <Label className="text-lg font-semibold mb-3">{label}</Label>
+        <div key={name} className="border-t border-b">
+          <div className="px-3 py-1.5">
+            <Label className="text-sm font-medium">{label}</Label>
+          </div>
           {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => {
             const isRequired = resolvedProperty.required?.includes(propName) || false;
             return renderField(
@@ -187,15 +189,15 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'string':
         if (resolvedProperty.enum) {
           return (
-            <div key={name} className="mb-4">
-              <Label>{label}</Label>
+            <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+              <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue(name, value);
                   setFormData(prev => ({ ...prev, [name]: value }));
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="flex-1 h-8">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
@@ -206,34 +208,29 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              {resolvedProperty.description && (
-                <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
-              )}
             </div>
           );
         }
         return (
-          <div key={name} className="mb-4">
-            <Label>{label}</Label>
+          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
             <Input 
               {...register(name)}
+              className="flex-1 h-8"
               onChange={(e) => {
                 setValue(name, e.target.value);
                 setFormData(prev => ({ ...prev, [name]: e.target.value }));
               }}
               placeholder={resolvedProperty.description}
             />
-            {resolvedProperty.description && (
-              <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
-            )}
           </div>
         );
       
       case 'number':
       case 'integer':
         return (
-          <div key={name} className="mb-4">
-            <Label>{label}</Label>
+          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
             <Input
               type="number"
               {...register(name, { 
@@ -241,6 +238,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                 min: resolvedProperty.minimum,
                 max: resolvedProperty.maximum
               })}
+              className="flex-1 h-8"
               onChange={(e) => {
                 const value = e.target.value ? Number(e.target.value) : null;
                 setValue(name, value);
@@ -248,26 +246,23 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               }}
               placeholder={resolvedProperty.description}
             />
-            {resolvedProperty.description && (
-              <p className="text-sm text-muted-foreground mt-1">{resolvedProperty.description}</p>
-            )}
           </div>
         );
       
       case 'boolean':
         return (
-          <div key={name} className="mb-4 flex items-center space-x-2">
-            <Checkbox
-              id={name}
-              onCheckedChange={(checked) => {
-                setValue(name, checked);
-                setFormData(prev => ({ ...prev, [name]: checked }));
-              }}
-            />
-            <Label htmlFor={name}>{label}</Label>
-            {resolvedProperty.description && (
-              <p className="text-sm text-muted-foreground ml-2">{resolvedProperty.description}</p>
-            )}
+          <div key={name} className="flex items-center px-3 py-1.5 hover:bg-muted">
+            <Label className="w-1/3 text-sm text-muted-foreground">{label}</Label>
+            <div className="flex-1">
+              <Checkbox
+                id={name}
+                className="h-4 w-4"
+                onCheckedChange={(checked) => {
+                  setValue(name, checked);
+                  setFormData(prev => ({ ...prev, [name]: checked }));
+                }}
+              />
+            </div>
           </div>
         );
 
@@ -446,18 +441,18 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         </div>
       </div>
 
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         {selectedSection && selectedBlock && (
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b">
               {selectedSection === 'initialize' || isEditingName ? (
-                <h2 className="text-2xl font-bold flex items-center gap-2">
+                <h2 className="text-lg font-medium flex items-center gap-2">
                   {isEditingName ? (
                     <>
                       <Input
                         value={editedName}
                         onChange={(e) => setEditedName(e.target.value)}
-                        className="text-2xl font-bold h-auto py-0 max-w-[200px]"
+                        className="h-8 max-w-[200px]"
                       />
                       <Button
                         variant="ghost"
@@ -479,11 +474,12 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   )}
                 </h2>
               ) : (
-                <h2 className="text-2xl font-bold flex items-center gap-2">
+                <h2 className="text-lg font-medium flex items-center gap-2">
                   {getBlockDisplayName(selectedSection, selectedBlock)}
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="h-8 w-8"
                     onClick={() => {
                       setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
                       setIsEditingName(true);
@@ -494,19 +490,25 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                 </h2>
               )}
             </div>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-              {(() => {
-                const blockSchema = getBlockSchema();
-                if (!blockSchema?.properties) return null;
-                
-                return Object.entries(blockSchema.properties).map(([name, property]) => {
-                  const isRequired = blockSchema.required?.includes(name) || false;
-                  return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
-                });
-              })()}
-              <Button type="submit" className="w-full">Save Changes</Button>
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
+              <div className="divide-y">
+                {(() => {
+                  const blockSchema = getBlockSchema();
+                  if (!blockSchema?.properties) return null;
+                  
+                  return Object.entries(blockSchema.properties).map(([name, property]) => {
+                    const isRequired = blockSchema.required?.includes(name) || false;
+                    return renderField(name, property as OpenAPIV3.SchemaObject, isRequired);
+                  });
+                })()}
+              </div>
+              <div className="sticky bottom-0 p-4 bg-background border-t">
+                <Button type="submit" className="w-full">
+                  Save Changes
+                </Button>
+              </div>
             </form>
-          </Card>
+          </div>
         )}
       </div>
 
