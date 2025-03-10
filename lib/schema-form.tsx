@@ -388,11 +388,11 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
 
   return (
     <div className="flex flex-grow">
-      <div className="w-[240px] border-r">
+      <div className="w-[240px] border-r overflow-y-auto overflow-x-hidden">
         <div className="space-y-1 p-6">
           <button
             className={cn(
-              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted",
+              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted truncate",
               selectedSection === 'initialize'
                 ? "text-primary"
                 : "text-muted-foreground"
@@ -408,13 +408,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
             sectionName !== 'initialize' && (
               <div key={sectionName} className="mt-4">
                 <div className="flex items-center justify-between px-3 mb-1">
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-sm font-medium text-muted-foreground truncate pr-2">
                     {sectionName.toUpperCase().replace(/_/g, ' ')}
                   </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 -mr-1.5"
+                    className="h-5 w-5 flex-shrink-0"
                     onClick={() => handleAddBlock(sectionName)}
                   >
                     <PlusCircle className="h-3 w-3" />
@@ -425,7 +425,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                     <button
                       key={type}
                       className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
+                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm truncate",
                         selectedSection === sectionName && selectedBlock === type
                           ? "text-primary"
                           : "text-muted-foreground"
@@ -434,6 +434,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                         setSelectedSection(sectionName);
                         setSelectedBlock(type);
                       }}
+                      title={displayName}
                     >
                       {displayName}
                     </button>
