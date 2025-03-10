@@ -320,10 +320,15 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return block?.displayName || blockType;
   };
 
-  // Get sections dynamically from schema
+  // Get sections dynamically from schema and ensure initialize is first
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
     if (key === 'type') return acc;
-    acc[key] = value;
+    if (key === 'initialize') {
+      // Add initialize first
+      acc = { initialize: value, ...acc };
+    } else {
+      acc[key] = value;
+    }
     return acc;
   }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
 
