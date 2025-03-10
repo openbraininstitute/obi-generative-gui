@@ -407,8 +407,16 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           {Object.entries(sections).map(([sectionName, sectionSchema]) => (
             sectionName !== 'initialize' && (
               <div key={sectionName} className="mb-4">
-                <div className="text-sm font-medium text-muted-foreground mb-1 px-3">
-                  {sectionName.toUpperCase().replace(/_/g, ' ')}
+                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-1 px-3">
+                  <span>{sectionName.toUpperCase().replace(/_/g, ' ')}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4"
+                    onClick={() => handleAddBlock(sectionName)}
+                  >
+                    <PlusCircle className="h-3 w-3" />
+                  </Button>
                 </div>
                 <div className="space-y-1">
                   {(blocks[sectionName] || []).map(({ type, displayName }) => (
@@ -428,13 +436,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                       {displayName}
                     </button>
                   ))}
-                  <button
-                    className="w-full text-left px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
-                    onClick={() => handleAddBlock(sectionName)}
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>Add {sectionName.slice(0, -1)}</span>
-                  </button>
                 </div>
               </div>
             )
