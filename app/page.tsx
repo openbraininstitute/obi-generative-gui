@@ -108,8 +108,8 @@ export default function Home() {
       )}
 
       {spec && (
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full relative">
+        <div className="flex-1 overflow-hidden flex">
+          <div className="h-full relative flex-1">
             {/* Sidebar toggle button */}
             <Button
               variant="ghost"
@@ -212,6 +212,15 @@ export default function Home() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Right image column */}
+          <div className="w-1/2 fixed right-0 top-[4.125rem] bottom-0 bg-black flex items-center justify-center">
+            <img 
+              src="/images/Microcircuit.png" 
+              alt="Microcircuits visualization"
+              className="max-w-full max-h-full object-contain p-8"
+            />
           </div>
         </div>
       )}
