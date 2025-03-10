@@ -389,7 +389,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   return (
     <div className="flex flex-grow">
       <div className="w-[240px] border-r">
-        <div className="space-y-1 font-mono p-6">
+        <div className="p-6">
           <button
             className={cn(
               "w-full text-left px-3 py-1.5 text-sm transition-colors",
