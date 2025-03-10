@@ -392,10 +392,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         <div className="space-y-1 p-6">
           <button
             className={cn(
-              "w-full text-left px-3 py-1.5 text-sm transition-colors",
+              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted",
               selectedSection === 'initialize'
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted"
+                ? "text-primary"
+                : "text-muted-foreground"
             )}
             onClick={() => {
               setSelectedSection('initialize');
@@ -425,10 +425,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                     <button
                       key={type}
                       className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors rounded-sm",
+                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
                         selectedSection === sectionName && selectedBlock === type
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-muted"
+                          ? "text-primary"
+                          : "text-muted-foreground"
                       )}
                       onClick={() => {
                         setSelectedSection(sectionName);
