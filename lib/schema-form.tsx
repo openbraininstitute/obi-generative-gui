@@ -2,17 +2,13 @@
 
 import { useForm } from "react-hook-form";
 import { OpenAPIV3 } from "openapi-types";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
-import { PlusCircle, X, Edit2 } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { BlockList } from "@/lib/components/block-list";
+import { FormField } from "@/lib/components/form-field";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -45,228 +41,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       return resolveSchemaRef(spec, schema.$ref);
     }
     return schema;
-  };
-
-  const isArrayType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
-    const resolvedProperty = resolveSchema(property);
-    if ('anyOf' in resolvedProperty) {
-      return resolvedProperty.anyOf?.some(schema => 
-        resolveSchema(schema as OpenAPIV3.SchemaObject).type === 'array'
-      ) || false;
-    }
-    return resolvedProperty.type === 'array';
-  };
-
-  const getPropertyType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string => {
-    const resolvedProperty = resolveSchema(property);
-    if ('anyOf' in resolvedProperty) {
-      const types = resolvedProperty.anyOf?.map(schema => 
-        resolveSchema(schema as OpenAPIV3.SchemaObject).type
-      );
-      return types?.find(type => type !== 'array') || 'string';
-    }
-    if (resolvedProperty.type === 'array') {
-      const itemSchema = resolveSchema(resolvedProperty.items as OpenAPIV3.SchemaObject);
-      return itemSchema.type || 'string';
-    }
-    return resolvedProperty.type || 'string';
-  };
-
-  const renderArrayField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
-    const fieldCount = arrayFields[name] || 1;
-    const type = getPropertyType(property);
-
-    return (
-      <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-        <Label className="min-w-[180px] text-sm">{name}</Label>
-        <div className="flex-1 space-y-2">
-          {Array.from({ length: fieldCount }).map((_, index) => (
-            <div key={`${name}-${index}`} className="flex gap-2">
-              {type === 'number' || type === 'integer' ? (
-                <Input
-                  type="number"
-                  {...register(`${name}.${index}`, { valueAsNumber: true })}
-                  className="flex-1 h-9"
-                  onChange={(e) => {
-                    const value = e.target.value ? Number(e.target.value) : null;
-                    setValue(`${name}.${index}`, value);
-                    const values = watch(name) || [];
-                    values[index] = value;
-                    setFormData(prev => ({ ...prev, [name]: values }));
-                  }}
-                />
-              ) : (
-                <Input
-                  {...register(`${name}.${index}`)}
-                  className="flex-1 h-9"
-                  onChange={(e) => {
-                    setValue(`${name}.${index}`, e.target.value);
-                    const values = watch(name) || [];
-                    values[index] = e.target.value;
-                    setFormData(prev => ({ ...prev, [name]: values }));
-                  }}
-                />
-              )}
-              {index === fieldCount - 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
-                >
-                  <PlusCircle className="h-4 w-4" />
-                </Button>
-              )}
-              {fieldCount > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => {
-                    const values = watch(name) || [];
-                    values.splice(index, 1);
-                    setValue(name, values);
-                    setFormData(prev => ({ ...prev, [name]: values }));
-                    if (index === fieldCount - 1) {
-                      setArrayFields(prev => ({ ...prev, [name]: prev[name] - 1 }));
-                    }
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
-    if (name === 'type') return null;
-
-    const resolvedProperty = resolveSchema(property);
-
-    if (isArrayType(property)) {
-      return renderArrayField(name, property);
-    }
-
-    if (resolvedProperty.const) {
-      return (
-        <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-          <Label className="min-w-[180px] text-sm">{name}</Label>
-          <Input 
-            value={resolvedProperty.const} 
-            disabled 
-            {...register(name)}
-            className="flex-1 h-9"
-          />
-        </div>
-      );
-    }
-
-    if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
-      return (
-        <div key={name} className="border-t border-b">
-          <div className="px-6 py-3">
-            <Label className="text-sm font-medium">{name}</Label>
-          </div>
-          {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => {
-            return renderField(
-              `${name}.${propName}`,
-              propSchema as OpenAPIV3.SchemaObject
-            );
-          })}
-        </div>
-      );
-    }
-
-    switch (resolvedProperty.type) {
-      case 'string':
-        if (resolvedProperty.enum) {
-          return (
-            <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-              <Label className="min-w-[180px] text-sm">{name}</Label>
-              <Select 
-                onValueChange={(value) => {
-                  setValue(name, value);
-                  setFormData(prev => ({ ...prev, [name]: value }));
-                }}
-              >
-                <SelectTrigger className="flex-1 h-9">
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  {resolvedProperty.enum.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          );
-        }
-        return (
-          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-            <Label className="min-w-[180px] text-sm">{name}</Label>
-            <Input 
-              {...register(name)}
-              className="flex-1 h-9"
-              onChange={(e) => {
-                setValue(name, e.target.value);
-                setFormData(prev => ({ ...prev, [name]: e.target.value }));
-              }}
-              placeholder={resolvedProperty.description}
-            />
-          </div>
-        );
-      
-      case 'number':
-      case 'integer':
-        return (
-          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-            <Label className="min-w-[180px] text-sm">{name}</Label>
-            <Input
-              type="number"
-              {...register(name, { 
-                valueAsNumber: true,
-                min: resolvedProperty.minimum,
-                max: resolvedProperty.maximum
-              })}
-              className="flex-1 h-9"
-              onChange={(e) => {
-                const value = e.target.value ? Number(e.target.value) : null;
-                setValue(name, value);
-                setFormData(prev => ({ ...prev, [name]: value }));
-              }}
-              placeholder={resolvedProperty.description}
-            />
-          </div>
-        );
-      
-      case 'boolean':
-        return (
-          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-            <Label className="min-w-[180px] text-sm">{name}</Label>
-            <div className="flex-1">
-              <Checkbox
-                id={name}
-                className="h-4 w-4"
-                onCheckedChange={(checked) => {
-                  setValue(name, checked);
-                  setFormData(prev => ({ ...prev, [name]: checked }));
-                }}
-              />
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
   };
 
   const getBlockSchema = () => {
@@ -307,13 +81,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     });
   };
 
-  const getBlockDisplayName = (section: string, blockType: string) => {
-    if (section === 'initialize') return 'Initialize';
-    const sectionBlocks = blocks[section] || [];
-    const block = sectionBlocks.find(b => b.type === blockType);
-    return block?.displayName || blockType;
-  };
-
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
     if (key === 'type') return acc;
     if (key === 'initialize') {
@@ -323,6 +90,19 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     }
     return acc;
   }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
+
+  // Initialize blocks state with available blocks from schema
+  useEffect(() => {
+    const initialBlocks: Record<string, BlockData[]> = {};
+    Object.keys(sections).forEach(section => {
+      if (section === 'initialize') {
+        initialBlocks[section] = [{ type: 'Initialize', displayName: 'Initialize' }];
+      } else {
+        initialBlocks[section] = [];
+      }
+    });
+    setBlocks(initialBlocks);
+  }, [schema]);
 
   const handleFormSubmit = (data: any) => {
     const processedData = Object.entries(data).reduce((acc, [key, value]) => {
@@ -381,78 +161,21 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
 
   return (
     <div className="flex flex-grow">
-      <div className="w-[240px] border-r overflow-y-auto overflow-x-hidden">
-        <div className="space-y-1 p-6">
-          <button
-            className={cn(
-              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted text-ellipsis overflow-hidden whitespace-nowrap",
-              selectedSection === 'initialize'
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
-            onClick={() => {
-              setSelectedSection('initialize');
-              setSelectedBlock('Initialize');
-            }}
-          >
-            Initialize
-          </button>
-          {Object.entries(sections).map(([sectionName, sectionSchema]) => (
-            sectionName !== 'initialize' && (
-              <div key={sectionName} className="mt-4">
-                <div className="flex items-center justify-between px-3 mb-1">
-                  <span className="text-sm font-medium text-muted-foreground text-ellipsis overflow-hidden whitespace-nowrap pr-2">
-                    {sectionName.toUpperCase().replace(/_/g, ' ')}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5 flex-shrink-0"
-                    onClick={() => handleAddBlock(sectionName)}
-                  >
-                    <PlusCircle className="h-3 w-3" />
-                  </Button>
-                </div>
-                <div className="space-y-1 pl-4">
-                  {(blocks[sectionName] || []).map(({ type, displayName }) => (
-                    <div key={type} className="group relative">
-                      <button
-                        className={cn(
-                          "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
-                          selectedSection === sectionName && selectedBlock === type
-                            ? "text-primary"
-                            : "text-muted-foreground"
-                        )}
-                        onClick={() => {
-                          setSelectedSection(sectionName);
-                          setSelectedBlock(type);
-                        }}
-                        title={displayName}
-                      >
-                        {displayName}
-                      </button>
-                      {selectedSection === sectionName && selectedBlock === type && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditedName(displayName);
-                            setIsEditDialogOpen(true);
-                          }}
-                        >
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          ))}
-        </div>
-      </div>
+      <BlockList
+        sections={sections}
+        blocks={blocks}
+        selectedSection={selectedSection}
+        selectedBlock={selectedBlock}
+        onSectionSelect={(section, block) => {
+          setSelectedSection(section);
+          setSelectedBlock(block);
+        }}
+        onAddBlock={handleAddBlock}
+        onEditBlock={(displayName) => {
+          setEditedName(displayName);
+          setIsEditDialogOpen(true);
+        }}
+      />
 
       <div className="flex-1 overflow-y-auto">
         {selectedSection && selectedBlock && (
@@ -466,9 +189,20 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   const blockSchema = getBlockSchema();
                   if (!blockSchema?.properties) return null;
                   
-                  return Object.entries(blockSchema.properties).map(([name, property]) => {
-                    return renderField(name, property as OpenAPIV3.SchemaObject);
-                  });
+                  return Object.entries(blockSchema.properties).map(([name, property]) => (
+                    <FormField
+                      key={name}
+                      name={name}
+                      property={property as OpenAPIV3.SchemaObject}
+                      register={register}
+                      setValue={setValue}
+                      watch={watch}
+                      resolveSchema={resolveSchema}
+                      arrayFields={arrayFields}
+                      setArrayFields={setArrayFields}
+                      setFormData={setFormData}
+                    />
+                  ));
                 })()}
               </div>
               <div className="sticky bottom-0 p-4 bg-background border-t">
