@@ -66,16 +66,16 @@ export function FormField({
     const type = getPropertyType(property);
 
     return (
-      <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-        <Label className="min-w-[180px] text-sm">{name}</Label>
-        <div className="flex-1 space-y-2">
+      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+        <Label className="text-sm text-muted-foreground">{name}</Label>
+        <div className="flex-1 space-y-1">
           {Array.from({ length: fieldCount }).map((_, index) => (
-            <div key={`${name}-${index}`} className="flex gap-2">
+            <div key={`${name}-${index}`} className="flex gap-1">
               {type === 'number' || type === 'integer' ? (
                 <Input
                   type="number"
                   {...register(`${name}.${index}`, { valueAsNumber: true })}
-                  className="flex-1 h-9"
+                  className="flex-1 h-6 text-sm"
                   onChange={(e) => {
                     const value = e.target.value ? Number(e.target.value) : null;
                     setValue(`${name}.${index}`, value);
@@ -87,7 +87,7 @@ export function FormField({
               ) : (
                 <Input
                   {...register(`${name}.${index}`)}
-                  className="flex-1 h-9"
+                  className="flex-1 h-6 text-sm"
                   onChange={(e) => {
                     setValue(`${name}.${index}`, e.target.value);
                     const values = watch(name) || [];
@@ -101,10 +101,10 @@ export function FormField({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9"
+                  className="h-6 w-6"
                   onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
                 >
-                  <PlusCircle className="h-4 w-4" />
+                  <PlusCircle className="h-3 w-3" />
                 </Button>
               )}
               {fieldCount > 1 && (
@@ -112,7 +112,7 @@ export function FormField({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9"
+                  className="h-6 w-6"
                   onClick={() => {
                     const values = watch(name) || [];
                     values.splice(index, 1);
@@ -123,7 +123,7 @@ export function FormField({
                     }
                   }}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -139,13 +139,13 @@ export function FormField({
 
   if (resolvedProperty.const) {
     return (
-      <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-        <Label className="min-w-[180px] text-sm">{name}</Label>
+      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+        <Label className="text-sm text-muted-foreground">{name}</Label>
         <Input 
           value={resolvedProperty.const} 
           disabled 
           {...register(name)}
-          className="flex-1 h-9"
+          className="flex-1 h-6 text-sm"
         />
       </div>
     );
@@ -154,8 +154,8 @@ export function FormField({
   if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
     return (
       <div className="border-t border-b">
-        <div className="px-6 py-3">
-          <Label className="text-sm font-medium">{name}</Label>
+        <div className="px-3 py-1.5">
+          <Label className="text-sm font-medium text-muted-foreground">{name}</Label>
         </div>
         {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => (
           <FormField
@@ -179,20 +179,20 @@ export function FormField({
     case 'string':
       if (resolvedProperty.enum) {
         return (
-          <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-            <Label className="min-w-[180px] text-sm">{name}</Label>
+          <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+            <Label className="text-sm text-muted-foreground">{name}</Label>
             <Select 
               onValueChange={(value) => {
                 setValue(name, value);
                 setFormData(prev => ({ ...prev, [name]: value }));
               }}
             >
-              <SelectTrigger className="flex-1 h-9">
+              <SelectTrigger className="flex-1 h-6 text-sm">
                 <SelectValue placeholder="Select an option" />
               </SelectTrigger>
               <SelectContent>
                 {resolvedProperty.enum.map((option) => (
-                  <SelectItem key={option} value={option}>
+                  <SelectItem key={option} value={option} className="text-sm">
                     {option}
                   </SelectItem>
                 ))}
@@ -202,11 +202,11 @@ export function FormField({
         );
       }
       return (
-        <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-          <Label className="min-w-[180px] text-sm">{name}</Label>
+        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+          <Label className="text-sm text-muted-foreground">{name}</Label>
           <Input 
             {...register(name)}
-            className="flex-1 h-9"
+            className="flex-1 h-6 text-sm"
             onChange={(e) => {
               setValue(name, e.target.value);
               setFormData(prev => ({ ...prev, [name]: e.target.value }));
@@ -219,8 +219,8 @@ export function FormField({
     case 'number':
     case 'integer':
       return (
-        <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-          <Label className="min-w-[180px] text-sm">{name}</Label>
+        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+          <Label className="text-sm text-muted-foreground">{name}</Label>
           <Input
             type="number"
             {...register(name, { 
@@ -228,7 +228,7 @@ export function FormField({
               min: resolvedProperty.minimum,
               max: resolvedProperty.maximum
             })}
-            className="flex-1 h-9"
+            className="flex-1 h-6 text-sm"
             onChange={(e) => {
               const value = e.target.value ? Number(e.target.value) : null;
               setValue(name, value);
@@ -241,8 +241,8 @@ export function FormField({
     
     case 'boolean':
       return (
-        <div className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
-          <Label className="min-w-[180px] text-sm">{name}</Label>
+        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+          <Label className="text-sm text-muted-foreground">{name}</Label>
           <div className="flex-1">
             <Checkbox
               id={name}
