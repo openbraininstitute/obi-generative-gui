@@ -156,7 +156,10 @@ export default function Home() {
       {spec && (
         <div className="flex-1 overflow-hidden flex">
           {/* Main content */}
-          <div className="w-1/2 min-h-full overflow-y-auto px-6">
+          <div className={cn(
+            "min-h-full overflow-y-auto px-6",
+            selectedOperation ? "w-1/2" : "w-full"
+          )}>
             <div className="py-6">
               {selectedOperation && (
                 <Card className="p-6">
@@ -190,19 +193,21 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right image column */}
-          <div className={cn(
-            "w-1/2 fixed right-0 top-[4.125rem] bottom-0 flex items-center justify-center transition-colors duration-300",
-            theme === 'dark' ? 'bg-black' : 'bg-white'
-          )}>
-            <div className="w-1/2 h-1/2 relative flex items-center justify-center">
-              <img 
-                src="/images/Microcircuits.png" 
-                alt="Microcircuits visualization"
-                className="max-w-full max-h-full object-contain"
-              />
+          {/* Right image column - only shown when a lab is selected */}
+          {selectedOperation && (
+            <div className={cn(
+              "w-1/2 fixed right-0 top-[4.125rem] bottom-0 flex items-center justify-center transition-colors duration-300",
+              theme === 'dark' ? 'bg-black' : 'bg-white'
+            )}>
+              <div className="w-1/2 h-1/2 relative flex items-center justify-center">
+                <img 
+                  src="/images/Microcircuits.png" 
+                  alt="Microcircuits visualization"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
