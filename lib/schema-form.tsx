@@ -408,7 +408,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
             sectionName !== 'initialize' && (
               <div key={sectionName} className="mb-4">
                 <div className="text-sm font-medium text-muted-foreground mb-1 px-3">
-                  {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                  {sectionName.toUpperCase()}
                 </div>
                 <div className="space-y-1">
                   {(blocks[sectionName] || []).map(({ type, displayName }) => (
