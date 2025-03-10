@@ -53,11 +53,11 @@ export function BlockList({
   };
 
   return (
-    <div className="w-[240px] border-r overflow-y-auto overflow-x-hidden">
+    <div className="h-full overflow-y-auto overflow-x-hidden">
       <div className="space-y-1 p-6">
         <button
           className={cn(
-            "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted text-ellipsis overflow-hidden whitespace-nowrap",
+            "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
             selectedSection === 'initialize'
               ? "text-primary"
               : "text-muted-foreground"
@@ -70,7 +70,7 @@ export function BlockList({
           sectionName !== 'initialize' && (
             <div key={sectionName} className="mt-4">
               <div className="flex items-center justify-between px-3 mb-1">
-                <span className="text-sm font-medium text-muted-foreground text-ellipsis overflow-hidden whitespace-nowrap pr-2">
+                <span className="text-sm font-medium text-muted-foreground">
                   {sectionName.toUpperCase().replace(/_/g, ' ')}
                 </span>
                 <Button
@@ -84,7 +84,7 @@ export function BlockList({
               </div>
               <div className="space-y-1 pl-4">
                 {(blocks[sectionName] || []).map((block) => (
-                  <div key={block.type} className="group relative">
+                  <div key={block.type} className="group">
                     {editingBlock?.section === sectionName && editingBlock?.type === block.type ? (
                       <div className="flex items-center gap-1 px-3 py-1">
                         <Input
@@ -94,7 +94,7 @@ export function BlockList({
                           onClick={(e) => e.stopPropagation()}
                           autoFocus
                         />
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -114,10 +114,10 @@ export function BlockList({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center">
+                      <div className="flex items-center min-w-0">
                         <button
                           className={cn(
-                            "flex-1 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
+                            "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
                             selectedSection === sectionName && selectedBlock === block.type
                               ? "text-primary"
                               : "text-muted-foreground"
@@ -125,13 +125,15 @@ export function BlockList({
                           onClick={() => onSectionSelect(sectionName, block.type)}
                           title={block.displayName}
                         >
-                          {block.displayName}
+                          <span className="block truncate">
+                            {block.displayName}
+                          </span>
                         </button>
                         {selectedSection === sectionName && selectedBlock === block.type && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                             onClick={(e) => handleStartEdit(e, sectionName, block)}
                           >
                             <Edit2 className="h-3 w-3" />
