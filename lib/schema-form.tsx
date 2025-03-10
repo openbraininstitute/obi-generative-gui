@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { OpenAPIV3 } from "openapi-types";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/resizable";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -179,6 +179,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           }}
           onAddBlock={handleAddBlock}
           onUpdateBlockName={handleUpdateBlockName}
+          onGenerate={handleSubmit(handleFormSubmit)}
         />
       </ResizablePanel>
       
@@ -191,7 +192,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               <div className="flex items-center justify-between px-6 py-4 border-b">
                 <h2 className="text-lg font-semibold">{selectedBlock}</h2>
               </div>
-              <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
+              <form className="flex-1 overflow-y-auto">
                 <div className="divide-y">
                   {(() => {
                     const blockSchema = getBlockSchema();
@@ -212,11 +213,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                       />
                     ));
                   })()}
-                </div>
-                <div className="sticky bottom-0 p-4 bg-background border-t">
-                  <Button type="submit" className="w-full">
-                    Save Changes
-                  </Button>
                 </div>
               </form>
             </div>
