@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -77,11 +78,28 @@ export default function Home() {
     ? getSchemaFromPath(spec, selectedPath, selectedMethod)
     : null;
 
+  const endpoints = spec ? Object.entries(spec.paths).map(([path, pathItem]) => ({
+    path,
+    methods: Object.entries(pathItem as OpenAPIV3.PathItemObject)
+      .filter(([method]) => method !== 'parameters')
+      .map(([method, operation]) => ({
+        method,
+        operation: operation as OpenAPIV3.OperationObject
+      }))
+  })) : [];
+
   if (loading && !spec) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-none px-6 py-4 border-b">
-          <div className="flex items-center justify-end max-w-[1400px] mx-auto">
+          <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+            <div className="w-[240px]">
+              <Select disabled>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select endpoint" />
+                </SelectTrigger>
+              </Select>
+            </div>
             <ThemeToggle />
           </div>
         </div>
@@ -95,7 +113,33 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-none px-6 py-4 border-b">
-        <div className="flex items-center justify-end max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+          <div className="w-[240px]">
+            <Select
+              value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
+              onValueChange={(value) => {
+                const [path, method] = value.split('|');
+                setSelectedPath(path);
+                setSelectedMethod(method);
+                setResponse(null);
+                setError(null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select endpoint" />
+              </SelectTrigger>
+              <SelectContent>
+                {endpoints.map(({ path, methods }) => (
+                  methods.map(({ method, operation }) => (
+                    <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
+                      <span className="uppercase font-mono mr-2">{method}</span>
+                      {operation.summary || operation.operationId || path}
+                    </SelectItem>
+                  ))
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <ThemeToggle />
         </div>
       </div>
