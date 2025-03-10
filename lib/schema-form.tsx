@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { PlusCircle, X, Edit2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface SchemaFormProps {
@@ -23,7 +23,6 @@ interface SchemaFormProps {
 interface BlockData {
   type: string;
   displayName: string;
-  isEditing?: boolean;
 }
 
 export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
@@ -33,17 +32,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [formData, setFormData] = useState<any>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
-  const editInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    // Focus input when editing starts
-    const editingBlock = Object.values(blocks).flat().find(block => block.isEditing);
-    if (editingBlock && editInputRef.current) {
-      editInputRef.current.focus();
-    }
-  }, [blocks]);
+  const [editedName, setEditedName] = useState("");
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -85,8 +77,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     const type = getPropertyType(property);
 
     return (
-      <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-        <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+      <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+        <Label className="min-w-[180px] text-sm">{name}</Label>
         <div className="flex-1 space-y-2">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-2">
@@ -94,7 +86,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                 <Input
                   type="number"
                   {...register(`${name}.${index}`, { valueAsNumber: true })}
-                  className="flex-1 h-8"
+                  className="flex-1 h-9"
                   onChange={(e) => {
                     const value = e.target.value ? Number(e.target.value) : null;
                     setValue(`${name}.${index}`, value);
@@ -106,7 +98,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               ) : (
                 <Input
                   {...register(`${name}.${index}`)}
-                  className="flex-1 h-8"
+                  className="flex-1 h-9"
                   onChange={(e) => {
                     setValue(`${name}.${index}`, e.target.value);
                     const values = watch(name) || [];
@@ -120,7 +112,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 flex-shrink-0"
+                  className="h-9 w-9"
                   onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -131,7 +123,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 flex-shrink-0"
+                  className="h-9 w-9"
                   onClick={() => {
                     const values = watch(name) || [];
                     values.splice(index, 1);
@@ -153,9 +145,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   };
 
   const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
-    const resolvedProperty = resolveSchema(property);
-
     if (name === 'type') return null;
+
+    const resolvedProperty = resolveSchema(property);
 
     if (isArrayType(property)) {
       return renderArrayField(name, property);
@@ -163,13 +155,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
 
     if (resolvedProperty.const) {
       return (
-        <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-          <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+        <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+          <Label className="min-w-[180px] text-sm">{name}</Label>
           <Input 
             value={resolvedProperty.const} 
             disabled 
             {...register(name)}
-            className="flex-1 h-8"
+            className="flex-1 h-9"
           />
         </div>
       );
@@ -178,7 +170,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
       return (
         <div key={name} className="border-t border-b">
-          <div className="px-3 py-1.5">
+          <div className="px-6 py-3">
             <Label className="text-sm font-medium">{name}</Label>
           </div>
           {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => {
@@ -195,15 +187,15 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'string':
         if (resolvedProperty.enum) {
           return (
-            <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-              <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+            <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+              <Label className="min-w-[180px] text-sm">{name}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue(name, value);
                   setFormData(prev => ({ ...prev, [name]: value }));
                 }}
               >
-                <SelectTrigger className="flex-1 h-8">
+                <SelectTrigger className="flex-1 h-9">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
@@ -218,11 +210,11 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           );
         }
         return (
-          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+            <Label className="min-w-[180px] text-sm">{name}</Label>
             <Input 
               {...register(name)}
-              className="flex-1 h-8"
+              className="flex-1 h-9"
               onChange={(e) => {
                 setValue(name, e.target.value);
                 setFormData(prev => ({ ...prev, [name]: e.target.value }));
@@ -235,8 +227,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       case 'number':
       case 'integer':
         return (
-          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+            <Label className="min-w-[180px] text-sm">{name}</Label>
             <Input
               type="number"
               {...register(name, { 
@@ -244,7 +236,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                 min: resolvedProperty.minimum,
                 max: resolvedProperty.maximum
               })}
-              className="flex-1 h-8"
+              className="flex-1 h-9"
               onChange={(e) => {
                 const value = e.target.value ? Number(e.target.value) : null;
                 setValue(name, value);
@@ -257,8 +249,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       
       case 'boolean':
         return (
-          <div key={name} className="flex items-center gap-6 px-3 py-1.5 hover:bg-muted">
-            <Label className="w-1/4 text-sm text-muted-foreground truncate" title={name}>{name}</Label>
+          <div key={name} className="flex items-center gap-4 px-6 py-3 hover:bg-muted">
+            <Label className="min-w-[180px] text-sm">{name}</Label>
             <div className="flex-1">
               <Checkbox
                 id={name}
@@ -372,44 +364,19 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(false);
   };
 
-  const startEditing = (section: string, blockType: string) => {
+  const handleUpdateBlockName = () => {
+    if (!selectedSection || !selectedBlock || selectedSection === 'initialize') return;
+    
     setBlocks(prev => ({
       ...prev,
-      [section]: prev[section]?.map(block => ({
-        ...block,
-        isEditing: block.type === blockType
-      })) || []
-    }));
-  };
-
-  const handleNameChange = (section: string, blockType: string, newName: string) => {
-    setBlocks(prev => ({
-      ...prev,
-      [section]: prev[section]?.map(block => 
-        block.type === blockType 
-          ? { ...block, displayName: newName, isEditing: false }
+      [selectedSection]: prev[selectedSection]?.map(block => 
+        block.type === selectedBlock 
+          ? { ...block, displayName: editedName }
           : block
       ) || []
     }));
-  };
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    section: string,
-    blockType: string,
-    currentName: string
-  ) => {
-    if (e.key === 'Enter') {
-      handleNameChange(section, blockType, currentName);
-    } else if (e.key === 'Escape') {
-      setBlocks(prev => ({
-        ...prev,
-        [section]: prev[section]?.map(block => ({
-          ...block,
-          isEditing: false
-        })) || []
-      }));
-    }
+    
+    setIsEditDialogOpen(false);
   };
 
   return (
@@ -447,45 +414,36 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   </Button>
                 </div>
                 <div className="space-y-1 pl-4">
-                  {(blocks[sectionName] || []).map(({ type, displayName, isEditing }) => (
-                    <div
-                      key={type}
-                      className="flex items-center gap-1 group"
-                    >
-                      {isEditing ? (
-                        <Input
-                          ref={editInputRef}
-                          defaultValue={displayName}
-                          className="h-7 text-sm"
-                          onKeyDown={(e) => handleKeyDown(e, sectionName, type, e.currentTarget.value)}
-                          onBlur={(e) => handleNameChange(sectionName, type, e.target.value)}
-                        />
-                      ) : (
-                        <>
-                          <button
-                            className={cn(
-                              "flex-1 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
-                              selectedSection === sectionName && selectedBlock === type
-                                ? "text-primary"
-                                : "text-muted-foreground"
-                            )}
-                            onClick={() => {
-                              setSelectedSection(sectionName);
-                              setSelectedBlock(type);
-                            }}
-                            title={displayName}
-                          >
-                            {displayName}
-                          </button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => startEditing(sectionName, type)}
-                          >
-                            <Edit2 className="h-3 w-3" />
-                          </Button>
-                        </>
+                  {(blocks[sectionName] || []).map(({ type, displayName }) => (
+                    <div key={type} className="group relative">
+                      <button
+                        className={cn(
+                          "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
+                          selectedSection === sectionName && selectedBlock === type
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        )}
+                        onClick={() => {
+                          setSelectedSection(sectionName);
+                          setSelectedBlock(type);
+                        }}
+                        title={displayName}
+                      >
+                        {displayName}
+                      </button>
+                      {selectedSection === sectionName && selectedBlock === type && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditedName(displayName);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
                       )}
                     </div>
                   ))}
@@ -500,10 +458,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         {selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div className="space-y-1">
-                <h2 className="text-lg font-medium">Parameters</h2>
-                <p className="text-sm text-muted-foreground">{selectedBlock}</p>
-              </div>
+              <h2 className="text-lg font-semibold">{selectedBlock}</h2>
             </div>
             <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
               <div className="divide-y">
@@ -543,6 +498,30 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
               </Button>
             ))}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Block Name</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              placeholder="Enter block name"
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBlockName}>
+              Save
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
