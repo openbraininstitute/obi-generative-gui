@@ -54,7 +54,7 @@ export function BlockList({
 
   return (
     <div className="h-full overflow-y-auto overflow-x-hidden">
-      <div className="space-y-1 p-6">
+      <div className="space-y-1 p-6 pt-12">
         <button
           className={cn(
             "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",

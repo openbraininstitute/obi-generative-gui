@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, ChevronDown } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -92,7 +92,15 @@ export default function Home() {
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-none px-6 py-4 border-b">
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-8 h-8"
+              disabled
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-3 ml-6">
               <Label>Lab:</Label>
               <div className="w-[240px]">
                 <Select disabled>
@@ -116,49 +124,59 @@ export default function Home() {
     <div className="min-h-screen bg-background flex flex-col">
       <div 
         className={cn(
-          "flex-none px-6 py-4 border-b transition-all duration-300 ease-in-out",
-          showTopBar ? "opacity-100" : "opacity-0 h-0 py-0 overflow-hidden"
+          "flex-none transition-all duration-300 ease-in-out",
+          showTopBar ? "h-[60px] opacity-100" : "h-0 opacity-0 overflow-hidden"
         )}
       >
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <Label>Lab:</Label>
-            <div className="w-[240px]">
-              <Select
-                value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
-                onValueChange={(value) => {
-                  const [path, method] = value.split('|');
-                  setSelectedPath(path);
-                  setSelectedMethod(method);
-                  setResponse(null);
-                  setError(null);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select lab" />
-                </SelectTrigger>
-                <SelectContent>
-                  {endpoints.map(({ path, methods }) => (
-                    methods.map(({ method, operation }) => (
-                      <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                        <span className="uppercase font-mono mr-2">{method}</span>
-                        {operation.summary || operation.operationId || path}
-                      </SelectItem>
-                    ))
-                  ))}
-                </SelectContent>
-              </Select>
+        <div className="px-6 py-4 border-b">
+          <div className="flex items-center gap-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-8 h-8"
+              onClick={() => setShowTopBar(!showTopBar)}
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-3 ml-6">
+              <Label>Lab:</Label>
+              <div className="w-[240px]">
+                <Select
+                  value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
+                  onValueChange={(value) => {
+                    const [path, method] = value.split('|');
+                    setSelectedPath(path);
+                    setSelectedMethod(method);
+                    setResponse(null);
+                    setError(null);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select lab" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {endpoints.map(({ path, methods }) => (
+                      methods.map(({ method, operation }) => (
+                        <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
+                          <span className="uppercase font-mono mr-2">{method}</span>
+                          {operation.summary || operation.operationId || path}
+                        </SelectItem>
+                      ))
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
         </div>
       </div>
 
-      {!showTopBar && selectedPath && selectedMethod && (
+      {!showTopBar && (
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity duration-200"
+          className="absolute left-4 top-2 w-8 h-8"
           onClick={() => setShowTopBar(true)}
         >
           <ChevronDown className="h-4 w-4" />
