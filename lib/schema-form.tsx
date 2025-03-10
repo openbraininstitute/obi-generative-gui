@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { PlusCircle, X, Edit2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface SchemaFormProps {
@@ -23,6 +23,7 @@ interface SchemaFormProps {
 interface BlockData {
   type: string;
   displayName: string;
+  isEditing?: boolean;
 }
 
 export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
@@ -34,8 +35,15 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Focus input when editing starts
+    const editingBlock = Object.values(blocks).flat().find(block => block.isEditing);
+    if (editingBlock && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [blocks]);
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -364,19 +372,44 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(false);
   };
 
-  const handleUpdateBlockName = () => {
-    if (!selectedSection || !selectedBlock || selectedSection === 'initialize') return;
-    
+  const startEditing = (section: string, blockType: string) => {
     setBlocks(prev => ({
       ...prev,
-      [selectedSection]: prev[selectedSection]?.map(block => 
-        block.type === selectedBlock 
-          ? { ...block, displayName: editedName }
+      [section]: prev[section]?.map(block => ({
+        ...block,
+        isEditing: block.type === blockType
+      })) || []
+    }));
+  };
+
+  const handleNameChange = (section: string, blockType: string, newName: string) => {
+    setBlocks(prev => ({
+      ...prev,
+      [section]: prev[section]?.map(block => 
+        block.type === blockType 
+          ? { ...block, displayName: newName, isEditing: false }
           : block
       ) || []
     }));
-    
-    setIsEditingName(false);
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    section: string,
+    blockType: string,
+    currentName: string
+  ) => {
+    if (e.key === 'Enter') {
+      handleNameChange(section, blockType, currentName);
+    } else if (e.key === 'Escape') {
+      setBlocks(prev => ({
+        ...prev,
+        [section]: prev[section]?.map(block => ({
+          ...block,
+          isEditing: false
+        })) || []
+      }));
+    }
   };
 
   return (
@@ -414,23 +447,47 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                   </Button>
                 </div>
                 <div className="space-y-1 pl-4">
-                  {(blocks[sectionName] || []).map(({ type, displayName }) => (
-                    <button
+                  {(blocks[sectionName] || []).map(({ type, displayName, isEditing }) => (
+                    <div
                       key={type}
-                      className={cn(
-                        "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
-                        selectedSection === sectionName && selectedBlock === type
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                      onClick={() => {
-                        setSelectedSection(sectionName);
-                        setSelectedBlock(type);
-                      }}
-                      title={displayName}
+                      className="flex items-center gap-1 group"
                     >
-                      {displayName}
-                    </button>
+                      {isEditing ? (
+                        <Input
+                          ref={editInputRef}
+                          defaultValue={displayName}
+                          className="h-7 text-sm"
+                          onKeyDown={(e) => handleKeyDown(e, sectionName, type, e.currentTarget.value)}
+                          onBlur={(e) => handleNameChange(sectionName, type, e.target.value)}
+                        />
+                      ) : (
+                        <>
+                          <button
+                            className={cn(
+                              "flex-1 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm text-ellipsis overflow-hidden whitespace-nowrap",
+                              selectedSection === sectionName && selectedBlock === type
+                                ? "text-primary"
+                                : "text-muted-foreground"
+                            )}
+                            onClick={() => {
+                              setSelectedSection(sectionName);
+                              setSelectedBlock(type);
+                            }}
+                            title={displayName}
+                          >
+                            {displayName}
+                          </button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => startEditing(sectionName, type)}
+                          >
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -443,56 +500,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         {selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b">
-              {selectedSection === 'initialize' || isEditingName ? (
-                <div className="space-y-1">
-                  <h2 className="text-lg font-medium flex items-center gap-2">
-                    {isEditingName ? (
-                      <>
-                        <Input
-                          value={editedName}
-                          onChange={(e) => setEditedName(e.target.value)}
-                          className="h-8 max-w-[200px]"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleUpdateBlockName}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsEditingName(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      'Initialize'
-                    )}
-                  </h2>
-                  {!isEditingName && <p className="text-sm text-muted-foreground">Initialize</p>}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <h2 className="text-lg font-medium flex items-center gap-2">
-                    {getBlockDisplayName(selectedSection, selectedBlock)}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => {
-                        setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
-                        setIsEditingName(true);
-                      }}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </h2>
-                  <p className="text-sm text-muted-foreground">{selectedBlock}</p>
-                </div>
-              )}
+              <div className="space-y-1">
+                <h2 className="text-lg font-medium">Parameters</h2>
+                <p className="text-sm text-muted-foreground">{selectedBlock}</p>
+              </div>
             </div>
             <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
               <div className="divide-y">
