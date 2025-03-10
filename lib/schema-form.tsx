@@ -147,6 +147,8 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const renderField = (name: string, property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject) => {
     const resolvedProperty = resolveSchema(property);
 
+    if (name === 'type') return null;
+
     if (isArrayType(property)) {
       return renderArrayField(name, property);
     }
@@ -442,48 +444,54 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               {selectedSection === 'initialize' || isEditingName ? (
-                <h2 className="text-lg font-medium flex items-center gap-2">
-                  {isEditingName ? (
-                    <>
-                      <Input
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        className="h-8 max-w-[200px]"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleUpdateBlockName}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditingName(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    'Initialize'
-                  )}
-                </h2>
+                <div className="space-y-1">
+                  <h2 className="text-lg font-medium flex items-center gap-2">
+                    {isEditingName ? (
+                      <>
+                        <Input
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          className="h-8 max-w-[200px]"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleUpdateBlockName}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsEditingName(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      'Initialize'
+                    )}
+                  </h2>
+                  {!isEditingName && <p className="text-sm text-muted-foreground">Initialize</p>}
+                </div>
               ) : (
-                <h2 className="text-lg font-medium flex items-center gap-2">
-                  {getBlockDisplayName(selectedSection, selectedBlock)}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
-                      setIsEditingName(true);
-                    }}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                </h2>
+                <div className="space-y-1">
+                  <h2 className="text-lg font-medium flex items-center gap-2">
+                    {getBlockDisplayName(selectedSection, selectedBlock)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        setEditedName(getBlockDisplayName(selectedSection, selectedBlock));
+                        setIsEditingName(true);
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{selectedBlock}</p>
+                </div>
               )}
             </div>
             <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
