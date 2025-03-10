@@ -86,7 +86,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-none px-6 py-4 border-b">
-          <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Label>Lab:</Label>
               <div className="w-[240px]">
@@ -110,7 +110,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-none px-6 py-4 border-b">
-        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Label>Lab:</Label>
             <div className="w-[240px]">
