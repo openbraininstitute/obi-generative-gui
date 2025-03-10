@@ -101,24 +101,28 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setBlocks(initialBlocks);
   }, [schema]);
 
-  const handleFormSubmit = (data: any) => {
-    const processedData = Object.entries(data).reduce((acc, [key, value]) => {
-      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-        const values = Object.entries(value)
-          .sort(([a], [b]) => parseInt(a) - parseInt(b))
-          .map(([_, v]) => v);
-        acc[key] = values;
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as any);
+  // Watch for form changes and submit automatically
+  useEffect(() => {
+    const subscription = watch((data) => {
+      const processedData = Object.entries(data).reduce((acc, [key, value]) => {
+        if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+          const values = Object.entries(value)
+            .sort(([a], [b]) => parseInt(a) - parseInt(b))
+            .map(([_, v]) => v);
+          acc[key] = values;
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
 
-    onSubmit({
-      ...processedData,
-      type: selectedBlock
+      onSubmit({
+        ...processedData,
+        type: selectedBlock
+      });
     });
-  };
+    return () => subscription.unsubscribe();
+  }, [watch, selectedBlock, onSubmit]);
 
   const handleAddBlock = (section: string) => {
     setDialogSection(section);
@@ -175,7 +179,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h2 className="text-lg font-semibold">{selectedBlock}</h2>
             </div>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="flex-1 overflow-y-auto">
+            <form className="flex-1 overflow-y-auto">
               <div className="divide-y">
                 {(() => {
                   const blockSchema = getBlockSchema();
@@ -196,11 +200,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                     />
                   ));
                 })()}
-              </div>
-              <div className="sticky bottom-0 p-4 bg-background border-t">
-                <Button type="submit" className="w-full">
-                  Save Changes
-                </Button>
               </div>
             </form>
           </div>
