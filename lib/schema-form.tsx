@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
-import { PlusCircle, Settings, X, Edit2 } from "lucide-react";
+import { PlusCircle, X, Edit2 } from "lucide-react";
 import { useState } from "react";
 
 interface SchemaFormProps {
@@ -396,8 +396,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         <div className="space-y-4">
           {Object.entries(sections).map(([sectionName, sectionSchema]) => (
             <Card key={sectionName} className="p-4">
-              <h3 className="font-medium mb-3 flex items-center">
-                <Settings className="w-4 h-4 mr-2" />
+              <h3 className="font-medium mb-3">
                 {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
               </h3>
               <div className="space-y-2">
