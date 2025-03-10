@@ -216,11 +216,13 @@ export default function Home() {
 
           {/* Right image column */}
           <div className="w-1/2 fixed right-0 top-[4.125rem] bottom-0 bg-black flex items-center justify-center">
-            <img 
-              src="/images/Microcircuit.png" 
-              alt="Microcircuits visualization"
-              className="max-w-full max-h-full object-contain p-8"
-            />
+            <div className="w-1/2 h-1/2 relative flex items-center justify-center">
+              <img 
+                src="/images/Microcircuits.png" 
+                alt="Microcircuits visualization"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
           </div>
         </div>
       )}
