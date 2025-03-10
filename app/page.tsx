@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -86,12 +87,15 @@ export default function Home() {
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-none px-6 py-4 border-b">
           <div className="flex items-center justify-between max-w-[1400px] mx-auto">
-            <div className="w-[240px]">
-              <Select disabled>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select endpoint" />
-                </SelectTrigger>
-              </Select>
+            <div className="flex items-center gap-3">
+              <Label>Lab:</Label>
+              <div className="w-[240px]">
+                <Select disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select lab" />
+                  </SelectTrigger>
+                </Select>
+              </div>
             </div>
             <ThemeToggle />
           </div>
@@ -107,31 +111,34 @@ export default function Home() {
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-none px-6 py-4 border-b">
         <div className="flex items-center justify-between max-w-[1400px] mx-auto">
-          <div className="w-[240px]">
-            <Select
-              value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
-              onValueChange={(value) => {
-                const [path, method] = value.split('|');
-                setSelectedPath(path);
-                setSelectedMethod(method);
-                setResponse(null);
-                setError(null);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select endpoint" />
-              </SelectTrigger>
-              <SelectContent>
-                {endpoints.map(({ path, methods }) => (
-                  methods.map(({ method, operation }) => (
-                    <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                      <span className="uppercase font-mono mr-2">{method}</span>
-                      {operation.summary || operation.operationId || path}
-                    </SelectItem>
-                  ))
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-3">
+            <Label>Lab:</Label>
+            <div className="w-[240px]">
+              <Select
+                value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
+                onValueChange={(value) => {
+                  const [path, method] = value.split('|');
+                  setSelectedPath(path);
+                  setSelectedMethod(method);
+                  setResponse(null);
+                  setError(null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select lab" />
+                </SelectTrigger>
+                <SelectContent>
+                  {endpoints.map(({ path, methods }) => (
+                    methods.map(({ method, operation }) => (
+                      <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
+                        <span className="uppercase font-mono mr-2">{method}</span>
+                        {operation.summary || operation.operationId || path}
+                      </SelectItem>
+                    ))
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <ThemeToggle />
         </div>
