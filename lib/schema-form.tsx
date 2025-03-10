@@ -390,57 +390,54 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     <div className="flex flex-grow">
       <div className="w-[240px] border-r">
         <div className="space-y-1 font-mono p-6">
+          <button
+            className={cn(
+              "w-full text-left px-3 py-1.5 text-sm transition-colors",
+              selectedSection === 'initialize'
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            )}
+            onClick={() => {
+              setSelectedSection('initialize');
+              setSelectedBlock('Initialize');
+            }}
+          >
+            Initialize
+          </button>
           {Object.entries(sections).map(([sectionName, sectionSchema]) => (
-            <div key={sectionName} className="mb-4">
-              <div className="text-sm font-medium text-muted-foreground mb-1 px-3">
-                {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-              </div>
-              <div className="space-y-1">
-                {sectionName === 'initialize' ? (
-                  <button
-                    className={cn(
-                      "w-full text-left px-3 py-1.5 text-sm transition-colors",
-                      selectedSection === sectionName
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted"
-                    )}
-                    onClick={() => {
-                      setSelectedSection(sectionName);
-                      setSelectedBlock('Initialize');
-                    }}
-                  >
-                    Initialize
-                  </button>
-                ) : (
-                  <>
-                    {(blocks[sectionName] || []).map(({ type, displayName }) => (
-                      <button
-                        key={type}
-                        className={cn(
-                          "w-full text-left px-3 py-1.5 text-sm transition-colors",
-                          selectedSection === sectionName && selectedBlock === type
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-muted"
-                        )}
-                        onClick={() => {
-                          setSelectedSection(sectionName);
-                          setSelectedBlock(type);
-                        }}
-                      >
-                        {displayName}
-                      </button>
-                    ))}
+            sectionName !== 'initialize' && (
+              <div key={sectionName} className="mb-4">
+                <div className="text-sm font-medium text-muted-foreground mb-1 px-3">
+                  {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                </div>
+                <div className="space-y-1">
+                  {(blocks[sectionName] || []).map(({ type, displayName }) => (
                     <button
-                      className="w-full text-left px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
-                      onClick={() => handleAddBlock(sectionName)}
+                      key={type}
+                      className={cn(
+                        "w-full text-left px-3 py-1.5 text-sm transition-colors",
+                        selectedSection === sectionName && selectedBlock === type
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted"
+                      )}
+                      onClick={() => {
+                        setSelectedSection(sectionName);
+                        setSelectedBlock(type);
+                      }}
                     >
-                      <PlusCircle className="w-4 h-4" />
-                      <span>Add {sectionName.slice(0, -1)}</span>
+                      {displayName}
                     </button>
-                  </>
-                )}
+                  ))}
+                  <button
+                    className="w-full text-left px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                    onClick={() => handleAddBlock(sectionName)}
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Add {sectionName.slice(0, -1)}</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )
           ))}
         </div>
       </div>
