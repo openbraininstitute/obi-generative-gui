@@ -70,90 +70,102 @@ export default function Home() {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 max-w-[1400px]">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="flex-none px-6 py-4 border-b">
+        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
           <div className="flex items-center space-x-4">
             <ServerIcon className="w-8 h-8" />
             <h1 className="text-3xl font-bold">FastAPI Client</h1>
           </div>
           <ThemeToggle />
         </div>
+      </div>
 
-        <Card className="p-6 mb-8">
-          <div className="flex space-x-4">
-            <Input
-              placeholder="Enter FastAPI URL (e.g., http://localhost:8000)"
-              value={apiUrl}
-              onChange={(e) => setApiUrl(e.target.value)}
-            />
-            <Button onClick={loadSpec} disabled={loading}>
-              {loading ? "Loading..." : "Load API"}
-            </Button>
-          </div>
-          
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </Card>
+      <div className="flex-none px-6 py-4 border-b">
+        <div className="max-w-[1400px] mx-auto">
+          <Card className="p-6">
+            <div className="flex space-x-4">
+              <Input
+                placeholder="Enter FastAPI URL (e.g., http://localhost:8000)"
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+              />
+              <Button onClick={loadSpec} disabled={loading}>
+                {loading ? "Loading..." : "Load API"}
+              </Button>
+            </div>
+            
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </Card>
+        </div>
+      </div>
 
-        {spec && (
-          <Tabs defaultValue="endpoints" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="endpoints">
-                <SendIcon className="w-4 h-4 mr-2" />
-                Endpoints
-              </TabsTrigger>
-              <TabsTrigger value="schema">
-                <FileJson className="w-4 h-4 mr-2" />
-                Schema
-              </TabsTrigger>
-            </TabsList>
+      {spec && (
+        <div className="flex-1 overflow-hidden">
+          <Tabs defaultValue="endpoints" className="h-full flex flex-col">
+            <div className="flex-none px-6 border-b">
+              <TabsList>
+                <TabsTrigger value="endpoints">
+                  <SendIcon className="w-4 h-4 mr-2" />
+                  Endpoints
+                </TabsTrigger>
+                <TabsTrigger value="schema">
+                  <FileJson className="w-4 h-4 mr-2" />
+                  Schema
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="endpoints" className="space-y-4">
-              <div className="grid grid-cols-[300px,1fr] gap-6">
-                <div className="space-y-4">
-                  {Object.entries(spec.paths).map(([path, pathItem]) => (
-                    <Card key={path} className="p-4">
-                      <h3 className="text-lg font-semibold mb-4 break-words font-mono text-[0.7em]">{path}</h3>
-                      <div className="space-y-2">
-                        {Object.entries(pathItem as OpenAPIV3.PathItemObject).map(
-                          ([method, operation]) => {
-                            if (method === 'parameters') return null;
-                            const op = operation as OpenAPIV3.OperationObject;
-                            return (
-                              <Button
-                                key={method}
-                                variant={
-                                  selectedPath === path && selectedMethod === method
-                                    ? "default"
-                                    : "outline"
-                                }
-                                onClick={() => {
-                                  setSelectedPath(path);
-                                  setSelectedMethod(method);
-                                  setResponse(null);
-                                  setError(null);
-                                }}
-                                className="w-full justify-start"
-                              >
-                                <span className="uppercase font-mono mr-2">
-                                  {method}
-                                </span>
-                                {op.summary || op.operationId || path}
-                              </Button>
-                            );
-                          }
-                        )}
-                      </div>
-                    </Card>
-                  ))}
+            <TabsContent value="endpoints" className="flex-1 overflow-hidden">
+              <div className="h-full flex">
+                {/* Left sidebar - Fixed width, scrollable */}
+                <div className="w-[300px] flex-none overflow-y-auto border-r p-6">
+                  <div className="space-y-4">
+                    {Object.entries(spec.paths).map(([path, pathItem]) => (
+                      <Card key={path} className="p-4">
+                        <h3 className="text-lg font-semibold mb-4 break-words font-mono text-[0.7em]">{path}</h3>
+                        <div className="space-y-2">
+                          {Object.entries(pathItem as OpenAPIV3.PathItemObject).map(
+                            ([method, operation]) => {
+                              if (method === 'parameters') return null;
+                              const op = operation as OpenAPIV3.OperationObject;
+                              return (
+                                <Button
+                                  key={method}
+                                  variant={
+                                    selectedPath === path && selectedMethod === method
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  onClick={() => {
+                                    setSelectedPath(path);
+                                    setSelectedMethod(method);
+                                    setResponse(null);
+                                    setError(null);
+                                  }}
+                                  className="w-full justify-start"
+                                >
+                                  <span className="uppercase font-mono mr-2">
+                                    {method}
+                                  </span>
+                                  {op.summary || op.operationId || path}
+                                </Button>
+                              );
+                            }
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
 
-                <div>
+                {/* Main content - Flexible width, scrollable */}
+                <div className="flex-1 overflow-y-auto p-6">
                   {selectedOperation && (
                     <Card className="p-6">
                       <h2 className="text-2xl font-bold mb-4">
@@ -188,15 +200,17 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="schema">
-              <Card className="p-6">
-                <pre className="overflow-auto">
-                  {JSON.stringify(spec, null, 2)}
-                </pre>
-              </Card>
+              <div className="p-6">
+                <Card className="p-6">
+                  <pre className="overflow-auto">
+                    {JSON.stringify(spec, null, 2)}
+                  </pre>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
