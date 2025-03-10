@@ -7,9 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { SendIcon, FileJson, AlertCircle } from "lucide-react";
+import { SendIcon, FileJson, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "@/lib/utils";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -20,10 +21,18 @@ export default function Home() {
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     loadSpec();
   }, []);
+
+  useEffect(() => {
+    // Automatically close sidebar when an endpoint is selected
+    if (selectedPath && selectedMethod) {
+      setSidebarOpen(false);
+    }
+  }, [selectedPath, selectedMethod]);
 
   const loadSpec = async () => {
     setLoading(true);
@@ -117,10 +126,32 @@ export default function Home() {
             </div>
 
             <TabsContent value="endpoints" className="flex-1 overflow-hidden">
-              <div className="h-full flex">
-                {/* Left sidebar - Fixed width, scrollable */}
-                <div className="w-[300px] flex-none overflow-y-auto border-r p-6">
-                  <div className="space-y-4">
+              <div className="h-full relative">
+                {/* Sidebar toggle button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "fixed top-[7.5rem] z-30 transition-all duration-300",
+                    sidebarOpen ? "left-[276px]" : "left-6"
+                  )}
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                  {sidebarOpen ? (
+                    <ChevronLeft className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+
+                {/* Left sidebar */}
+                <div
+                  className={cn(
+                    "fixed top-[5.125rem] bottom-0 left-0 w-[300px] overflow-y-auto border-r bg-background transition-transform duration-300 z-20",
+                    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                  )}
+                >
+                  <div className="p-6 space-y-4">
                     {Object.entries(spec.paths).map(([path, pathItem]) => (
                       <Card key={path} className="p-4">
                         <h3 className="text-lg font-semibold mb-4 break-words font-mono text-[0.7em]">{path}</h3>
@@ -159,37 +190,44 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Main content - Flexible width, scrollable */}
-                <div className="flex-1 overflow-y-auto p-6">
-                  {selectedOperation && (
-                    <Card className="p-6">
-                      <h2 className="text-2xl font-bold mb-4">
-                        {selectedOperation.summary || selectedOperation.operationId || selectedPath}
-                      </h2>
-                      {selectedOperation.description && (
-                        <p className="text-muted-foreground mb-4">{selectedOperation.description}</p>
-                      )}
-                      {schema ? (
-                        <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
-                      ) : (
-                        <p className="text-muted-foreground">This endpoint doesn't require a request body.</p>
-                      )}
-                    </Card>
+                {/* Main content */}
+                <div
+                  className={cn(
+                    "min-h-full overflow-y-auto transition-all duration-300 px-6",
+                    sidebarOpen ? "ml-[300px]" : "ml-0"
                   )}
+                >
+                  <div className="py-6">
+                    {selectedOperation && (
+                      <Card className="p-6">
+                        <h2 className="text-2xl font-bold mb-4">
+                          {selectedOperation.summary || selectedOperation.operationId || selectedPath}
+                        </h2>
+                        {selectedOperation.description && (
+                          <p className="text-muted-foreground mb-4">{selectedOperation.description}</p>
+                        )}
+                        {schema ? (
+                          <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
+                        ) : (
+                          <p className="text-muted-foreground">This endpoint doesn't require a request body.</p>
+                        )}
+                      </Card>
+                    )}
 
-                  {response && (
-                    <Card className="p-6 mt-6">
-                      <h2 className="text-2xl font-bold mb-4">Response</h2>
-                      <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
-                        <div className="font-semibold mb-2">
-                          Status: {response.status}
+                    {response && (
+                      <Card className="p-6 mt-6">
+                        <h2 className="text-2xl font-bold mb-4">Response</h2>
+                        <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
+                          <div className="font-semibold mb-2">
+                            Status: {response.status}
+                          </div>
+                          <pre className="overflow-auto">
+                            {JSON.stringify(response.data, null, 2)}
+                          </pre>
                         </div>
-                        <pre className="overflow-auto">
-                          {JSON.stringify(response.data, null, 2)}
-                        </pre>
-                      </div>
-                    </Card>
-                  )}
+                      </Card>
+                    )}
+                  </div>
                 </div>
               </div>
             </TabsContent>
