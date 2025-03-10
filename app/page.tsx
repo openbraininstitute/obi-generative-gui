@@ -10,6 +10,7 @@ import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -21,6 +22,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { theme } = useTheme();
 
   useEffect(() => {
     loadSpec();
@@ -215,7 +217,10 @@ export default function Home() {
           </div>
 
           {/* Right image column */}
-          <div className="w-1/2 fixed right-0 top-[4.125rem] bottom-0 bg-black flex items-center justify-center">
+          <div className={cn(
+            "w-1/2 fixed right-0 top-[4.125rem] bottom-0 flex items-center justify-center transition-colors duration-300",
+            theme === 'dark' ? 'bg-black' : 'bg-white'
+          )}>
             <div className="w-1/2 h-1/2 relative flex items-center justify-center">
               <img 
                 src="/images/Microcircuits.png" 
