@@ -233,7 +233,7 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
     <>
       <ResizablePanelGroup
         direction="horizontal"
-        className="h-[calc(100vh-4rem)]"
+        className="h-full"
       >
         <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
           <BlockList
@@ -257,48 +257,52 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
         {editorOnRight ? (
           <>
             <ResizablePanel defaultSize={50} minSize={30}>
-              <ImageViewer 
-                src="/images/Microcircuits.png"
-                alt="Microcircuits visualization"
-              />
+              <div className="h-full">
+                <ImageViewer 
+                  src="/images/Microcircuits.png"
+                  alt="Microcircuits visualization"
+                />
+              </div>
             </ResizablePanel>
             
             <ResizableHandle withHandle className="bg-border" />
             
             <ResizablePanel defaultSize={30} minSize={20}>
-              <div className="h-full overflow-y-auto">
+              <div className="h-full flex flex-col">
                 {selectedSection && selectedBlock && (
-                  <div className="h-full flex flex-col">
-                    <div className="flex items-center px-6 py-4">
+                  <>
+                    <div className="flex-none flex items-center px-6 py-4">
                       <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
                         {selectedBlock}
                       </div>
                     </div>
-                    <form className="flex-1 overflow-y-auto">
-                      <div className="divide-y">
-                        {(() => {
-                          const blockSchema = getBlockSchema();
-                          if (!blockSchema?.properties) return null;
-                          
-                          return Object.entries(blockSchema.properties).map(([name, property]) => (
-                            <FormField
-                              key={name}
-                              name={name}
-                              property={property as OpenAPIV3.SchemaObject}
-                              register={register}
-                              setValue={setValue}
-                              watch={watch}
-                              resolveSchema={resolveSchema}
-                              arrayFields={arrayFields}
-                              setArrayFields={setArrayFields}
-                              setFormData={handleFormDataUpdate}
-                              blocks={blocks}
-                            />
-                          ));
-                        })()}
-                      </div>
-                    </form>
-                  </div>
+                    <div className="flex-1 overflow-y-auto">
+                      <form>
+                        <div className="divide-y">
+                          {(() => {
+                            const blockSchema = getBlockSchema();
+                            if (!blockSchema?.properties) return null;
+                            
+                            return Object.entries(blockSchema.properties).map(([name, property]) => (
+                              <FormField
+                                key={name}
+                                name={name}
+                                property={property as OpenAPIV3.SchemaObject}
+                                register={register}
+                                setValue={setValue}
+                                watch={watch}
+                                resolveSchema={resolveSchema}
+                                arrayFields={arrayFields}
+                                setArrayFields={setArrayFields}
+                                setFormData={handleFormDataUpdate}
+                                blocks={blocks}
+                              />
+                            ));
+                          })()}
+                        </div>
+                      </form>
+                    </div>
+                  </>
                 )}
               </div>
             </ResizablePanel>
@@ -306,39 +310,41 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
         ) : (
           <>
             <ResizablePanel defaultSize={50} minSize={30}>
-              <div className="h-full overflow-y-auto">
+              <div className="h-full flex flex-col">
                 {selectedSection && selectedBlock && (
-                  <div className="h-full flex flex-col">
-                    <div className="flex items-center px-6 py-4">
+                  <>
+                    <div className="flex-none flex items-center px-6 py-4">
                       <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
                         {selectedBlock}
                       </div>
                     </div>
-                    <form className="flex-1 overflow-y-auto">
-                      <div className="divide-y">
-                        {(() => {
-                          const blockSchema = getBlockSchema();
-                          if (!blockSchema?.properties) return null;
-                          
-                          return Object.entries(blockSchema.properties).map(([name, property]) => (
-                            <FormField
-                              key={name}
-                              name={name}
-                              property={property as OpenAPIV3.SchemaObject}
-                              register={register}
-                              setValue={setValue}
-                              watch={watch}
-                              resolveSchema={resolveSchema}
-                              arrayFields={arrayFields}
-                              setArrayFields={setArrayFields}
-                              setFormData={handleFormDataUpdate}
-                              blocks={blocks}
-                            />
-                          ));
-                        })()}
-                      </div>
-                    </form>
-                  </div>
+                    <div className="flex-1 overflow-y-auto">
+                      <form>
+                        <div className="divide-y">
+                          {(() => {
+                            const blockSchema = getBlockSchema();
+                            if (!blockSchema?.properties) return null;
+                            
+                            return Object.entries(blockSchema.properties).map(([name, property]) => (
+                              <FormField
+                                key={name}
+                                name={name}
+                                property={property as OpenAPIV3.SchemaObject}
+                                register={register}
+                                setValue={setValue}
+                                watch={watch}
+                                resolveSchema={resolveSchema}
+                                arrayFields={arrayFields}
+                                setArrayFields={setArrayFields}
+                                setFormData={handleFormDataUpdate}
+                                blocks={blocks}
+                              />
+                            ));
+                          })()}
+                        </div>
+                      </form>
+                    </div>
+                  </>
                 )}
               </div>
             </ResizablePanel>
@@ -346,10 +352,12 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
             <ResizableHandle withHandle className="bg-border" />
             
             <ResizablePanel defaultSize={30} minSize={20}>
-              <ImageViewer 
-                src="/images/Microcircuits.png"
-                alt="Microcircuits visualization"
-              />
+              <div className="h-full">
+                <ImageViewer 
+                  src="/images/Microcircuits.png"
+                  alt="Microcircuits visualization"
+                />
+              </div>
             </ResizablePanel>
           </>
         )}

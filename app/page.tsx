@@ -131,8 +131,8 @@ export default function Home() {
         >
           {showChat ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
-        <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden">
-          <div className="px-6 py-4 border-b">
+        <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden flex flex-col">
+          <div className="flex-none px-6 py-4 border-b">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
                 <Label>Lab:</Label>
@@ -177,7 +177,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="px-6 py-4">
+            <div className="flex-none px-6 py-4">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="h-[calc(100vh-12rem)]">
+          <div className="flex-1">
             {spec && (
               selectedOperation && schema ? (
                 <SchemaForm 
