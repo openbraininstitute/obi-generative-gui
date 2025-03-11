@@ -15,8 +15,13 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
   const [zoom, setZoom] = useState(100);
   const { theme } = useTheme();
 
+  const isDark = theme === 'dark';
+
   return (
-    <div className="h-full flex flex-col">
+    <div className={cn(
+      "h-full flex flex-col",
+      isDark ? "bg-black" : "bg-white"
+    )}>
       <div className="flex-1 relative overflow-hidden">
         <div 
           className="absolute inset-0 flex items-center justify-center"
@@ -31,7 +36,7 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
       </div>
       <div className={cn(
         "flex-none p-4 border-t",
-        theme === 'dark' ? 'bg-black/50' : 'bg-white/50'
+        isDark ? "bg-black" : "bg-white"
       )}>
         <div className="flex items-center gap-4">
           <ZoomOut className="h-4 w-4 text-muted-foreground" />
