@@ -171,7 +171,6 @@ export default function Home() {
                     {endpoints.map(({ path, methods }) => (
                       methods.map(({ method, operation, displayName }) => (
                         <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                          <span className="uppercase font-mono mr-2">{method}</span>
                           {displayName}
                         </SelectItem>
                       ))

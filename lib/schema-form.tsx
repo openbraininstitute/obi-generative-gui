@@ -133,10 +133,17 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(true);
   };
 
+  const toSnakeCase = (str: string) => {
+    return str
+      .split(/(?=[A-Z])/)
+      .join('_')
+      .toLowerCase();
+  };
+
   const handleSelectBlock = (blockType: string) => {
     const newBlock = {
       type: blockType,
-      displayName: blockType
+      displayName: toSnakeCase(blockType)
     };
     
     setBlocks(prev => ({
