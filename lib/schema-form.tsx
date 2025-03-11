@@ -140,16 +140,34 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
     });
   };
 
+  const toSnakeCase = (str: string): string => {
+    return str
+      .replace(/([A-Z])/g, '_$1')
+      .toLowerCase()
+      .replace(/^_/, '');
+  };
+
+  const getNextBlockIndex = (section: string, blockType: string): number => {
+    const sectionBlocks = blocks[section] || [];
+    const typeBlocks = sectionBlocks.filter(block => 
+      block.displayName.startsWith(toSnakeCase(blockType))
+    );
+    return typeBlocks.length;
+  };
+
   const handleAddBlock = (section: string) => {
     setDialogSection(section);
     setIsDialogOpen(true);
   };
 
   const handleSelectBlock = (blockType: string) => {
+    const nextIndex = getNextBlockIndex(dialogSection, blockType);
+    const snakeCaseName = `${toSnakeCase(blockType)}_${nextIndex}`;
+    
     const newBlock = {
       id: nanoid(),
       type: blockType,
-      displayName: blockType
+      displayName: snakeCaseName
     };
     
     setBlocks(prev => ({
