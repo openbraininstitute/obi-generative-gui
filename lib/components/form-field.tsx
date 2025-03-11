@@ -120,7 +120,7 @@ export function FormField({
                   }}
                 >
                   <SelectTrigger className="flex-1 h-6 text-sm">
-                    <SelectValue placeholder={`Select ${getAvailableBlockTypes(itemSchema).join(' or ')}`} />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {getAvailableBlocks(getAvailableBlockTypes(itemSchema)).map((block) => (
@@ -157,7 +157,7 @@ export function FormField({
                   }}
                 >
                   <SelectTrigger className="flex-1 h-6 text-sm">
-                    <SelectValue placeholder="Select an option" />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {itemSchema.enum.map((option) => (
@@ -235,7 +235,7 @@ export function FormField({
           }}
         >
           <SelectTrigger className="flex-1 h-6 text-sm">
-            <SelectValue placeholder={`Select ${blockTypes.join(' or ')}`} />
+            <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
             {availableBlocks.map((block) => (
@@ -305,7 +305,7 @@ export function FormField({
               }}
             >
               <SelectTrigger className="flex-1 h-6 text-sm">
-                <SelectValue placeholder="Select an option" />
+                <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 {resolvedProperty.enum.map((option) => (

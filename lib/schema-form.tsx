@@ -291,7 +291,7 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Select {dialogSection.slice(0, -1)} Type</DialogTitle>
+            <DialogTitle>Select</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {getAvailableBlocks(dialogSection).map((blockName) => (
