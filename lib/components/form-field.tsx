@@ -9,6 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PlusCircle, X } from "lucide-react";
 import { UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
+interface BlockData {
+  id: string;
+  type: string;
+  displayName: string;
+}
+
 interface FormFieldProps {
   name: string;
   property: OpenAPIV3.SchemaObject;
@@ -19,6 +25,7 @@ interface FormFieldProps {
   arrayFields: Record<string, number>;
   setArrayFields: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
+  blocks: Record<string, BlockData[]>;
 }
 
 export function FormField({
@@ -31,6 +38,7 @@ export function FormField({
   arrayFields,
   setArrayFields,
   setFormData,
+  blocks,
 }: FormFieldProps) {
   if (name === 'type') return null;
 
@@ -61,9 +69,39 @@ export function FormField({
     return resolvedProperty.type || 'string';
   };
 
+  const isBlockReference = (property: OpenAPIV3.SchemaObject): boolean => {
+    if (property.anyOf) {
+      return property.anyOf.some(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        return resolved.type === 'object' && resolved.properties?.type?.const;
+      });
+    }
+    return property.type === 'object' && property.properties?.type?.const !== undefined;
+  };
+
+  const getAvailableBlockTypes = (property: OpenAPIV3.SchemaObject): string[] => {
+    if (property.anyOf) {
+      return property.anyOf.map(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        return resolved.properties?.type?.const as string;
+      }).filter(Boolean);
+    }
+    if (property.type === 'object' && property.properties?.type?.const) {
+      return [property.properties.type.const as string];
+    }
+    return [];
+  };
+
+  const getAvailableBlocks = (blockTypes: string[]): BlockData[] => {
+    return Object.values(blocks)
+      .flat()
+      .filter(block => blockTypes.includes(block.type));
+  };
+
   const renderArrayField = () => {
     const fieldCount = arrayFields[name] || 1;
     const type = getPropertyType(property);
+    const itemSchema = resolveSchema((resolvedProperty.items || {}) as OpenAPIV3.SchemaObject);
 
     return (
       <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
@@ -71,7 +109,32 @@ export function FormField({
         <div className="flex-1 space-y-1">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-1">
-              {type === 'number' || type === 'integer' ? (
+              {isBlockReference(itemSchema) ? (
+                <Select 
+                  onValueChange={(value) => {
+                    const [type, displayName] = value.split('|');
+                    const values = watch(name) || [];
+                    values[index] = { type, name: displayName };
+                    setValue(name, values);
+                    setFormData(prev => ({ ...prev, [name]: values }));
+                  }}
+                >
+                  <SelectTrigger className="flex-1 h-6 text-sm">
+                    <SelectValue placeholder={`Select ${getAvailableBlockTypes(itemSchema).join(' or ')}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableBlocks(getAvailableBlockTypes(itemSchema)).map((block) => (
+                      <SelectItem 
+                        key={block.id} 
+                        value={`${block.type}|${block.displayName}`}
+                        className="text-sm"
+                      >
+                        {block.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : type === 'number' || type === 'integer' ? (
                 <Input
                   type="number"
                   {...register(`${name}.${index}`, { valueAsNumber: true })}
@@ -84,6 +147,26 @@ export function FormField({
                     setFormData(prev => ({ ...prev, [name]: values }));
                   }}
                 />
+              ) : type === 'string' && itemSchema.enum ? (
+                <Select 
+                  onValueChange={(value) => {
+                    setValue(`${name}.${index}`, value);
+                    const values = watch(name) || [];
+                    values[index] = value;
+                    setFormData(prev => ({ ...prev, [name]: values }));
+                  }}
+                >
+                  <SelectTrigger className="flex-1 h-6 text-sm">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {itemSchema.enum.map((option) => (
+                      <SelectItem key={option} value={option} className="text-sm">
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <Input
                   {...register(`${name}.${index}`)}
@@ -137,6 +220,39 @@ export function FormField({
     return renderArrayField();
   }
 
+  if (isBlockReference(resolvedProperty)) {
+    const blockTypes = getAvailableBlockTypes(resolvedProperty);
+    const availableBlocks = getAvailableBlocks(blockTypes);
+    
+    return (
+      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+        <Label className="text-sm text-muted-foreground">{name}</Label>
+        <Select 
+          onValueChange={(value) => {
+            const [type, displayName] = value.split('|');
+            setValue(name, { type, name: displayName });
+            setFormData(prev => ({ ...prev, [name]: { type, name: displayName } }));
+          }}
+        >
+          <SelectTrigger className="flex-1 h-6 text-sm">
+            <SelectValue placeholder={`Select ${blockTypes.join(' or ')}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {availableBlocks.map((block) => (
+              <SelectItem 
+                key={block.id} 
+                value={`${block.type}|${block.displayName}`}
+                className="text-sm"
+              >
+                {block.displayName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
   if (resolvedProperty.const) {
     return (
       <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
@@ -169,6 +285,7 @@ export function FormField({
             arrayFields={arrayFields}
             setArrayFields={setArrayFields}
             setFormData={setFormData}
+            blocks={blocks}
           />
         ))}
       </div>
