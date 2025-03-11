@@ -350,19 +350,19 @@ export function ModelingInterface() {
           {...provided.dragHandleProps}
           className={`p-3 rounded cursor-pointer transition-all duration-300 ${
             isSelected 
-              ? 'bg-white text-[#001B44]' 
+              ? 'bg-white text-[#002766]' 
               : 'bg-blue-900 text-white hover:bg-blue-800'
           }`}
           onClick={onClick}
         >
           <div className="flex items-center space-x-3">
-            <div className={isSelected ? 'text-[#001B44]' : 'text-white'}>
+            <div className={isSelected ? 'text-[#002766]' : 'text-white'}>
               {item.icon}
             </div>
             <div>
               <div className="font-medium">{item.title}</div>
               {item.subtitle && (
-                <div className={`text-sm ${isSelected ? 'text-[#001B44]/70' : 'text-gray-400'}`}>
+                <div className={`text-sm ${isSelected ? 'text-[#002766]/70' : 'text-gray-400'}`}>
                   {item.subtitle}
                 </div>
               )}
@@ -437,7 +437,7 @@ export function ModelingInterface() {
   };
 
   return (
-    <div className="bg-[#001B44] text-white">
+    <div className="bg-[#002766] text-white">
       <header className="bg-[#002B69] p-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Menu className="w-6 h-6 cursor-pointer hover:text-blue-300 transition-colors" />
@@ -591,21 +591,21 @@ export function ModelingInterface() {
                       key={task.id}
                       onClick={() => handleTaskSelect(task.id)}
                       className={`border-t border-blue-800 cursor-pointer hover:bg-blue-800/50 ${
-                        selectedTaskId === task.id ? 'bg-white text-[#001B44]' : ''
+                        selectedTaskId === task.id ? 'bg-white text-[#002766]' : ''
                       }`}
                     >
                       <td className="px-6 py-4 flex items-center space-x-2">
                         {task.type === 'task' ? (
-                          <FileText className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-blue-300'}`} />
+                          <FileText className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-blue-300'}`} />
                         ) : (
-                          <Book className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-blue-300'}`} />
+                          <Book className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-blue-300'}`} />
                         )}
                         <span>{task.title}</span>
                       </td>
-                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-gray-300'}`}>
+                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-gray-300'}`}>
                         {task.description}
                       </td>
-                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-gray-300'}`}>
+                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-gray-300'}`}>
                         {task.lastModified}
                       </td>
                     </tr>

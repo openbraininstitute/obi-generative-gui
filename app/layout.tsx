@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'OBI - Generative GUI',
+  title: 'Open Brain Platform',
   description: 'Neuroscience at the speed of thought',
 };
 
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-[#002766]`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
