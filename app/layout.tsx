@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Open Brain Platform',
+  title: 'OBI - Generative GUI',
   description: 'Neuroscience at the speed of thought',
 };
 

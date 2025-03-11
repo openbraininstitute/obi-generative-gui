@@ -77,13 +77,26 @@ export default function Home() {
     ? getSchemaFromPath(spec, selectedPath, selectedMethod)
     : null;
 
+  const getEndpointDisplayName = (path: string, method: string, operation: OpenAPIV3.OperationObject) => {
+    // Extract the last part of the path
+    const pathParts = path.split('/').filter(Boolean);
+    const lastPart = pathParts[pathParts.length - 1];
+    
+    // Convert to title case and remove underscores
+    return lastPart
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const endpoints = spec ? Object.entries(spec.paths).map(([path, pathItem]) => ({
     path,
     methods: Object.entries(pathItem as OpenAPIV3.PathItemObject)
       .filter(([method]) => method !== 'parameters')
       .map(([method, operation]) => ({
         method,
-        operation: operation as OpenAPIV3.OperationObject
+        operation: operation as OpenAPIV3.OperationObject,
+        displayName: getEndpointDisplayName(path, method, operation as OpenAPIV3.OperationObject)
       }))
   })) : [];
 
@@ -156,10 +169,10 @@ export default function Home() {
                   </SelectTrigger>
                   <SelectContent>
                     {endpoints.map(({ path, methods }) => (
-                      methods.map(({ method, operation }) => (
+                      methods.map(({ method, operation, displayName }) => (
                         <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
                           <span className="uppercase font-mono mr-2">{method}</span>
-                          {operation.summary || operation.operationId || path}
+                          {displayName}
                         </SelectItem>
                       ))
                     ))}
