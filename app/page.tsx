@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ChatAgent } from "@/components/chat-agent";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -102,157 +103,94 @@ export default function Home() {
 
   if (loading && !spec) {
     return (
-      <div className="h-screen flex flex-col bg-background overflow-hidden">
-        <div className="flex-none px-6 py-4 border-b h-16">
-          <div className="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-8 h-8"
-              disabled
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-            <div className="flex items-center gap-3 ml-6">
-              <Label>Lab:</Label>
-              <div className="w-[240px]">
-                <Select disabled>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select lab" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
-                <Switch
-                  checked={editorOnRight}
-                  onCheckedChange={setEditorOnRight}
-                  size="sm"
-                />
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-muted-foreground">Loading API specification...</p>
-        </div>
+      <div className="h-screen flex items-center justify-center bg-background">
+        <p className="text-lg text-muted-foreground">Loading API specification...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <div 
-        className={cn(
-          "flex-none transition-all duration-300 ease-in-out",
-          showTopBar ? "h-16" : "h-0 opacity-0 overflow-hidden"
-        )}
-      >
-        <div className="px-6 py-4 border-b h-16">
-          <div className="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-8 h-8"
-              onClick={() => setShowTopBar(!showTopBar)}
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-            <div className="flex items-center gap-3 ml-6">
-              <Label>Lab:</Label>
-              <div className="w-[240px]">
-                <Select
-                  value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
-                  onValueChange={(value) => {
-                    const [path, method] = value.split('|');
-                    setSelectedPath(path);
-                    setSelectedMethod(method);
-                    setResponse(null);
-                    setError(null);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select lab" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {endpoints.map(({ path, methods }) => (
-                      methods.map(({ method, operation, displayName }) => (
-                        <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                          {displayName}
-                        </SelectItem>
-                      ))
-                    ))}
-                  </SelectContent>
-                </Select>
+    <div className="h-screen flex bg-background">
+      <div className="w-[400px] border-r">
+        <ChatAgent />
+      </div>
+      <div className="flex-1 relative">
+        <div 
+          className={cn(
+            "absolute right-8 top-8 w-[900px] rounded-lg border shadow-lg bg-background",
+            "transition-all duration-300 ease-in-out"
+          )}
+        >
+          <div className="px-6 py-4 border-b">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <Label>Lab:</Label>
+                <div className="w-[240px]">
+                  <Select
+                    value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
+                    onValueChange={(value) => {
+                      const [path, method] = value.split('|');
+                      setSelectedPath(path);
+                      setSelectedMethod(method);
+                      setResponse(null);
+                      setError(null);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select lab" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {endpoints.map(({ path, methods }) => (
+                        methods.map(({ method, operation, displayName }) => (
+                          <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
+                            {displayName}
+                          </SelectItem>
+                        ))
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
-                <Switch
-                  checked={editorOnRight}
-                  onCheckedChange={setEditorOnRight}
-                  size="sm"
-                />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                  <Switch
+                    checked={editorOnRight}
+                    onCheckedChange={setEditorOnRight}
+                    size="sm"
+                  />
+                </div>
+                <ThemeToggle />
               </div>
-              <ThemeToggle />
             </div>
           </div>
-        </div>
-      </div>
 
-      {!showTopBar && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute left-4 top-2 w-8 h-8"
-          onClick={() => setShowTopBar(true)}
-        >
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      )}
-
-      {error && (
-        <div className="flex-none px-6 py-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-hidden">
-        {spec && (
-          selectedOperation && schema ? (
-            <SchemaForm 
-              schema={schema} 
-              spec={spec} 
-              onSubmit={handleSubmit}
-              editorOnRight={editorOnRight}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-lg text-muted-foreground">Select a lab to begin</p>
+          {error && (
+            <div className="px-6 py-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             </div>
-          )
-        )}
+          )}
 
-        {response && (
-          <Card className="p-6 mt-6">
-            <h2 className="text-2xl font-bold mb-4">Response</h2>
-            <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
-              <div className="font-semibold mb-2">
-                Status: {response.status}
-              </div>
-              <pre className="overflow-auto">
-                {JSON.stringify(response.data, null, 2)}
-              </pre>
-            </div>
-          </Card>
-        )}
+          <div className="h-[calc(100vh-12rem)]">
+            {spec && (
+              selectedOperation && schema ? (
+                <SchemaForm 
+                  schema={schema} 
+                  spec={spec} 
+                  onSubmit={handleSubmit}
+                  editorOnRight={editorOnRight}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-lg text-muted-foreground">Select a lab to begin</p>
+                </div>
+              )
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
