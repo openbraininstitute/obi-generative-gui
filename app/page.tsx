@@ -104,14 +104,14 @@ export default function Home() {
 
   if (loading && !spec) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <p className="text-lg text-muted-foreground">Loading API specification...</p>
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-lg text-white">Loading API specification...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-background p-8 flex gap-8">
+    <div className="h-screen p-8 flex gap-8">
       <div 
         className={cn(
           "transition-all duration-300 ease-in-out",
