@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface BlockData {
+  id: string;
   type: string;
   displayName: string;
 }
@@ -20,7 +21,7 @@ interface BlockListProps {
   selectedBlock: string | null;
   onSectionSelect: (section: string, block: string) => void;
   onAddBlock: (section: string) => void;
-  onUpdateBlockName: (section: string, blockType: string, newName: string) => void;
+  onUpdateBlockName: (section: string, blockId: string, newName: string) => void;
   onGenerate: () => void;
 }
 
@@ -34,18 +35,18 @@ export function BlockList({
   onUpdateBlockName,
   onGenerate,
 }: BlockListProps) {
-  const [editingBlock, setEditingBlock] = useState<{ section: string; type: string } | null>(null);
+  const [editingBlock, setEditingBlock] = useState<{ section: string; id: string } | null>(null);
   const [editedName, setEditedName] = useState("");
 
   const handleStartEdit = (e: React.MouseEvent, section: string, block: BlockData) => {
     e.stopPropagation();
-    setEditingBlock({ section, type: block.type });
+    setEditingBlock({ section, id: block.id });
     setEditedName(block.displayName);
   };
 
-  const handleSaveEdit = (e: React.MouseEvent, section: string, type: string) => {
+  const handleSaveEdit = (e: React.MouseEvent, section: string, blockId: string) => {
     e.stopPropagation();
-    onUpdateBlockName(section, type, editedName);
+    onUpdateBlockName(section, blockId, editedName);
     setEditingBlock(null);
   };
 
@@ -87,8 +88,8 @@ export function BlockList({
                 </div>
                 <div className="space-y-1 pl-4">
                   {(blocks[sectionName] || []).map((block) => (
-                    <div key={block.type} className="group">
-                      {editingBlock?.section === sectionName && editingBlock?.type === block.type ? (
+                    <div key={block.id} className="group">
+                      {editingBlock?.section === sectionName && editingBlock?.id === block.id ? (
                         <div className="flex items-center gap-1 px-3 py-1">
                           <Input
                             value={editedName}
@@ -102,7 +103,7 @@ export function BlockList({
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={(e) => handleSaveEdit(e, sectionName, block.type)}
+                              onClick={(e) => handleSaveEdit(e, sectionName, block.id)}
                             >
                               <Check className="h-3 w-3" />
                             </Button>

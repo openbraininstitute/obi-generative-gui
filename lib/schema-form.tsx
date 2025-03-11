@@ -23,6 +23,7 @@ interface SchemaFormProps {
 }
 
 interface BlockData {
+  id: string;
   type: string;
   displayName: string;
 }
@@ -101,7 +102,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     const initialBlocks: Record<string, BlockData[]> = {};
     Object.keys(sections).forEach(section => {
       if (section === 'initialize') {
-        initialBlocks[section] = [{ type: 'Initialize', displayName: 'Initialize' }];
+        initialBlocks[section] = [{ id: 'initialize', type: 'Initialize', displayName: 'Initialize' }];
       } else {
         initialBlocks[section] = [];
       }
@@ -148,6 +149,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     ).length;
     
     const newBlock = {
+      id: `${blockType}_${Date.now()}`,
       type: blockType,
       displayName: `${snakeCaseName}_${sameTypeCount}`
     };
@@ -162,13 +164,13 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     setIsDialogOpen(false);
   };
 
-  const handleUpdateBlockName = (section: string, blockType: string, newName: string) => {
+  const handleUpdateBlockName = (section: string, blockId: string, newName: string) => {
     if (section === 'initialize') return;
     
     setBlocks(prev => ({
       ...prev,
       [section]: prev[section]?.map(block => 
-        block.type === blockType 
+        block.id === blockId
           ? { ...block, displayName: newName }
           : block
       ) || []
