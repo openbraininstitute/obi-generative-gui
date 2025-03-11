@@ -2,9 +2,8 @@
 
 import { OpenAPIV3 } from "openapi-types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit2, PlusCircle, Check, X } from "lucide-react";
+import { Edit2, PlusCircle, Check, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -22,6 +21,7 @@ interface BlockListProps {
   onSectionSelect: (section: string, block: string) => void;
   onAddBlock: (section: string) => void;
   onUpdateBlockName: (section: string, blockId: string, newName: string) => void;
+  onDeleteBlock: (section: string, blockId: string) => void;
   onGenerate: () => void;
 }
 
@@ -33,6 +33,7 @@ export function BlockList({
   onSectionSelect,
   onAddBlock,
   onUpdateBlockName,
+  onDeleteBlock,
   onGenerate,
 }: BlockListProps) {
   const [editingBlock, setEditingBlock] = useState<{ section: string; id: string } | null>(null);
@@ -53,6 +54,11 @@ export function BlockList({
   const handleCancelEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingBlock(null);
+  };
+
+  const handleDelete = (e: React.MouseEvent, section: string, blockId: string) => {
+    e.stopPropagation();
+    onDeleteBlock(section, blockId);
   };
 
   return (
@@ -91,10 +97,10 @@ export function BlockList({
                     <div key={block.id} className="group">
                       {editingBlock?.section === sectionName && editingBlock?.id === block.id ? (
                         <div className="flex items-center gap-1 px-3 py-1">
-                          <Input
+                          <input
                             value={editedName}
                             onChange={(e) => setEditedName(e.target.value)}
-                            className="h-6 text-sm"
+                            className="h-6 text-sm flex-1 px-2 rounded border"
                             onClick={(e) => e.stopPropagation()}
                             autoFocus
                           />
@@ -134,14 +140,24 @@ export function BlockList({
                             </span>
                           </button>
                           {selectedSection === sectionName && selectedBlock === block.type && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                              onClick={(e) => handleStartEdit(e, sectionName, block)}
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={(e) => handleStartEdit(e, sectionName, block)}
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive"
+                                onClick={(e) => handleDelete(e, sectionName, block.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                           )}
                         </div>
                       )}

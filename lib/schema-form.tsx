@@ -193,6 +193,32 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
     }));
   };
 
+  const handleDeleteBlock = (section: string, blockId: string) => {
+    if (section === 'initialize') return;
+
+    setBlocks(prev => ({
+      ...prev,
+      [section]: prev[section]?.filter(block => block.id !== blockId) || []
+    }));
+
+    // Clear form data for the deleted block
+    const deletedBlock = blocks[section]?.find(block => block.id === blockId);
+    if (deletedBlock) {
+      const blockKey = `${section}-${deletedBlock.type}`;
+      setFormData(prev => {
+        const newFormData = { ...prev };
+        delete newFormData[blockKey];
+        return newFormData;
+      });
+    }
+
+    // Reset selection if the deleted block was selected
+    if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
+      setSelectedSection('initialize');
+      setSelectedBlock('Initialize');
+    }
+  };
+
   const handleFormDataUpdate = (newData: any) => {
     if (selectedSection && selectedBlock) {
       const blockKey = `${selectedSection}-${selectedBlock}`;
@@ -221,6 +247,7 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
             }}
             onAddBlock={handleAddBlock}
             onUpdateBlockName={handleUpdateBlockName}
+            onDeleteBlock={handleDeleteBlock}
             onGenerate={handleSubmit(handleFormSubmit)}
           />
         </ResizablePanel>
