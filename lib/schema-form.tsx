@@ -214,8 +214,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
         <div className="h-full overflow-y-auto">
           {selectedSection && selectedBlock && (
             <div className="h-full flex flex-col">
-              <div className="flex items-center justify-between px-6 py-4 border-b">
-                <h2 className="text-lg font-semibold">{selectedBlock}</h2>
+              <div className="flex items-center px-6 py-4 border-b">
+                <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+                  {selectedBlock}
+                </div>
               </div>
               <form className="flex-1 overflow-y-auto">
                 <div className="divide-y">
