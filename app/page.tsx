@@ -111,30 +111,27 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen bg-background p-8 flex gap-8">
       <div 
         className={cn(
-          "w-[400px] border-r transition-all duration-300 ease-in-out",
-          !showChat && "w-0 opacity-0 overflow-hidden"
+          "transition-all duration-300 ease-in-out",
+          showChat ? "w-[400px]" : "w-0 opacity-0"
         )}
       >
-        <ChatAgent />
+        <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden">
+          <ChatAgent />
+        </div>
       </div>
       <div className="flex-1 relative">
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-50 rounded-none border-y border-r h-12 w-6 bg-background"
+          className="absolute -left-3 top-1/2 -translate-y-1/2 z-50 rounded-full border h-6 w-6 bg-background shadow-md"
           onClick={() => setShowChat(!showChat)}
         >
           {showChat ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
-        <div 
-          className={cn(
-            "absolute transition-all duration-300 ease-in-out rounded-lg border shadow-lg bg-background",
-            showChat ? "left-8 right-8 top-8" : "left-12 right-8 top-8"
-          )}
-        >
+        <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden">
           <div className="px-6 py-4 border-b">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
