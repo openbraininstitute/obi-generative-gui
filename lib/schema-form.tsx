@@ -12,9 +12,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useTheme } from "next-themes";
+import { ImageViewer } from "@/lib/components/image-viewer";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -37,7 +39,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
-  const { theme } = useTheme();
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -176,6 +177,16 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     }));
   };
 
+  const getBlockTypes = (property: OpenAPIV3.SchemaObject): string[] => {
+    if (property.anyOf) {
+      return property.anyOf.map(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        return resolved.properties?.type?.const as string;
+      }).filter(Boolean);
+    }
+    return [property.properties?.type?.const as string].filter(Boolean);
+  };
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -212,20 +223,60 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
                     const blockSchema = getBlockSchema();
                     if (!blockSchema?.properties) return null;
                     
-                    return Object.entries(blockSchema.properties).map(([name, property]) => (
-                      <FormField
-                        key={name}
-                        name={name}
-                        property={property as OpenAPIV3.SchemaObject}
-                        register={register}
-                        setValue={setValue}
-                        watch={watch}
-                        resolveSchema={resolveSchema}
-                        arrayFields={arrayFields}
-                        setArrayFields={setArrayFields}
-                        setFormData={setFormData}
-                      />
-                    ));
+                    return Object.entries(blockSchema.properties).map(([name, property]) => {
+                      const resolvedProperty = resolveSchema(property as OpenAPIV3.SchemaObject);
+                      
+                      if (resolvedProperty.type === 'object' && resolvedProperty.properties?.type?.const) {
+                        const blockType = resolvedProperty.properties.type.const as string;
+                        const availableBlocks = Object.values(blocks)
+                          .flat()
+                          .filter(block => block.type === blockType);
+
+                        return (
+                          <div key={name} className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+                            <Label className="text-sm text-muted-foreground">{name}</Label>
+                            <Select 
+                              onValueChange={(value) => {
+                                const [type, displayName] = value.split('|');
+                                setValue(name, { type, name: displayName });
+                                setFormData(prev => ({ ...prev, [name]: { type, name: displayName } }));
+                              }}
+                            >
+                              <SelectTrigger className="flex-1 h-6 text-sm">
+                                <SelectValue placeholder={`Select ${blockType}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableBlocks.map((block) => (
+                                  <SelectItem 
+                                    key={block.id} 
+                                    value={`${block.type}|${block.displayName}`} 
+                                    className="text-sm"
+                                  >
+                                    {block.displayName}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <FormField
+                          key={name}
+                          name={name}
+                          property={property as OpenAPIV3.SchemaObject}
+                          register={register}
+                          setValue={setValue}
+                          watch={watch}
+                          resolveSchema={resolveSchema}
+                          arrayFields={arrayFields}
+                          setArrayFields={setArrayFields}
+                          setFormData={setFormData}
+                          blocks={blocks}
+                        />
+                      );
+                    });
                   })()}
                 </div>
               </form>
@@ -237,18 +288,10 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       <ResizableHandle withHandle className="bg-border" />
       
       <ResizablePanel defaultSize={30} minSize={20} className="h-full">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center transition-colors duration-300",
-          theme === 'dark' ? 'bg-black' : 'bg-white'
-        )}>
-          <div className="w-1/2 h-1/2 relative flex items-center justify-center">
-            <img 
-              src="/images/Microcircuits.png" 
-              alt="Microcircuits visualization"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-        </div>
+        <ImageViewer 
+          src="/images/Microcircuits.png"
+          alt="Microcircuits visualization"
+        />
       </ResizablePanel>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
