@@ -30,10 +30,10 @@ interface BlockData {
 }
 
 export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaFormProps) {
-  const { register, handleSubmit, setValue, watch } = useForm();
+  const { register, handleSubmit, setValue, watch, reset } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
@@ -109,6 +109,18 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
     setBlocks(initialBlocks);
   }, [schema]);
 
+  useEffect(() => {
+    if (selectedSection && selectedBlock) {
+      const blockKey = `${selectedSection}-${selectedBlock}`;
+      const savedData = formData[blockKey];
+      if (savedData) {
+        reset(savedData);
+      } else {
+        reset({});
+      }
+    }
+  }, [selectedSection, selectedBlock]);
+
   const handleFormSubmit = (data: any) => {
     const processedData = Object.entries(data).reduce((acc, [key, value]) => {
       if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
@@ -161,6 +173,16 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
           : block
       ) || []
     }));
+  };
+
+  const handleFormDataUpdate = (newData: any) => {
+    if (selectedSection && selectedBlock) {
+      const blockKey = `${selectedSection}-${selectedBlock}`;
+      setFormData(prev => ({
+        ...prev,
+        [blockKey]: { ...prev[blockKey], ...newData }
+      }));
+    }
   };
 
   return (
@@ -224,7 +246,7 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
                               resolveSchema={resolveSchema}
                               arrayFields={arrayFields}
                               setArrayFields={setArrayFields}
-                              setFormData={setFormData}
+                              setFormData={handleFormDataUpdate}
                               blocks={blocks}
                             />
                           ));
@@ -264,7 +286,7 @@ export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaForm
                               resolveSchema={resolveSchema}
                               arrayFields={arrayFields}
                               setArrayFields={setArrayFields}
-                              setFormData={setFormData}
+                              setFormData={handleFormDataUpdate}
                               blocks={blocks}
                             />
                           ));

@@ -43,6 +43,7 @@ export function FormField({
   if (name === 'type') return null;
 
   const resolvedProperty = resolveSchema(property);
+  const currentValue = watch(name);
 
   const isArrayType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
     const resolvedProperty = resolveSchema(property);
@@ -102,6 +103,7 @@ export function FormField({
     const fieldCount = arrayFields[name] || 1;
     const type = getPropertyType(property);
     const itemSchema = resolveSchema((resolvedProperty.items || {}) as OpenAPIV3.SchemaObject);
+    const values = watch(name) || [];
 
     return (
       <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
@@ -111,12 +113,13 @@ export function FormField({
             <div key={`${name}-${index}`} className="flex gap-1">
               {isBlockReference(itemSchema) ? (
                 <Select 
+                  value={values[index]?.type ? `${values[index].type}|${values[index].name}` : undefined}
                   onValueChange={(value) => {
                     const [type, displayName] = value.split('|');
-                    const values = watch(name) || [];
-                    values[index] = { type, name: displayName };
-                    setValue(name, values);
-                    setFormData(prev => ({ ...prev, [name]: values }));
+                    const newValues = [...values];
+                    newValues[index] = { type, name: displayName };
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
                   }}
                 >
                   <SelectTrigger className="flex-1 h-6 text-sm">
@@ -137,23 +140,25 @@ export function FormField({
               ) : type === 'number' || type === 'integer' ? (
                 <Input
                   type="number"
+                  value={values[index] || ''}
                   {...register(`${name}.${index}`, { valueAsNumber: true })}
                   className="flex-1 h-6 text-sm"
                   onChange={(e) => {
                     const value = e.target.value ? Number(e.target.value) : null;
-                    setValue(`${name}.${index}`, value);
-                    const values = watch(name) || [];
-                    values[index] = value;
-                    setFormData(prev => ({ ...prev, [name]: values }));
+                    const newValues = [...values];
+                    newValues[index] = value;
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
                   }}
                 />
               ) : type === 'string' && itemSchema.enum ? (
                 <Select 
+                  value={values[index]}
                   onValueChange={(value) => {
-                    setValue(`${name}.${index}`, value);
-                    const values = watch(name) || [];
-                    values[index] = value;
-                    setFormData(prev => ({ ...prev, [name]: values }));
+                    const newValues = [...values];
+                    newValues[index] = value;
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
                   }}
                 >
                   <SelectTrigger className="flex-1 h-6 text-sm">
@@ -169,13 +174,14 @@ export function FormField({
                 </Select>
               ) : (
                 <Input
+                  value={values[index] || ''}
                   {...register(`${name}.${index}`)}
                   className="flex-1 h-6 text-sm"
                   onChange={(e) => {
-                    setValue(`${name}.${index}`, e.target.value);
-                    const values = watch(name) || [];
-                    values[index] = e.target.value;
-                    setFormData(prev => ({ ...prev, [name]: values }));
+                    const newValues = [...values];
+                    newValues[index] = e.target.value;
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
                   }}
                 />
               )}
@@ -197,10 +203,10 @@ export function FormField({
                   size="icon"
                   className="h-6 w-6"
                   onClick={() => {
-                    const values = watch(name) || [];
-                    values.splice(index, 1);
-                    setValue(name, values);
-                    setFormData(prev => ({ ...prev, [name]: values }));
+                    const newValues = [...values];
+                    newValues.splice(index, 1);
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
                     if (index === fieldCount - 1) {
                       setArrayFields(prev => ({ ...prev, [name]: prev[name] - 1 }));
                     }
@@ -228,10 +234,11 @@ export function FormField({
       <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
         <Label className="text-sm text-muted-foreground">{name}</Label>
         <Select 
+          value={currentValue?.type ? `${currentValue.type}|${currentValue.name}` : undefined}
           onValueChange={(value) => {
             const [type, displayName] = value.split('|');
             setValue(name, { type, name: displayName });
-            setFormData(prev => ({ ...prev, [name]: { type, name: displayName } }));
+            setFormData({ [name]: { type, name: displayName } });
           }}
         >
           <SelectTrigger className="flex-1 h-6 text-sm">
@@ -299,9 +306,10 @@ export function FormField({
           <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
             <Label className="text-sm text-muted-foreground">{name}</Label>
             <Select 
+              value={currentValue}
               onValueChange={(value) => {
                 setValue(name, value);
-                setFormData(prev => ({ ...prev, [name]: value }));
+                setFormData({ [name]: value });
               }}
             >
               <SelectTrigger className="flex-1 h-6 text-sm">
@@ -322,11 +330,12 @@ export function FormField({
         <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
           <Label className="text-sm text-muted-foreground">{name}</Label>
           <Input 
+            value={currentValue || ''}
             {...register(name)}
             className="flex-1 h-6 text-sm"
             onChange={(e) => {
               setValue(name, e.target.value);
-              setFormData(prev => ({ ...prev, [name]: e.target.value }));
+              setFormData({ [name]: e.target.value });
             }}
             placeholder={resolvedProperty.description}
           />
@@ -340,6 +349,7 @@ export function FormField({
           <Label className="text-sm text-muted-foreground">{name}</Label>
           <Input
             type="number"
+            value={currentValue || ''}
             {...register(name, { 
               valueAsNumber: true,
               min: resolvedProperty.minimum,
@@ -349,7 +359,7 @@ export function FormField({
             onChange={(e) => {
               const value = e.target.value ? Number(e.target.value) : null;
               setValue(name, value);
-              setFormData(prev => ({ ...prev, [name]: value }));
+              setFormData({ [name]: value });
             }}
             placeholder={resolvedProperty.description}
           />
@@ -363,10 +373,11 @@ export function FormField({
           <div className="flex-1">
             <Checkbox
               id={name}
+              checked={currentValue || false}
               className="h-4 w-4"
               onCheckedChange={(checked) => {
                 setValue(name, checked);
-                setFormData(prev => ({ ...prev, [name]: checked }));
+                setFormData({ [name]: checked });
               }}
             />
           </div>
