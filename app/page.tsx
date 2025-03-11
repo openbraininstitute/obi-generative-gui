@@ -78,11 +78,9 @@ export default function Home() {
     : null;
 
   const getEndpointDisplayName = (path: string, method: string, operation: OpenAPIV3.OperationObject) => {
-    // Extract the last part of the path
     const pathParts = path.split('/').filter(Boolean);
     const lastPart = pathParts[pathParts.length - 1];
     
-    // Convert to title case and remove underscores
     return lastPart
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -134,14 +132,14 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div 
         className={cn(
           "flex-none transition-all duration-300 ease-in-out",
-          showTopBar ? "h-[60px] opacity-100" : "h-0 opacity-0 overflow-hidden"
+          showTopBar ? "h-16" : "h-0 opacity-0 overflow-hidden"
         )}
       >
-        <div className="px-6 py-4 border-b">
+        <div className="px-6 py-4 border-b h-16">
           <div className="flex items-center gap-6">
             <Button
               variant="ghost"
@@ -204,29 +202,31 @@ export default function Home() {
         </div>
       )}
 
-      {spec && (
-        <div className="flex-1 overflow-hidden">
-          {selectedOperation && schema ? (
+      <div className="flex-1 overflow-hidden">
+        {spec && (
+          selectedOperation && schema ? (
             <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
           ) : (
-            <div className="flex-1" />
-          )}
+            <div className="h-full flex items-center justify-center">
+              <p className="text-lg text-muted-foreground">Select a lab to begin</p>
+            </div>
+          )
+        )}
 
-          {response && (
-            <Card className="p-6 mt-6">
-              <h2 className="text-2xl font-bold mb-4">Response</h2>
-              <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
-                <div className="font-semibold mb-2">
-                  Status: {response.status}
-                </div>
-                <pre className="overflow-auto">
-                  {JSON.stringify(response.data, null, 2)}
-                </pre>
+        {response && (
+          <Card className="p-6 mt-6">
+            <h2 className="text-2xl font-bold mb-4">Response</h2>
+            <div className={`bg-muted p-4 rounded-lg ${!response.ok ? 'border-destructive border-2' : ''}`}>
+              <div className="font-semibold mb-2">
+                Status: {response.status}
               </div>
-            </Card>
-          )}
-        </div>
-      )}
+              <pre className="overflow-auto">
+                {JSON.stringify(response.data, null, 2)}
+              </pre>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

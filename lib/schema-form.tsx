@@ -97,7 +97,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return acc;
   }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
 
-  // Initialize blocks state with available blocks from schema
   useEffect(() => {
     const initialBlocks: Record<string, BlockData[]> = {};
     Object.keys(sections).forEach(section => {
@@ -180,9 +179,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   return (
     <ResizablePanelGroup
       direction="horizontal"
-      className="flex-grow rounded-lg"
+      className="h-[calc(100vh-4rem)]"
     >
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="h-full">
         <BlockList
           sections={sections}
           blocks={blocks}
@@ -200,7 +199,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       
       <ResizableHandle withHandle className="bg-border" />
       
-      <ResizablePanel defaultSize={50} minSize={30}>
+      <ResizablePanel defaultSize={50} minSize={30} className="h-full">
         <div className="h-full overflow-y-auto">
           {selectedSection && selectedBlock && (
             <div className="h-full flex flex-col">
@@ -237,7 +236,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       
       <ResizableHandle withHandle className="bg-border" />
       
-      <ResizablePanel defaultSize={30} minSize={20}>
+      <ResizablePanel defaultSize={30} minSize={20} className="h-full">
         <div className={cn(
           "w-full h-full flex items-center justify-center transition-colors duration-300",
           theme === 'dark' ? 'bg-black' : 'bg-white'
