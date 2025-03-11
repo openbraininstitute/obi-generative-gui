@@ -17,13 +17,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { LayoutTemplate } from "lucide-react";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
   onSubmit: (data: any) => void;
+  editorOnRight: boolean;
 }
 
 interface BlockData {
@@ -32,7 +31,7 @@ interface BlockData {
   displayName: string;
 }
 
-export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
+export function SchemaForm({ schema, spec, onSubmit, editorOnRight }: SchemaFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
@@ -41,7 +40,6 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
-  const [editorOnRight, setEditorOnRight] = useState(false);
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -210,17 +208,9 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
       <div className="h-full overflow-y-auto">
         {selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center px-6 py-4">
               <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
                 {selectedBlock}
-              </div>
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
-                <Switch
-                  checked={editorOnRight}
-                  onCheckedChange={setEditorOnRight}
-                  size="sm"
-                />
               </div>
             </div>
             <form className="flex-1 overflow-y-auto">

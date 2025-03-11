@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, LayoutTemplate } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -23,6 +24,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
+  const [editorOnRight, setEditorOnRight] = useState(false);
 
   useEffect(() => {
     loadSpec();
@@ -100,8 +102,8 @@ export default function Home() {
 
   if (loading && !spec) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <div className="flex-none px-6 py-4 border-b">
+      <div className="h-screen flex flex-col bg-background overflow-hidden">
+        <div className="flex-none px-6 py-4 border-b h-16">
           <div className="flex items-center gap-6">
             <Button
               variant="ghost"
@@ -121,7 +123,17 @@ export default function Home() {
                 </Select>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                <Switch
+                  checked={editorOnRight}
+                  onCheckedChange={setEditorOnRight}
+                  size="sm"
+                />
+              </div>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -177,7 +189,17 @@ export default function Home() {
                 </Select>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                <Switch
+                  checked={editorOnRight}
+                  onCheckedChange={setEditorOnRight}
+                  size="sm"
+                />
+              </div>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </div>
@@ -205,7 +227,12 @@ export default function Home() {
       <div className="flex-1 overflow-hidden">
         {spec && (
           selectedOperation && schema ? (
-            <SchemaForm schema={schema} spec={spec} onSubmit={handleSubmit} />
+            <SchemaForm 
+              schema={schema} 
+              spec={spec} 
+              onSubmit={handleSubmit}
+              editorOnRight={editorOnRight}
+            />
           ) : (
             <div className="h-full flex items-center justify-center">
               <p className="text-lg text-muted-foreground">Select a lab to begin</p>
