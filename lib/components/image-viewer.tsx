@@ -19,8 +19,8 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
 
   return (
     <div className={cn(
-      "h-full flex flex-col",
-      isDark ? "bg-black" : "bg-white"
+      "h-full flex flex-col image-viewer",
+      isDark ? "bg-background" : "bg-white"
     )}>
       <div className="flex-1 relative overflow-hidden">
         <div 
@@ -36,7 +36,7 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
       </div>
       <div className={cn(
         "flex-none p-4 border-t",
-        isDark ? "bg-black" : "bg-white"
+        isDark ? "bg-background" : "bg-white"
       )}>
         <div className="flex items-center gap-4">
           <ZoomOut className="h-4 w-4 text-muted-foreground" />
