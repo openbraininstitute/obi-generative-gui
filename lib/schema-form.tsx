@@ -141,9 +141,15 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   };
 
   const handleSelectBlock = (blockType: string) => {
+    const snakeCaseName = toSnakeCase(blockType);
+    const existingBlocks = blocks[dialogSection] || [];
+    const sameTypeCount = existingBlocks.filter(block => 
+      block.type === blockType
+    ).length;
+    
     const newBlock = {
       type: blockType,
-      displayName: toSnakeCase(blockType)
+      displayName: `${snakeCaseName}_${sameTypeCount}`
     };
     
     setBlocks(prev => ({
