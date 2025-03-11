@@ -131,8 +131,8 @@ export default function Home() {
         </Button>
         <div 
           className={cn(
-            "absolute right-8 top-8 rounded-lg border shadow-lg bg-background transition-all duration-300 ease-in-out",
-            showChat ? "w-[900px]" : "w-[1100px]"
+            "absolute transition-all duration-300 ease-in-out rounded-lg border shadow-lg bg-background",
+            showChat ? "left-8 right-8 top-8" : "left-12 right-8 top-8"
           )}
         >
           <div className="px-6 py-4 border-b">
