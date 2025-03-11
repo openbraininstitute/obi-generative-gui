@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { LayoutTemplate } from "lucide-react";
 
 interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -39,6 +41,7 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const [editorOnRight, setEditorOnRight] = useState(false);
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -187,114 +190,136 @@ export function SchemaForm({ schema, spec, onSubmit }: SchemaFormProps) {
     return [property.properties?.type?.const as string].filter(Boolean);
   };
 
+  const panels = [
+    <ResizablePanel key="nav" defaultSize={20} minSize={15} maxSize={30} className="h-full">
+      <BlockList
+        sections={sections}
+        blocks={blocks}
+        selectedSection={selectedSection}
+        selectedBlock={selectedBlock}
+        onSectionSelect={(section, block) => {
+          setSelectedSection(section);
+          setSelectedBlock(block);
+        }}
+        onAddBlock={handleAddBlock}
+        onUpdateBlockName={handleUpdateBlockName}
+        onGenerate={handleSubmit(handleFormSubmit)}
+      />
+    </ResizablePanel>,
+    <ResizablePanel key="editor" defaultSize={50} minSize={30} className="h-full">
+      <div className="h-full overflow-y-auto">
+        {selectedSection && selectedBlock && (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+                {selectedBlock}
+              </div>
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                <Switch
+                  checked={editorOnRight}
+                  onCheckedChange={setEditorOnRight}
+                  size="sm"
+                />
+              </div>
+            </div>
+            <form className="flex-1 overflow-y-auto">
+              <div className="divide-y">
+                {(() => {
+                  const blockSchema = getBlockSchema();
+                  if (!blockSchema?.properties) return null;
+                  
+                  return Object.entries(blockSchema.properties).map(([name, property]) => {
+                    const resolvedProperty = resolveSchema(property as OpenAPIV3.SchemaObject);
+                    
+                    if (resolvedProperty.type === 'object' && resolvedProperty.properties?.type?.const) {
+                      const blockType = resolvedProperty.properties.type.const as string;
+                      const availableBlocks = Object.values(blocks)
+                        .flat()
+                        .filter(block => block.type === blockType);
+
+                      return (
+                        <div key={name} className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
+                          <Label className="text-sm text-muted-foreground">{name}</Label>
+                          <Select 
+                            onValueChange={(value) => {
+                              const [type, displayName] = value.split('|');
+                              setValue(name, { type, name: displayName });
+                              setFormData(prev => ({ ...prev, [name]: { type, name: displayName } }));
+                            }}
+                          >
+                            <SelectTrigger className="flex-1 h-6 text-sm">
+                              <SelectValue placeholder={`Select ${blockType}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableBlocks.map((block) => (
+                                <SelectItem 
+                                  key={block.id} 
+                                  value={`${block.type}|${block.displayName}`} 
+                                  className="text-sm"
+                                >
+                                  {block.displayName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <FormField
+                        key={name}
+                        name={name}
+                        property={property as OpenAPIV3.SchemaObject}
+                        register={register}
+                        setValue={setValue}
+                        watch={watch}
+                        resolveSchema={resolveSchema}
+                        arrayFields={arrayFields}
+                        setArrayFields={setArrayFields}
+                        setFormData={setFormData}
+                        blocks={blocks}
+                      />
+                    );
+                  });
+                })()}
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+    </ResizablePanel>,
+    <ResizablePanel key="viewer" defaultSize={30} minSize={20} className="h-full">
+      <ImageViewer 
+        src="/images/Microcircuits.png"
+        alt="Microcircuits visualization"
+      />
+    </ResizablePanel>
+  ];
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
       className="h-[calc(100vh-4rem)]"
     >
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="h-full">
-        <BlockList
-          sections={sections}
-          blocks={blocks}
-          selectedSection={selectedSection}
-          selectedBlock={selectedBlock}
-          onSectionSelect={(section, block) => {
-            setSelectedSection(section);
-            setSelectedBlock(block);
-          }}
-          onAddBlock={handleAddBlock}
-          onUpdateBlockName={handleUpdateBlockName}
-          onGenerate={handleSubmit(handleFormSubmit)}
-        />
-      </ResizablePanel>
-      
-      <ResizableHandle withHandle className="bg-border" />
-      
-      <ResizablePanel defaultSize={50} minSize={30} className="h-full">
-        <div className="h-full overflow-y-auto">
-          {selectedSection && selectedBlock && (
-            <div className="h-full flex flex-col">
-              <div className="flex items-center px-6 py-4">
-                <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
-                  {selectedBlock}
-                </div>
-              </div>
-              <form className="flex-1 overflow-y-auto">
-                <div className="divide-y">
-                  {(() => {
-                    const blockSchema = getBlockSchema();
-                    if (!blockSchema?.properties) return null;
-                    
-                    return Object.entries(blockSchema.properties).map(([name, property]) => {
-                      const resolvedProperty = resolveSchema(property as OpenAPIV3.SchemaObject);
-                      
-                      if (resolvedProperty.type === 'object' && resolvedProperty.properties?.type?.const) {
-                        const blockType = resolvedProperty.properties.type.const as string;
-                        const availableBlocks = Object.values(blocks)
-                          .flat()
-                          .filter(block => block.type === blockType);
-
-                        return (
-                          <div key={name} className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted">
-                            <Label className="text-sm text-muted-foreground">{name}</Label>
-                            <Select 
-                              onValueChange={(value) => {
-                                const [type, displayName] = value.split('|');
-                                setValue(name, { type, name: displayName });
-                                setFormData(prev => ({ ...prev, [name]: { type, name: displayName } }));
-                              }}
-                            >
-                              <SelectTrigger className="flex-1 h-6 text-sm">
-                                <SelectValue placeholder={`Select ${blockType}`} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableBlocks.map((block) => (
-                                  <SelectItem 
-                                    key={block.id} 
-                                    value={`${block.type}|${block.displayName}`} 
-                                    className="text-sm"
-                                  >
-                                    {block.displayName}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <FormField
-                          key={name}
-                          name={name}
-                          property={property as OpenAPIV3.SchemaObject}
-                          register={register}
-                          setValue={setValue}
-                          watch={watch}
-                          resolveSchema={resolveSchema}
-                          arrayFields={arrayFields}
-                          setArrayFields={setArrayFields}
-                          setFormData={setFormData}
-                          blocks={blocks}
-                        />
-                      );
-                    });
-                  })()}
-                </div>
-              </form>
-            </div>
-          )}
-        </div>
-      </ResizablePanel>
-      
-      <ResizableHandle withHandle className="bg-border" />
-      
-      <ResizablePanel defaultSize={30} minSize={20} className="h-full">
-        <ImageViewer 
-          src="/images/Microcircuits.png"
-          alt="Microcircuits visualization"
-        />
-      </ResizablePanel>
+      {editorOnRight ? (
+        <>
+          {panels[0]}
+          <ResizableHandle withHandle className="bg-border" />
+          {panels[2]}
+          <ResizableHandle withHandle className="bg-border" />
+          {panels[1]}
+        </>
+      ) : (
+        <>
+          {panels[0]}
+          <ResizableHandle withHandle className="bg-border" />
+          {panels[1]}
+          <ResizableHandle withHandle className="bg-border" />
+          {panels[2]}
+        </>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
