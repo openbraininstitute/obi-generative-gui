@@ -67,7 +67,7 @@ export function TaskNotebookPanel({
   };
 
   return (
-    <div className="w-1/2 bg-[#002B69] rounded-lg overflow-hidden">
+    <div className="w-full bg-[#002B69] rounded-lg overflow-hidden">
       <div className="flex items-center justify-between p-4 border-b border-blue-800">
         <div className="flex items-center space-x-4">
           <button

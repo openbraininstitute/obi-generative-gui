@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Menu, Activity, Filter, ChevronDown } from 'lucide-react';
 import { WorkspaceColumns } from './workspace-columns';
 import { TaskNotebookPanel } from './task-notebook-panel';
-import { ViewSelector } from './view-selector';
 
 export function ModelingInterface() {
   const [selectedModelingLevel, setSelectedModelingLevel] = useState('Circuit Activity');
@@ -14,7 +13,6 @@ export function ModelingInterface() {
   const [showTasksTable, setShowTasksTable] = useState(true);
   const [selectedTaskType, setSelectedTaskType] = useState<'task' | 'notebook'>('task');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [selectedView, setSelectedView] = useState<'all' | 'active' | 'completed'>('all');
 
   const handleModelingLevelChange = (level: string) => {
     setSelectedModelingLevel(level);
@@ -72,7 +70,7 @@ export function ModelingInterface() {
       />
 
       {selectedStep && (
-        <div className="px-4 pb-4 flex gap-4">
+        <div className="px-4 pb-4">
           <TaskNotebookPanel
             selectedTaskType={selectedTaskType}
             selectedTaskId={selectedTaskId}
@@ -80,10 +78,6 @@ export function ModelingInterface() {
             onTaskTypeChange={setSelectedTaskType}
             onTaskSelect={handleTaskSelect}
             onToggleTasksTable={() => setShowTasksTable(!showTasksTable)}
-          />
-          <ViewSelector
-            selectedView={selectedView}
-            onViewChange={setSelectedView}
           />
         </div>
       )}
