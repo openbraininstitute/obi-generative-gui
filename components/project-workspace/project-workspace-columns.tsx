@@ -280,15 +280,17 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
               </div>
             )}
           </Droppable>
-          <AddButton
-            type="level"
-            isAddingTo={isAddingTo}
-            newItemName={newItemName}
-            onNameChange={setNewItemName}
-            onAdd={handleAddNewItem}
-            onCancel={() => setIsAddingTo(null)}
-            onClick={() => setIsAddingTo('level')}
-          />
+          {!selectedStep && (
+            <AddButton
+              type="level"
+              isAddingTo={isAddingTo}
+              newItemName={newItemName}
+              onNameChange={setNewItemName}
+              onAdd={handleAddNewItem}
+              onCancel={() => setIsAddingTo(null)}
+              onClick={() => setIsAddingTo('level')}
+            />
+          )}
         </div>
 
         <div className="space-y-2">
@@ -312,7 +314,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
               </div>
             )}
           </Droppable>
-          {selectedModelingLevel && (
+          {selectedModelingLevel && !selectedStep && (
             <AddButton
               type="stage"
               isAddingTo={isAddingTo}
@@ -346,15 +348,15 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
               </div>
             )}
           </Droppable>
-          {selectedStage && (
+          {selectedStage && !selectedStep && (
             <AddButton
               type="stepType"
               isAddingTo={isAddingTo}
               newItemName={newItemName}
-              onNameChange={setNewItemName}
               onAdd={handleAddNewItem}
               onCancel={() => setIsAddingTo(null)}
               onClick={() => setIsAddingTo('stepType')}
+              onNameChange={setNewItemName}
             />
           )}
         </div>
@@ -380,15 +382,15 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
               </div>
             )}
           </Droppable>
-          {selectedStepType && (
+          {selectedStepType && !selectedStep && (
             <AddButton
               type="step"
               isAddingTo={isAddingTo}
               newItemName={newItemName}
-              onNameChange={setNewItemName}
               onAdd={handleAddNewItem}
               onCancel={() => setIsAddingTo(null)}
               onClick={() => setIsAddingTo('step')}
+              onNameChange={setNewItemName}
             />
           )}
         </div>
