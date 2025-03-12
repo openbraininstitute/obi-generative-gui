@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
-import { ChatAgent } from "@/components/chat-agent";
+import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
@@ -25,7 +25,7 @@ export default function Home() {
           <ResizablePanel defaultSize={25} minSize={20} maxSize={30}>
             <div className="h-full p-4">
               <div className="h-full rounded-lg overflow-hidden shadow-lg">
-                <ChatAgent />
+                <AIAgent />
               </div>
             </div>
           </ResizablePanel>
