@@ -103,8 +103,47 @@ export function WorkspaceColumns({
     const { source, destination } = result;
     
     if (source.droppableId === destination.droppableId) {
-      // Handle reordering within columns
-      // Note: We're not updating the state here since we're using fixed hierarchical data
+      switch (source.droppableId) {
+        case 'modelingLevels':
+          setLevels(prev => reorder(prev, source.index, destination.index));
+          break;
+        case 'stages':
+          if (selectedModelingLevel) {
+            setLevelToStages(prev => ({
+              ...prev,
+              [selectedModelingLevel]: reorder(
+                prev[selectedModelingLevel] || [],
+                source.index,
+                destination.index
+              )
+            }));
+          }
+          break;
+        case 'stepTypes':
+          if (selectedStage) {
+            setStageToStepTypes(prev => ({
+              ...prev,
+              [selectedStage]: reorder(
+                prev[selectedStage] || [],
+                source.index,
+                destination.index
+              )
+            }));
+          }
+          break;
+        case 'steps':
+          if (selectedStepType) {
+            setStepTypeToSteps(prev => ({
+              ...prev,
+              [selectedStepType]: reorder(
+                prev[selectedStepType] || [],
+                source.index,
+                destination.index
+              )
+            }));
+          }
+          break;
+      }
     }
   };
 
