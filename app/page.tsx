@@ -58,17 +58,8 @@ export default function Home() {
         <div className="flex-1 p-6">
           <ScrollArea className="h-full rounded-lg">
             <div className="space-y-6">
-              {/* Project Workspace */}
-              <div className="min-h-[400px]">
-                <ProjectWorkspace onStepSelect={setSelectedStep} />
-              </div>
-              
-              {/* Step Editor */}
-              {selectedStep && (
-                <div className="bg-background rounded-lg">
-                  <StepEditor />
-                </div>
-              )}
+              <ProjectWorkspace onStepSelect={setSelectedStep} />
+              {selectedStep && <StepEditor />}
             </div>
           </ScrollArea>
         </div>

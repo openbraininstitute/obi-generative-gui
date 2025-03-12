@@ -10,7 +10,7 @@ interface ProjectWorkspaceProps {
 export function ProjectWorkspace({ onStepSelect }: ProjectWorkspaceProps) {
   return (
     <ProjectWorkspaceProvider>
-      <div className="h-full">
+      <div className="bg-background rounded-lg shadow-lg border">
         <div className="px-8">
           <ProjectWorkspaceColumns onStepSelect={onStepSelect} />
         </div>

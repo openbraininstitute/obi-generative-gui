@@ -89,15 +89,15 @@ export function StepEditor() {
 
   if (loading && !spec) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-lg text-white">Loading API specification...</p>
+      <div className="bg-background rounded-lg shadow-lg border p-6">
+        <p className="text-lg text-muted-foreground">Loading API specification...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-none px-6 py-4 border-b">
+    <div className="bg-background rounded-lg shadow-lg border">
+      <div className="px-6 py-4 border-b">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <Label>Lab:</Label>
@@ -131,7 +131,7 @@ export function StepEditor() {
       </div>
 
       {error && (
-        <div className="flex-none px-6 py-4">
+        <div className="px-6 py-4">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
@@ -139,7 +139,7 @@ export function StepEditor() {
         </div>
       )}
 
-      <div className="flex-1 h-[calc(100%-4rem)]">
+      <div className="p-6">
         {spec && (
           selectedOperation && schema ? (
             <StepEditorForm 
@@ -148,9 +148,7 @@ export function StepEditor() {
               onSubmit={handleSubmit}
             />
           ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-lg text-muted-foreground">Select a lab to begin</p>
-            </div>
+            <p className="text-lg text-muted-foreground">Select a lab to begin</p>
           )
         )}
       </div>
