@@ -113,22 +113,27 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={20} minSize={15}>
-          <div className="h-full">
-            <ChatAgent />
-          </div>
-        </ResizablePanel>
-        
-        <ResizableHandle />
-        
-        <ResizablePanel defaultSize={80}>
-          <div className="h-full flex flex-col">
-            <div className="flex-none">
-              <ModelingInterface />
+    <div className="h-screen flex flex-col">
+      {/* Top Bar */}
+      <div className="w-full bg-[#002B69]">
+        <ModelingInterface />
+      </div>
+      
+      {/* Main Content */}
+      <div className="flex-1 bg-[#002766]">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* AI Agent Panel */}
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={30}>
+            <div className="h-full p-4">
+              <div className="h-full rounded-lg overflow-hidden shadow-lg">
+                <ChatAgent />
+              </div>
             </div>
-            <div className="flex-1 p-8">
+          </ResizablePanel>
+
+          {/* Workspace and Experiment Designer Panel */}
+          <ResizablePanel defaultSize={75}>
+            <div className="h-full p-4">
               <div className="h-full rounded-lg border shadow-lg bg-background overflow-hidden">
                 <div className="flex-none px-6 py-4 border-b">
                   <div className="flex items-center gap-6">
@@ -219,9 +224,9 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 }
