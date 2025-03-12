@@ -36,25 +36,25 @@ export function AddButton({
 }: AddButtonProps) {
   if (isAddingTo === type) {
     return (
-      <div className="p-3 rounded bg-transparent border border-[#1890FF] flex items-center space-x-2 mt-2">
+      <div className="p-3 rounded bg-transparent border border-[#40A9FF] flex items-center space-x-2 mt-2">
         <input
           type="text"
           value={newItemName}
           onChange={(e) => onNameChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onAdd()}
-          className="flex-1 bg-blue-800/30 text-white rounded px-2 py-1"
+          className="flex-1 bg-blue-800/30 dark:bg-black/30 text-white rounded px-2 py-1"
           placeholder="Enter name..."
           autoFocus
         />
         <button 
           onClick={onAdd}
-          className="text-white/70 hover:text-white"
+          className="text-white hover:text-white/80"
         >
           Add
         </button>
         <button
           onClick={onCancel}
-          className="text-white/70 hover:text-white ml-2"
+          className="text-white hover:text-white/80 ml-2"
         >
           <X className="w-4 h-4" />
         </button>
@@ -65,7 +65,7 @@ export function AddButton({
   return (
     <button
       onClick={onClick}
-      className="w-full p-3 rounded bg-transparent border border-[#1890FF] hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white mt-2"
+      className="w-full p-3 rounded bg-transparent border border-[#40A9FF] hover:bg-blue-800/30 dark:hover:bg-black/30 flex items-center justify-center space-x-2 text-white mt-2"
     >
       <PlusCircle className="w-4 h-4" />
       <span>Add {type.charAt(0).toUpperCase() + type.slice(1)}</span>
@@ -94,8 +94,8 @@ export function DraggableItem({
       className={cn(
         "p-3 rounded cursor-pointer mb-2",
         isSelected 
-          ? "bg-white text-[#002766]" 
-          : "bg-transparent border border-[#1890FF] text-white hover:bg-blue-800/30"
+          ? "bg-white dark:bg-black text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700" 
+          : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
       )}
       onClick={onClick}
       style={{
@@ -106,7 +106,7 @@ export function DraggableItem({
       }}
     >
       <div className="flex items-center space-x-3">
-        <div className={isSelected ? "text-[#002766]" : "text-white"}>
+        <div className={isSelected ? "text-[#002766] dark:text-white" : "text-white"}>
           {item.icon}
         </div>
         <div className="font-medium truncate">
