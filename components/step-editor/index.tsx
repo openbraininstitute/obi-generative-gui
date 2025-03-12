@@ -4,12 +4,20 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const API_URL = "http://127.0.0.1:8000";
+
+interface Task {
+  id: string;
+  name: string;
+}
 
 export function StepEditor() {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
@@ -18,6 +26,14 @@ export function StepEditor() {
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: '1', name: 'Task 1' },
+    { id: '2', name: 'Task 2' },
+    { id: '3', name: 'Task 3' }
+  ]);
+  const [selectedTask, setSelectedTask] = useState<string>("");
+  const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
+  const [newTaskName, setNewTaskName] = useState("");
 
   useEffect(() => {
     loadSpec();
@@ -56,6 +72,20 @@ export function StepEditor() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCreateTask = () => {
+    if (!newTaskName.trim()) return;
+
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      name: newTaskName
+    };
+
+    setTasks(prev => [...prev, newTask]);
+    setSelectedTask(newTask.id);
+    setNewTaskName("");
+    setIsNewTaskDialogOpen(false);
   };
 
   const selectedOperation = spec && selectedPath && selectedMethod
@@ -127,6 +157,33 @@ export function StepEditor() {
               </Select>
             </div>
           </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-[240px]">
+              <Select
+                value={selectedTask}
+                onValueChange={setSelectedTask}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select task" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tasks.map((task) => (
+                    <SelectItem key={task.id} value={task.id}>
+                      {task.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsNewTaskDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -148,6 +205,30 @@ export function StepEditor() {
           />
         )}
       </div>
+
+      <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Task</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter task name"
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTask}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
