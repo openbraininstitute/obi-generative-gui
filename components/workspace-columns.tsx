@@ -271,7 +271,7 @@ export function WorkspaceColumns({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-4 gap-4 py-4">
         <div className="space-y-2">
           <ColumnHeader title="STAGE" />
           <Droppable droppableId="modelingLevels">

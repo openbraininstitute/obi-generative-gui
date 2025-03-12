@@ -49,16 +49,18 @@ export function ModelingInterface() {
         </div>
       </header>
 
-      <WorkspaceColumns
-        selectedModelingLevel={selectedModelingLevel}
-        selectedStage={selectedStage}
-        selectedStepType={selectedStepType}
-        selectedStep={selectedStep}
-        onModelingLevelChange={handleModelingLevelChange}
-        onStageChange={handleStageChange}
-        onStepTypeChange={handleStepTypeChange}
-        onStepChange={setSelectedStep}
-      />
+      <div className="px-8">
+        <WorkspaceColumns
+          selectedModelingLevel={selectedModelingLevel}
+          selectedStage={selectedStage}
+          selectedStepType={selectedStepType}
+          selectedStep={selectedStep}
+          onModelingLevelChange={handleModelingLevelChange}
+          onStageChange={handleStageChange}
+          onStepTypeChange={handleStepTypeChange}
+          onStepChange={setSelectedStep}
+        />
+      </div>
     </div>
   );
 }
