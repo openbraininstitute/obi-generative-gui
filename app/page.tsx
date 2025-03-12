@@ -53,7 +53,7 @@ export default function Home() {
 
         {/* Right Side - Project Workspace */}
         <div className="flex-1 p-6">
-          <div className="h-full rounded-lg border shadow-lg overflow-hidden">
+          <div className="h-full rounded-lg overflow-hidden">
             <ProjectWorkspace />
           </div>
         </div>
