@@ -1,6 +1,6 @@
 "use client";
 
-import { Book, ChevronRight, FileText } from 'lucide-react';
+import { Book, ChevronRight, FileText, Activity, Eye, ListFilter } from 'lucide-react';
 
 interface TaskItem {
   id: string;
@@ -14,18 +14,22 @@ interface TaskNotebookPanelProps {
   selectedTaskType: 'task' | 'notebook';
   selectedTaskId: string | null;
   showTasksTable: boolean;
+  selectedView: 'all' | 'active' | 'completed';
   onTaskTypeChange: (type: 'task' | 'notebook') => void;
   onTaskSelect: (taskId: string) => void;
   onToggleTasksTable: () => void;
+  onViewChange: (view: 'all' | 'active' | 'completed') => void;
 }
 
 export function TaskNotebookPanel({
   selectedTaskType,
   selectedTaskId,
   showTasksTable,
+  selectedView,
   onTaskTypeChange,
   onTaskSelect,
-  onToggleTasksTable
+  onToggleTasksTable,
+  onViewChange
 }: TaskNotebookPanelProps) {
   const tasks: TaskItem[] = [
     {
@@ -89,16 +93,47 @@ export function TaskNotebookPanel({
             <span>Notebooks</span>
           </button>
         </div>
-        <button
-          onClick={onToggleTasksTable}
-          className="text-blue-300 hover:text-blue-100"
-        >
-          <ChevronRight
-            className={`w-6 h-6 transform transition-transform ${
-              showTasksTable ? 'rotate-90' : ''
-            }`}
-          />
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="bg-[#002B69] rounded-lg overflow-hidden flex">
+            <button
+              onClick={() => onViewChange('all')}
+              className={`px-6 py-2 flex items-center space-x-2 ${
+                selectedView === 'all' ? 'bg-blue-700' : 'hover:bg-blue-800'
+              }`}
+            >
+              <ListFilter className="w-4 h-4" />
+              <span>All</span>
+            </button>
+            <button
+              onClick={() => onViewChange('active')}
+              className={`px-6 py-2 flex items-center space-x-2 ${
+                selectedView === 'active' ? 'bg-blue-700' : 'hover:bg-blue-800'
+              }`}
+            >
+              <Activity className="w-4 h-4" />
+              <span>Active</span>
+            </button>
+            <button
+              onClick={() => onViewChange('completed')}
+              className={`px-6 py-2 flex items-center space-x-2 ${
+                selectedView === 'completed' ? 'bg-blue-700' : 'hover:bg-blue-800'
+              }`}
+            >
+              <Eye className="w-4 h-4" />
+              <span>Completed</span>
+            </button>
+          </div>
+          <button
+            onClick={onToggleTasksTable}
+            className="text-blue-300 hover:text-blue-100"
+          >
+            <ChevronRight
+              className={`w-6 h-6 transform transition-transform ${
+                showTasksTable ? 'rotate-90' : ''
+              }`}
+            />
+          </button>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
