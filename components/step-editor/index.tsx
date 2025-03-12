@@ -96,7 +96,7 @@ export function StepEditor() {
   }
 
   return (
-    <div className="bg-background rounded-lg shadow-lg border h-full">
+    <div className="bg-background rounded-lg shadow-lg border h-full flex flex-col">
       <div className="px-6 py-4 border-b">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
@@ -139,15 +139,13 @@ export function StepEditor() {
         </div>
       )}
 
-      <div className="p-6 flex-1">
-        {spec && (
-          selectedOperation && schema ? (
-            <StepEditorForm 
-              schema={schema} 
-              spec={spec} 
-              onSubmit={handleSubmit}
-            />
-          ) : null
+      <div className="flex-1">
+        {spec && selectedOperation && schema && (
+          <StepEditorForm 
+            schema={schema} 
+            spec={spec} 
+            onSubmit={handleSubmit}
+          />
         )}
       </div>
     </div>

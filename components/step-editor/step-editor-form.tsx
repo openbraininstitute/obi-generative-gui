@@ -13,9 +13,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
 
-interface StepEditorFormProps {
+interface SchemaFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
   onSubmit: (data: any) => void;
@@ -27,7 +28,7 @@ interface BlockData {
   displayName: string;
 }
 
-export function StepEditorForm({ schema, spec, onSubmit }: StepEditorFormProps) {
+export function StepEditorForm({ schema, spec, onSubmit }: SchemaFormProps) {
   const { register, handleSubmit, setValue, watch, reset } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
@@ -199,7 +200,6 @@ export function StepEditorForm({ schema, spec, onSubmit }: StepEditorFormProps) 
       [section]: prev[section]?.filter(block => block.id !== blockId) || []
     }));
 
-    // Clear form data for the deleted block
     const deletedBlock = blocks[section]?.find(block => block.id === blockId);
     if (deletedBlock) {
       const blockKey = `${section}-${deletedBlock.type}`;
@@ -210,7 +210,6 @@ export function StepEditorForm({ schema, spec, onSubmit }: StepEditorFormProps) 
       });
     }
 
-    // Reset selection if the deleted block was selected
     if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
       setSelectedSection('initialize');
       setSelectedBlock('Initialize');
@@ -228,26 +227,25 @@ export function StepEditorForm({ schema, spec, onSubmit }: StepEditorFormProps) 
   };
 
   return (
-    <>
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="h-full"
-      >
+    <div className="h-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-          <BlockList
-            sections={sections}
-            blocks={blocks}
-            selectedSection={selectedSection}
-            selectedBlock={selectedBlock}
-            onSectionSelect={(section, block) => {
-              setSelectedSection(section);
-              setSelectedBlock(block);
-            }}
-            onAddBlock={handleAddBlock}
-            onUpdateBlockName={handleUpdateBlockName}
-            onDeleteBlock={handleDeleteBlock}
-            onGenerate={handleSubmit(handleFormSubmit)}
-          />
+          <div className="h-full flex flex-col">
+            <BlockList
+              sections={sections}
+              blocks={blocks}
+              selectedSection={selectedSection}
+              selectedBlock={selectedBlock}
+              onSectionSelect={(section, block) => {
+                setSelectedSection(section);
+                setSelectedBlock(block);
+              }}
+              onAddBlock={handleAddBlock}
+              onUpdateBlockName={handleUpdateBlockName}
+              onDeleteBlock={handleDeleteBlock}
+              onGenerate={handleSubmit(handleFormSubmit)}
+            />
+          </div>
         </ResizablePanel>
         
         <ResizableHandle withHandle className="bg-border" />
@@ -311,17 +309,18 @@ export function StepEditorForm({ schema, spec, onSubmit }: StepEditorFormProps) 
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {getAvailableBlocks(dialogSection).map((blockName) => (
-              <button
+              <Button
                 key={blockName}
-                className="w-full justify-start px-4 py-2 text-left hover:bg-muted rounded-md"
+                variant="outline"
+                className="w-full justify-start"
                 onClick={() => handleSelectBlock(blockName)}
               >
                 {blockName}
-              </button>
+              </Button>
             ))}
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
