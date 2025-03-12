@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, Plus, LayoutTemplate } from "lucide-react";
+import { AlertCircle, Plus, LayoutTemplate, Settings, FileBox, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -36,6 +37,7 @@ export function StepEditor() {
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
   const [editorOnRight, setEditorOnRight] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("configure");
 
   useEffect(() => {
     loadSpec();
@@ -187,13 +189,32 @@ export function StepEditor() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <LayoutTemplate className="h-4 w-4" />
-            <Switch
-              checked={editorOnRight}
-              onCheckedChange={setEditorOnRight}
-              size="sm"
-            />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <LayoutTemplate className="h-4 w-4" />
+              <Switch
+                checked={editorOnRight}
+                onCheckedChange={setEditorOnRight}
+                size="sm"
+              />
+            </div>
+
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="configure" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Configure
+                </TabsTrigger>
+                <TabsTrigger value="artifacts" className="flex items-center gap-2">
+                  <FileBox className="h-4 w-4" />
+                  Artifacts
+                </TabsTrigger>
+                <TabsTrigger value="description" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Description
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
       </div>
