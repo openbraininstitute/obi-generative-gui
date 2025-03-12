@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { LayoutTemplate, ChevronLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
+  const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
 
   return (
     <div className="h-screen flex flex-col">
@@ -34,10 +39,25 @@ export default function Home() {
       {/* Main Content Area */}
       <div className="flex-1 bg-[#002766] flex">
         {/* Left Side - AI Agent */}
-        <div className="w-[400px] p-6">
-          <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-            <AIAgent />
+        <div className={cn(
+          "relative transition-all duration-300 ease-in-out",
+          isAIAgentCollapsed ? "w-0" : "w-[400px]"
+        )}>
+          <div className={cn(
+            "absolute inset-0 p-6 transition-all duration-300",
+            isAIAgentCollapsed ? "opacity-0" : "opacity-100"
+          )}>
+            <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
+              <AIAgent />
+            </div>
           </div>
+          <ChevronLeft 
+            className={cn(
+              "absolute top-1/2 transform -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200",
+              isAIAgentCollapsed ? "-right-10 rotate-180" : "-right-3"
+            )}
+            onClick={() => setIsAIAgentCollapsed(!isAIAgentCollapsed)}
+          />
         </div>
 
         {/* Right Side - Project Workspace and Step Editor */}
