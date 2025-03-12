@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ModelingInterface } from "@/components/modeling-interface";
+import { ProjectWorkspace } from "@/components/project-workspace";
 import { ChatAgent } from "@/components/chat-agent";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
@@ -114,12 +114,8 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Top Bar */}
-      <div className="w-full bg-[#002B69]">
-        <ModelingInterface />
-      </div>
+      <ProjectWorkspace />
       
-      {/* Main Content */}
       <div className="flex-1 bg-[#002766]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* AI Agent Panel */}
@@ -177,6 +173,7 @@ export default function Home() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="a">A</SelectItem>
+                            
                             <SelectItem value="b">B</SelectItem>
                             <SelectItem value="c">C</SelectItem>
                           </SelectContent>
