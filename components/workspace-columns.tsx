@@ -20,6 +20,36 @@ export function WorkspaceColumns({
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
 
+  const [levels, setLevels] = useState<ModelingItem[]>([
+    { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
+    { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
+    { title: 'Neuron morphologies', icon: <Network className="w-6 h-6" /> },
+    { title: 'Neuron placement', icon: <Box className="w-6 h-6" /> },
+    { title: 'Connectivity', icon: <Activity className="w-6 h-6" /> },
+    { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
+    { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
+    { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
+  ]);
+
+  const [stages, setStages] = useState<ModelingItem[]>([
+    { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
+    { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
+    { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
+  ]);
+
+  const [stepTypes, setStepTypes] = useState<ModelingItem[]>([
+    { title: 'Perform', icon: <Play className="w-6 h-6" /> },
+    { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
+    { title: 'Predict', icon: <Activity className="w-6 h-6" /> }
+  ]);
+
+  const [steps, setSteps] = useState<ModelingItem[]>([
+    { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
+    { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
+    { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
+  ]);
+
   useEffect(() => {
     if (selectedStep) {
       setIsCollapsed(true);
@@ -32,39 +62,35 @@ export function WorkspaceColumns({
     }
   }, [isAddingTo]);
 
-  const modelingLevels: ModelingItem[] = [
-    { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
-    { title: 'Neuron morphologies', icon: <Network className="w-6 h-6" /> },
-    { title: 'Neuron placement', icon: <Box className="w-6 h-6" /> },
-    { title: 'Connectivity', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
-    { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
-  ];
-
-  const currentStages: ModelingItem[] = [
-    { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
-  ];
-
-  const currentStepTypes: ModelingItem[] = [
-    { title: 'Perform', icon: <Play className="w-6 h-6" /> },
-    { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
-    { title: 'Predict', icon: <Activity className="w-6 h-6" /> }
-  ];
-
-  const currentSteps: ModelingItem[] = [
-    { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
-  ];
+  const reorder = <T extends unknown>(list: T[], startIndex: number, endIndex: number): T[] => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-    // Drag and drop logic would go here
+
+    const { source, destination } = result;
+    
+    // Only reorder if dropping in the same list
+    if (source.droppableId === destination.droppableId) {
+      switch (source.droppableId) {
+        case 'modelingLevels':
+          setLevels(reorder(levels, source.index, destination.index));
+          break;
+        case 'stages':
+          setStages(reorder(stages, source.index, destination.index));
+          break;
+        case 'stepTypes':
+          setStepTypes(reorder(stepTypes, source.index, destination.index));
+          break;
+        case 'steps':
+          setSteps(reorder(steps, source.index, destination.index));
+          break;
+      }
+    }
   };
 
   const getFilteredItems = (items: ModelingItem[], selectedItem: string) => {
@@ -108,7 +134,7 @@ export function WorkspaceColumns({
           <Droppable droppableId="modelingLevels">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(modelingLevels, selectedModelingLevel).map((item, index) => (
+                {getFilteredItems(levels, selectedModelingLevel).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
@@ -142,7 +168,7 @@ export function WorkspaceColumns({
           <Droppable droppableId="stages">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(currentStages, selectedStage).map((item, index) => (
+                {getFilteredItems(stages, selectedStage).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
@@ -176,7 +202,7 @@ export function WorkspaceColumns({
           <Droppable droppableId="stepTypes">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(currentStepTypes, selectedStepType).map((item, index) => (
+                {getFilteredItems(stepTypes, selectedStepType).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
@@ -210,7 +236,7 @@ export function WorkspaceColumns({
           <Droppable droppableId="steps">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(currentSteps, selectedStep).map((item, index) => (
+                {getFilteredItems(steps, selectedStep).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
