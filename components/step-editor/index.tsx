@@ -89,14 +89,14 @@ export function StepEditor() {
 
   if (loading && !spec) {
     return (
-      <div className="bg-background rounded-lg shadow-lg border p-6">
+      <div className="bg-background rounded-lg shadow-lg border p-6 h-full">
         <p className="text-lg text-muted-foreground">Loading API specification...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-background rounded-lg shadow-lg border">
+    <div className="bg-background rounded-lg shadow-lg border h-full">
       <div className="px-6 py-4 border-b">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
@@ -139,7 +139,7 @@ export function StepEditor() {
         </div>
       )}
 
-      <div className="p-6">
+      <div className="p-6 flex-1">
         {spec && (
           selectedOperation && schema ? (
             <StepEditorForm 
