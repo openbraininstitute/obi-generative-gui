@@ -20,7 +20,48 @@ export function WorkspaceColumns({
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
 
-  const [levels, setLevels] = useState<ModelingItem[]>([
+  // Define hierarchical relationships
+  const levelToStages: Record<string, ModelingItem[]> = {
+    'Circuit Activity': [
+      { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
+      { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
+      { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
+    ],
+    'Circuit': [
+      { title: 'Signal Processing', icon: <Network className="w-6 h-6" /> },
+      { title: 'Pattern Formation', icon: <Activity className="w-6 h-6" /> }
+    ],
+    'Neuron Physiology': [
+      { title: 'Action Potential', icon: <Zap className="w-6 h-6" /> },
+      { title: 'Membrane Dynamics', icon: <Activity className="w-6 h-6" /> }
+    ]
+  };
+
+  const stageToStepTypes: Record<string, ModelingItem[]> = {
+    'Feeding Initiation': [
+      { title: 'Perform', icon: <Play className="w-6 h-6" /> },
+      { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
+      { title: 'Predict', icon: <Activity className="w-6 h-6" /> }
+    ],
+    'Walking sideways': [
+      { title: 'Simulate', icon: <Play className="w-6 h-6" /> },
+      { title: 'Analyze', icon: <Eye className="w-6 h-6" /> }
+    ]
+  };
+
+  const stepTypeToSteps: Record<string, ModelingItem[]> = {
+    'Perform': [
+      { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
+      { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
+      { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
+    ],
+    'Validate': [
+      { title: 'Compare with experimental data', icon: <Activity className="w-6 h-6" /> },
+      { title: 'Statistical analysis', icon: <Network className="w-6 h-6" /> }
+    ]
+  };
+
+  const [levels] = useState<ModelingItem[]>([
     { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
     { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
     { title: 'Neuron morphologies', icon: <Network className="w-6 h-6" /> },
@@ -32,23 +73,10 @@ export function WorkspaceColumns({
     { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
   ]);
 
-  const [stages, setStages] = useState<ModelingItem[]>([
-    { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
-  ]);
-
-  const [stepTypes, setStepTypes] = useState<ModelingItem[]>([
-    { title: 'Perform', icon: <Play className="w-6 h-6" /> },
-    { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
-    { title: 'Predict', icon: <Activity className="w-6 h-6" /> }
-  ]);
-
-  const [steps, setSteps] = useState<ModelingItem[]>([
-    { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
-  ]);
+  // Get available items based on parent selection
+  const getAvailableStages = () => levelToStages[selectedModelingLevel] || [];
+  const getAvailableStepTypes = () => stageToStepTypes[selectedStage] || [];
+  const getAvailableSteps = () => stepTypeToSteps[selectedStepType] || [];
 
   useEffect(() => {
     if (selectedStep) {
@@ -74,23 +102,64 @@ export function WorkspaceColumns({
 
     const { source, destination } = result;
     
-    // Only reorder if dropping in the same list
     if (source.droppableId === destination.droppableId) {
-      switch (source.droppableId) {
-        case 'modelingLevels':
-          setLevels(reorder(levels, source.index, destination.index));
+      // Handle reordering within columns
+      // Note: We're not updating the state here since we're using fixed hierarchical data
+    }
+  };
+
+  const handleModelingLevelChange = (level: string) => {
+    onModelingLevelChange(level);
+    // Clear child selections when parent changes
+    onStageChange('');
+    onStepTypeChange('');
+    onStepChange('');
+    setIsCollapsed(false);
+  };
+
+  const handleStageChange = (stage: string) => {
+    // Find corresponding modeling level if not already selected
+    if (!selectedModelingLevel) {
+      for (const [level, stages] of Object.entries(levelToStages)) {
+        if (stages.some(s => s.title === stage)) {
+          onModelingLevelChange(level);
           break;
-        case 'stages':
-          setStages(reorder(stages, source.index, destination.index));
-          break;
-        case 'stepTypes':
-          setStepTypes(reorder(stepTypes, source.index, destination.index));
-          break;
-        case 'steps':
-          setSteps(reorder(steps, source.index, destination.index));
-          break;
+        }
       }
     }
+    onStageChange(stage);
+    onStepTypeChange('');
+    onStepChange('');
+    setIsCollapsed(false);
+  };
+
+  const handleStepTypeChange = (type: string) => {
+    // Find corresponding stage and level if not already selected
+    if (!selectedStage) {
+      for (const [stage, types] of Object.entries(stageToStepTypes)) {
+        if (types.some(t => t.title === type)) {
+          handleStageChange(stage);
+          break;
+        }
+      }
+    }
+    onStepTypeChange(type);
+    onStepChange('');
+    setIsCollapsed(false);
+  };
+
+  const handleStepChange = (step: string) => {
+    // Find corresponding step type, stage, and level if not already selected
+    if (!selectedStepType) {
+      for (const [type, steps] of Object.entries(stepTypeToSteps)) {
+        if (steps.some(s => s.title === step)) {
+          handleStepTypeChange(type);
+          break;
+        }
+      }
+    }
+    onStepChange(step);
+    setIsCollapsed(true);
   };
 
   const getFilteredItems = (items: ModelingItem[], selectedItem: string) => {
@@ -98,32 +167,27 @@ export function WorkspaceColumns({
   };
 
   const shouldShowAddButton = (type: 'level' | 'stage' | 'stepType' | 'step') => {
-    if (!isCollapsed) return true;
-    
-    switch (type) {
-      case 'level':
-        return !selectedModelingLevel;
-      case 'stage':
-        return !selectedStage;
-      case 'stepType':
-        return !selectedStepType;
-      case 'step':
-        return !selectedStep;
-      default:
-        return false;
+    if (isCollapsed) {
+      switch (type) {
+        case 'level':
+          return !selectedModelingLevel;
+        case 'stage':
+          return selectedModelingLevel && !selectedStage;
+        case 'stepType':
+          return selectedStage && !selectedStepType;
+        case 'step':
+          return selectedStepType && !selectedStep;
+        default:
+          return false;
+      }
     }
+    return true;
   };
 
   const handleAddNewItem = () => {
     if (!newItemName.trim()) return;
-    // Add new item logic would go here
     setNewItemName('');
     setIsAddingTo(null);
-  };
-
-  const handleItemClick = (handler: () => void) => {
-    setIsCollapsed(false);
-    handler();
   };
 
   return (
@@ -141,7 +205,7 @@ export function WorkspaceColumns({
                         item={item}
                         isSelected={item.title === selectedModelingLevel}
                         provided={provided}
-                        onClick={() => handleItemClick(() => onModelingLevelChange(item.title))}
+                        onClick={() => handleModelingLevelChange(item.title)}
                       />
                     )}
                   </Draggable>
@@ -168,14 +232,14 @@ export function WorkspaceColumns({
           <Droppable droppableId="stages">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(stages, selectedStage).map((item, index) => (
+                {getFilteredItems(getAvailableStages(), selectedStage).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
                         item={item}
                         isSelected={item.title === selectedStage}
                         provided={provided}
-                        onClick={() => handleItemClick(() => onStageChange(item.title))}
+                        onClick={() => handleStageChange(item.title)}
                       />
                     )}
                   </Draggable>
@@ -184,7 +248,7 @@ export function WorkspaceColumns({
               </div>
             )}
           </Droppable>
-          {shouldShowAddButton('stage') && (
+          {shouldShowAddButton('stage') && selectedModelingLevel && (
             <AddButton
               type="stage"
               isAddingTo={isAddingTo}
@@ -202,14 +266,14 @@ export function WorkspaceColumns({
           <Droppable droppableId="stepTypes">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(stepTypes, selectedStepType).map((item, index) => (
+                {getFilteredItems(getAvailableStepTypes(), selectedStepType).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
                         item={item}
                         isSelected={item.title === selectedStepType}
                         provided={provided}
-                        onClick={() => handleItemClick(() => onStepTypeChange(item.title))}
+                        onClick={() => handleStepTypeChange(item.title)}
                       />
                     )}
                   </Draggable>
@@ -218,7 +282,7 @@ export function WorkspaceColumns({
               </div>
             )}
           </Droppable>
-          {shouldShowAddButton('stepType') && (
+          {shouldShowAddButton('stepType') && selectedStage && (
             <AddButton
               type="stepType"
               isAddingTo={isAddingTo}
@@ -236,14 +300,14 @@ export function WorkspaceColumns({
           <Droppable droppableId="steps">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                {getFilteredItems(steps, selectedStep).map((item, index) => (
+                {getFilteredItems(getAvailableSteps(), selectedStep).map((item, index) => (
                   <Draggable key={item.title} draggableId={item.title} index={index}>
                     {(provided) => (
                       <DraggableItem
                         item={item}
                         isSelected={item.title === selectedStep}
                         provided={provided}
-                        onClick={() => handleItemClick(() => onStepChange(item.title))}
+                        onClick={() => handleStepChange(item.title)}
                       />
                     )}
                   </Draggable>
@@ -252,7 +316,7 @@ export function WorkspaceColumns({
               </div>
             )}
           </Droppable>
-          {shouldShowAddButton('step') && (
+          {shouldShowAddButton('step') && selectedStepType && (
             <AddButton
               type="step"
               isAddingTo={isAddingTo}
