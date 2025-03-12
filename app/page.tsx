@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { ChatAgent } from "@/components/chat-agent";
-import { StepEditorViewer } from "@/components/step-editor-viewer";
+import { StepEditor } from "@/components/step-editor";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 export default function Home() {
@@ -69,7 +69,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex-1 h-[calc(100%-4rem)]">
-                  <StepEditorViewer />
+                  <StepEditor />
                 </div>
               </div>
             </div>

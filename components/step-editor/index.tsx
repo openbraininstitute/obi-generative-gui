@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 
 const API_URL = "http://127.0.0.1:8000";
 
-export function StepEditorViewer() {
+export function StepEditor() {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
