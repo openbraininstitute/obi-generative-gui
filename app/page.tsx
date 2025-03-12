@@ -1,17 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutTemplate } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Home() {
-  const [editorOnRight, setEditorOnRight] = useState(false);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
 
   return (
@@ -31,17 +27,7 @@ export default function Home() {
           <button className="bg-blue-800 px-4 py-2 rounded hover:bg-blue-700 transition-colors text-white">
             Validation
           </button>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <LayoutTemplate className="h-4 w-4 text-white" />
-              <Switch
-                checked={editorOnRight}
-                onCheckedChange={setEditorOnRight}
-                size="sm"
-              />
-            </div>
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </header>
 
