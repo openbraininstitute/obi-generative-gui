@@ -7,7 +7,6 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 interface ModelingItem {
   title: string;
   icon: React.ReactNode;
-  subtitle?: string;
 }
 
 interface WorkspaceColumnsProps {
@@ -44,13 +43,13 @@ export function WorkspaceColumns({
     { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
     { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
     { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" />, subtitle: 'Circuit Activity Modeling Level' }
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
   ]);
 
   const [hierarchyData, setHierarchyData] = useState({
     'Circuit Activity': {
       stages: [
-        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" />, subtitle: 'Simulation Stage' },
+        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
         { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
         { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
       ],
@@ -59,9 +58,9 @@ export function WorkspaceColumns({
           types: {
             'Perform': {
               steps: [
-                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" />, subtitle: 'Circuit Simulation' },
-                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" />, subtitle: 'Neural Response' },
-                { title: 'Pattern generation', icon: <Network className="w-6 h-6" />, subtitle: 'Circuit Pattern' }
+                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
+                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
+                { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
               ]
             },
             'Validate': {
@@ -239,8 +238,7 @@ export function WorkspaceColumns({
     title: type,
     icon: type === 'Perform' ? <Play className="w-6 h-6" /> :
           type === 'Validate' ? <Eye className="w-6 h-6" /> :
-          <Activity className="w-6 h-6" />,
-    subtitle: type === 'Perform' ? 'Perform Step Type' : undefined
+          <Activity className="w-6 h-6" />
   }));
   const currentSteps = selectedStepType ? 
     (hierarchyData[selectedModelingLevel]?.stepTypes[selectedStage]?.types[selectedStepType]?.steps || []) : 
@@ -264,14 +262,7 @@ export function WorkspaceColumns({
             <div className={isSelected ? 'text-[#002766]' : 'text-white/70'}>
               {item.icon}
             </div>
-            <div>
-              <div className="font-medium">{item.title}</div>
-              {item.subtitle && (
-                <div className={`text-sm ${isSelected ? 'text-[#002766]/70' : 'text-gray-400'}`}>
-                  {item.subtitle}
-                </div>
-              )}
-            </div>
+            <div className="font-medium">{item.title}</div>
           </div>
         </div>
       )}
