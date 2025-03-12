@@ -23,15 +23,6 @@ export default function Home() {
           <h1 className="text-white font-semibold text-lg">Open Brain Platform</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500 transition-colors text-white">
-            Build
-          </button>
-          <button className="bg-blue-800 px-4 py-2 rounded hover:bg-blue-700 transition-colors text-white">
-            01 Circuit
-          </button>
-          <button className="bg-blue-800 px-4 py-2 rounded hover:bg-blue-700 transition-colors text-white">
-            Validation
-          </button>
           <ThemeToggle />
         </div>
       </header>
