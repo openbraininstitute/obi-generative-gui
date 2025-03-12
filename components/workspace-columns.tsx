@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, Zap, Network, Activity, FlaskRound as Flask, Play, Box, Eye } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ModelingItem, WorkspaceColumnsProps } from '@/types/workspace';
@@ -19,6 +19,20 @@ export function WorkspaceColumns({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
+
+  // Effect to handle collapsing when a step is selected
+  useEffect(() => {
+    if (selectedStep) {
+      setIsCollapsed(true);
+    }
+  }, [selectedStep]);
+
+  // Effect to uncollapse when adding new items
+  useEffect(() => {
+    if (isAddingTo) {
+      setIsCollapsed(false);
+    }
+  }, [isAddingTo]);
 
   const modelingLevels: ModelingItem[] = [
     { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
@@ -83,6 +97,11 @@ export function WorkspaceColumns({
     setIsAddingTo(null);
   };
 
+  const handleItemClick = (handler: () => void) => {
+    setIsCollapsed(false);
+    handler();
+  };
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-4 gap-4 p-4">
@@ -98,10 +117,7 @@ export function WorkspaceColumns({
                         item={item}
                         isSelected={item.title === selectedModelingLevel}
                         provided={provided}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          onModelingLevelChange(item.title);
-                        }}
+                        onClick={() => handleItemClick(() => onModelingLevelChange(item.title))}
                       />
                     )}
                   </Draggable>
@@ -135,10 +151,7 @@ export function WorkspaceColumns({
                         item={item}
                         isSelected={item.title === selectedStage}
                         provided={provided}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          onStageChange(item.title);
-                        }}
+                        onClick={() => handleItemClick(() => onStageChange(item.title))}
                       />
                     )}
                   </Draggable>
@@ -172,10 +185,7 @@ export function WorkspaceColumns({
                         item={item}
                         isSelected={item.title === selectedStepType}
                         provided={provided}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          onStepTypeChange(item.title);
-                        }}
+                        onClick={() => handleItemClick(() => onStepTypeChange(item.title))}
                       />
                     )}
                   </Draggable>
@@ -209,10 +219,7 @@ export function WorkspaceColumns({
                         item={item}
                         isSelected={item.title === selectedStep}
                         provided={provided}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          onStepChange(item.title);
-                        }}
+                        onClick={() => handleItemClick(() => onStepChange(item.title))}
                       />
                     )}
                   </Draggable>
