@@ -59,7 +59,11 @@ export default function Home() {
           <ScrollArea className="h-full rounded-lg">
             <div className="space-y-6">
               <ProjectWorkspace onStepSelect={setSelectedStep} />
-              {selectedStep && <StepEditor />}
+              {selectedStep && (
+                <div className="px-8">
+                  <StepEditor />
+                </div>
+              )}
             </div>
           </ScrollArea>
         </div>
