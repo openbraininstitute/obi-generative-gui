@@ -103,16 +103,8 @@ export function DraggableItem({
         <div className={isSelected ? "text-[#002766]" : "text-white/70"}>
           {item.icon}
         </div>
-        <div>
-          <div className="font-medium">{item.title}</div>
-          {item.subtitle && (
-            <div className={cn(
-              "text-sm",
-              isSelected ? "text-[#002766]/70" : "text-gray-400"
-            )}>
-              {item.subtitle}
-            </div>
-          )}
+        <div className="font-medium truncate">
+          {item.title}
         </div>
       </div>
     </div>

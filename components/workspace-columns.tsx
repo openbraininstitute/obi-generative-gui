@@ -20,14 +20,12 @@ export function WorkspaceColumns({
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
 
-  // Effect to handle collapsing when a step is selected
   useEffect(() => {
     if (selectedStep) {
       setIsCollapsed(true);
     }
   }, [selectedStep]);
 
-  // Effect to uncollapse when adding new items
   useEffect(() => {
     if (isAddingTo) {
       setIsCollapsed(false);
@@ -43,25 +41,25 @@ export function WorkspaceColumns({
     { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
     { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
     { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" />, subtitle: 'Circuit Activity Modeling Level' }
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
   ];
 
   const currentStages: ModelingItem[] = [
-    { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" />, subtitle: 'Simulation Stage' },
+    { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
     { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
     { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
   ];
 
   const currentStepTypes: ModelingItem[] = [
-    { title: 'Perform', icon: <Play className="w-6 h-6" />, subtitle: 'Perform Step Type' },
+    { title: 'Perform', icon: <Play className="w-6 h-6" /> },
     { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
     { title: 'Predict', icon: <Activity className="w-6 h-6" /> }
   ];
 
   const currentSteps: ModelingItem[] = [
-    { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" />, subtitle: 'Circuit Simulation' },
-    { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" />, subtitle: 'Neural Response' },
-    { title: 'Pattern generation', icon: <Network className="w-6 h-6" />, subtitle: 'Circuit Pattern' }
+    { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
+    { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
+    { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
   ];
 
   const handleDragEnd = (result: any) => {
