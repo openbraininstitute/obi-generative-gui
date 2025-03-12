@@ -48,7 +48,7 @@ export function AIAgent() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-card rounded-lg">
+    <div className="flex flex-col h-full bg-background rounded-lg">
       <div className="flex-none p-4 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-6 h-6 text-blue-500" />

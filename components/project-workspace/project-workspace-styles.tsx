@@ -65,7 +65,7 @@ export function AddButton({
   return (
     <button
       onClick={onClick}
-      className="w-full p-3 rounded bg-transparent border border-[#1890FF] hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white/70 mt-2"
+      className="w-full p-3 rounded bg-transparent border border-[#1890FF] hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white mt-2"
     >
       <PlusCircle className="w-4 h-4" />
       <span>Add {type.charAt(0).toUpperCase() + type.slice(1)}</span>
@@ -95,7 +95,7 @@ export function DraggableItem({
         "p-3 rounded cursor-pointer mb-2",
         isSelected 
           ? "bg-white text-[#002766]" 
-          : "bg-transparent border border-[#1890FF] text-white/70 hover:bg-blue-800/30"
+          : "bg-transparent border border-[#1890FF] text-white hover:bg-blue-800/30"
       )}
       onClick={onClick}
       style={{
@@ -106,7 +106,7 @@ export function DraggableItem({
       }}
     >
       <div className="flex items-center space-x-3">
-        <div className={isSelected ? "text-[#002766]" : "text-white/70"}>
+        <div className={isSelected ? "text-[#002766]" : "text-white"}>
           {item.icon}
         </div>
         <div className="font-medium truncate">
