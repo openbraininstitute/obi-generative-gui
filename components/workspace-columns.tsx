@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Brain, Zap, Network, Activity, FlaskRound as Flask, Play, Box, Eye, Plus } from 'lucide-react';
+import { Brain, Zap, Network, Activity, FlaskRound as Flask, Play, Box, Eye, Plus, X } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface ModelingItem {
   title: string;
   icon: React.ReactNode;
+  subtitle?: string;
 }
 
 interface WorkspaceColumnsProps {
@@ -33,7 +34,7 @@ export function WorkspaceColumns({
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
-  
+
   useEffect(() => {
     if (selectedStep) {
       setIsCollapsed(true);
@@ -55,13 +56,13 @@ export function WorkspaceColumns({
     { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
     { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
     { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" />, subtitle: 'Circuit Activity Modeling Level' }
   ]);
 
   const [hierarchyData, setHierarchyData] = useState({
     'Circuit Activity': {
       stages: [
-        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
+        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" />, subtitle: 'Simulation Stage' },
         { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
         { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
       ],
@@ -70,9 +71,9 @@ export function WorkspaceColumns({
           types: {
             'Perform': {
               steps: [
-                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
-                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
-                { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
+                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" />, subtitle: 'Circuit Simulation' },
+                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" />, subtitle: 'Neural Response' },
+                { title: 'Pattern generation', icon: <Network className="w-6 h-6" />, subtitle: 'Circuit Pattern' }
               ]
             },
             'Validate': {
@@ -263,7 +264,14 @@ export function WorkspaceColumns({
             <div className={isSelected ? 'text-[#002766]' : 'text-white/70'}>
               {item.icon}
             </div>
-            <div className="font-medium">{item.title}</div>
+            <div>
+              <div className="font-medium">{item.title}</div>
+              {item.subtitle && (
+                <div className={`text-sm ${isSelected ? 'text-[#002766]/70' : 'text-gray-400'}`}>
+                  {item.subtitle}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -312,6 +320,12 @@ export function WorkspaceColumns({
           >
             Add
           </button>
+          <button
+            onClick={() => setIsAddingTo(null)}
+            className="text-white/70 hover:text-white ml-2"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       ) : (
         <button
@@ -329,7 +343,7 @@ export function WorkspaceColumns({
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-4 gap-4 p-4">
         <div className="space-y-2">
-          <h2 className="text-sm text-gray-400 mb-4">MODELING LEVEL</h2>
+          <h2 className="text-sm text-[#40A9FF] mb-4 text-center font-medium">STAGE</h2>
           <Droppable droppableId="modelingLevels">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -349,7 +363,7 @@ export function WorkspaceColumns({
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-sm text-gray-400 mb-4">STAGE</h2>
+          <h2 className="text-sm text-[#40A9FF] mb-4 text-center font-medium">SUB-STAGE</h2>
           <Droppable droppableId="stages">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -369,7 +383,7 @@ export function WorkspaceColumns({
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-sm text-gray-400 mb-4">STEP TYPE</h2>
+          <h2 className="text-sm text-[#40A9FF] mb-4 text-center font-medium">STEP-TYPE</h2>
           <Droppable droppableId="stepTypes">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -389,7 +403,7 @@ export function WorkspaceColumns({
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-sm text-gray-400 mb-4">STEP</h2>
+          <h2 className="text-sm text-[#40A9FF] mb-4 text-center font-medium">STEP</h2>
           <Droppable droppableId="steps">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
