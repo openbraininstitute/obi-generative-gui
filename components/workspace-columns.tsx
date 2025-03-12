@@ -34,6 +34,18 @@ export function WorkspaceColumns({
   const [newItemName, setNewItemName] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
   
+  useEffect(() => {
+    if (selectedStep) {
+      setIsCollapsed(true);
+    }
+  }, [selectedStep]);
+
+  useEffect(() => {
+    if (isAddingTo) {
+      setIsCollapsed(false);
+    }
+  }, [isAddingTo]);
+
   const [modelingLevels, setModelingLevels] = useState<ModelingItem[]>([
     { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
     { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
@@ -79,20 +91,6 @@ export function WorkspaceColumns({
       }
     }
   });
-
-  useEffect(() => {
-    if (isAddingTo) {
-      setIsCollapsed(false);
-    }
-  }, [isAddingTo]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsCollapsed(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [selectedModelingLevel, selectedStage, selectedStepType, selectedStep]);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -256,7 +254,10 @@ export function WorkspaceColumns({
               ? 'bg-white text-[#002766]' 
               : 'bg-transparent border border-[#1890FF] text-white/70 hover:bg-blue-800/30'
           }`}
-          onClick={onClick}
+          onClick={() => {
+            setIsCollapsed(false);
+            onClick();
+          }}
         >
           <div className="flex items-center space-x-3">
             <div className={isSelected ? 'text-[#002766]' : 'text-white/70'}>
