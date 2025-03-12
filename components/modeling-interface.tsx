@@ -7,6 +7,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 interface ModelingItem {
   title: string;
   icon: React.ReactNode;
+  subtitle?: string;
 }
 
 interface TaskItem {
@@ -85,13 +86,13 @@ export function ModelingInterface() {
     { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
     { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
     { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" />, subtitle: 'Circuit Activity Modeling Level' }
   ]);
 
   const [hierarchyData, setHierarchyData] = useState<HierarchyData>({
     'Circuit Activity': {
       stages: [
-        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
+        { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" />, subtitle: 'Simulation Stage' },
         { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
         { title: 'Antena flex', icon: <Network className="w-6 h-6" /> }
       ],
@@ -100,9 +101,9 @@ export function ModelingInterface() {
           types: {
             'Perform': {
               steps: [
-                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
-                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
-                { title: 'Pattern generation', icon: <Network className="w-6 h-6" /> }
+                { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" />, subtitle: 'Circuit Simulation' },
+                { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" />, subtitle: 'Neural Response' },
+                { title: 'Pattern generation', icon: <Network className="w-6 h-6" />, subtitle: 'Circuit Pattern' }
               ]
             },
             'Validate': {
@@ -333,7 +334,8 @@ export function ModelingInterface() {
     title: type,
     icon: type === 'Perform' ? <Play className="w-6 h-6" /> :
           type === 'Validate' ? <Eye className="w-6 h-6" /> :
-          <Activity className="w-6 h-6" />
+          <Activity className="w-6 h-6" />,
+    subtitle: type === 'Perform' ? 'Perform Step Type' : undefined
   }));
   const currentSteps = selectedStepType ? 
     (hierarchyData[selectedModelingLevel]?.stepTypes[selectedStage]?.types[selectedStepType]?.steps || []) : 
@@ -346,10 +348,10 @@ export function ModelingInterface() {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`p-3 rounded cursor-pointer transition-all duration-300 ${
+          className={`p-3 rounded cursor-pointer transition-all duration-300 mb-2 ${
             isSelected 
               ? 'bg-white text-[#002766]' 
-              : 'bg-transparent border border-blue-400/30 text-white/70 hover:bg-blue-800/30'
+              : 'bg-transparent border border-[#1890FF] text-white/70 hover:bg-blue-800/30'
           }`}
           onClick={onClick}
         >
@@ -357,8 +359,13 @@ export function ModelingInterface() {
             <div className={isSelected ? 'text-[#002766]' : 'text-white/70'}>
               {item.icon}
             </div>
-            <div className="font-medium">
-              {item.title}
+            <div>
+              <div className="font-medium">{item.title}</div>
+              {item.subtitle && (
+                <div className={`text-sm ${isSelected ? 'text-[#002766]/70' : 'text-gray-400'}`}>
+                  {item.subtitle}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -392,19 +399,19 @@ export function ModelingInterface() {
 
     return condition && (
       isAddingTo === type ? (
-        <div className="p-3 rounded bg-transparent border border-blue-400/30 flex items-center space-x-2">
+        <div className="p-3 rounded bg-transparent border border-[#1890FF] flex items-center space-x-2 mt-2">
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddNewItem()}
-            className="flex-1 bg-transparent border-none text-white placeholder-blue-300/50 focus:outline-none"
+            className="flex-1 bg-blue-800/30 text-white rounded px-2 py-1"
             placeholder="Enter name..."
             autoFocus
           />
           <button 
             onClick={handleAddNewItem}
-            className="text-blue-300 hover:text-blue-100"
+            className="text-white/70 hover:text-white"
           >
             Add
           </button>
@@ -412,7 +419,7 @@ export function ModelingInterface() {
       ) : (
         <button
           onClick={() => setIsAddingTo(type)}
-          className="w-full p-3 rounded bg-transparent border border-blue-400/30 hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white/70"
+          className="w-full p-3 rounded bg-transparent border border-[#1890FF] hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white/70 mt-2"
         >
           <Plus className="w-4 h-4" />
           <span>Add {type.charAt(0).toUpperCase() + type.slice(1)}</span>
@@ -450,12 +457,12 @@ export function ModelingInterface() {
       </header>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-4 px-8">
-          <div className="pr-4">
+        <div className="grid grid-cols-4 gap-4 p-4">
+          <div className="space-y-2">
             <h2 className="text-sm text-gray-400 mb-4">MODELING LEVEL</h2>
             <Droppable droppableId="modelingLevels">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
                   {getFilteredItems(modelingLevels, selectedModelingLevel).map((item, index) => 
                     renderDraggableItem(
                       item,
@@ -471,11 +478,11 @@ export function ModelingInterface() {
             {renderAddButton('level', true)}
           </div>
 
-          <div className="px-4">
+          <div className="space-y-2">
             <h2 className="text-sm text-gray-400 mb-4">STAGE</h2>
             <Droppable droppableId="stages">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
                   {getFilteredItems(currentStages, selectedStage).map((item, index) =>
                     renderDraggableItem(
                       item,
@@ -491,11 +498,11 @@ export function ModelingInterface() {
             {renderAddButton('stage', !!selectedModelingLevel)}
           </div>
 
-          <div className="px-4">
+          <div className="space-y-2">
             <h2 className="text-sm text-gray-400 mb-4">STEP TYPE</h2>
             <Droppable droppableId="stepTypes">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
                   {getFilteredItems(currentStepTypes, selectedStepType).map((item, index) =>
                     renderDraggableItem(
                       item,
@@ -511,11 +518,11 @@ export function ModelingInterface() {
             {renderAddButton('stepType', !!selectedStage)}
           </div>
 
-          <div className="pl-4">
+          <div className="space-y-2">
             <h2 className="text-sm text-gray-400 mb-4">STEP</h2>
             <Droppable droppableId="steps">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
                   {getFilteredItems(currentSteps, selectedStep).map((item, index) =>
                     renderDraggableItem(
                       item,
@@ -534,7 +541,7 @@ export function ModelingInterface() {
       </DragDropContext>
 
       {selectedStep && (
-        <div className="px-8 pb-4 flex gap-4">
+        <div className="px-4 pb-4 flex gap-4">
           <div className="w-1/2 bg-[#002B69] rounded-lg overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-blue-800">
               <div className="flex items-center space-x-4">
@@ -584,21 +591,21 @@ export function ModelingInterface() {
                       key={task.id}
                       onClick={() => handleTaskSelect(task.id)}
                       className={`border-t border-blue-800 cursor-pointer hover:bg-blue-800/50 ${
-                        selectedTaskId === task.id ? 'bg-white text-[#001B44]' : ''
+                        selectedTaskId === task.id ? 'bg-white text-[#002766]' : ''
                       }`}
                     >
                       <td className="px-6 py-4 flex items-center space-x-2">
                         {task.type === 'task' ? (
-                          <FileText className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-blue-300'}`} />
+                          <FileText className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-blue-300'}`} />
                         ) : (
-                          <Book className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-blue-300'}`} />
+                          <Book className={`w-4 h-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-blue-300'}`} />
                         )}
                         <span>{task.title}</span>
                       </td>
-                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-gray-300'}`}>
+                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-gray-300'}`}>
                         {task.description}
                       </td>
-                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#001B44]' : 'text-gray-300'}`}>
+                      <td className={`px-6 py-4 ${selectedTaskId === task.id ? 'text-[#002766]' : 'text-gray-300'}`}>
                         {task.lastModified}
                       </td>
                     </tr>
