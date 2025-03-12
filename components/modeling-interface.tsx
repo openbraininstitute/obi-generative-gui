@@ -7,7 +7,6 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 interface ModelingItem {
   title: string;
   icon: React.ReactNode;
-  subtitle?: string;
 }
 
 interface TaskItem {
@@ -350,12 +349,12 @@ export function ModelingInterface() {
           className={`p-3 rounded cursor-pointer transition-all duration-300 ${
             isSelected 
               ? 'bg-white text-[#002766]' 
-              : 'bg-blue-900 text-white hover:bg-blue-800'
+              : 'bg-transparent border border-blue-400/30 text-white/70 hover:bg-blue-800/30'
           }`}
           onClick={onClick}
         >
           <div className="flex items-center space-x-3">
-            <div className={isSelected ? 'text-[#002766]' : 'text-white'}>
+            <div className={isSelected ? 'text-[#002766]' : 'text-white/70'}>
               {item.icon}
             </div>
             <div className="font-medium">
@@ -393,13 +392,13 @@ export function ModelingInterface() {
 
     return condition && (
       isAddingTo === type ? (
-        <div className="p-3 rounded bg-blue-900 flex items-center space-x-2">
+        <div className="p-3 rounded bg-transparent border border-blue-400/30 flex items-center space-x-2">
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddNewItem()}
-            className="flex-1 bg-blue-800 text-white rounded px-2 py-1"
+            className="flex-1 bg-transparent border-none text-white placeholder-blue-300/50 focus:outline-none"
             placeholder="Enter name..."
             autoFocus
           />
@@ -413,7 +412,7 @@ export function ModelingInterface() {
       ) : (
         <button
           onClick={() => setIsAddingTo(type)}
-          className="w-full p-3 rounded bg-blue-900 hover:bg-blue-800 flex items-center justify-center space-x-2 text-white"
+          className="w-full p-3 rounded bg-transparent border border-blue-400/30 hover:bg-blue-800/30 flex items-center justify-center space-x-2 text-white/70"
         >
           <Plus className="w-4 h-4" />
           <span>Add {type.charAt(0).toUpperCase() + type.slice(1)}</span>
