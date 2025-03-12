@@ -3,12 +3,16 @@
 import { ProjectWorkspaceColumns } from './project-workspace-columns';
 import { ProjectWorkspaceProvider } from './project-workspace-provider';
 
-export function ProjectWorkspace() {
+interface ProjectWorkspaceProps {
+  onStepSelect: (step: string | null) => void;
+}
+
+export function ProjectWorkspace({ onStepSelect }: ProjectWorkspaceProps) {
   return (
     <ProjectWorkspaceProvider>
       <div className="h-full">
         <div className="px-8">
-          <ProjectWorkspaceColumns />
+          <ProjectWorkspaceColumns onStepSelect={onStepSelect} />
         </div>
       </div>
     </ProjectWorkspaceProvider>

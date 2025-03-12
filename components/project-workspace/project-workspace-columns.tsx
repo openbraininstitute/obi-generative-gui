@@ -7,7 +7,11 @@ import { useProjectWorkspace } from './project-workspace-provider';
 import { ModelingItem } from './types';
 import { ColumnHeader, AddButton, DraggableItem } from './project-workspace-styles';
 
-export function ProjectWorkspaceColumns() {
+interface ProjectWorkspaceColumnsProps {
+  onStepSelect: (step: string | null) => void;
+}
+
+export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumnsProps) {
   const {
     selectedModelingLevel,
     selectedStage,
@@ -23,7 +27,10 @@ export function ProjectWorkspaceColumns() {
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
 
-  // Define hierarchical relationships with state management
+  useEffect(() => {
+    onStepSelect(selectedStep);
+  }, [selectedStep, onStepSelect]);
+
   const [levels, setLevels] = useState<ModelingItem[]>([
     { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
     { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
@@ -88,7 +95,6 @@ export function ProjectWorkspaceColumns() {
     }
   }, [isAddingTo]);
 
-  // Get available items based on parent selection
   const getAvailableStages = () => levelToStages[selectedModelingLevel] || [];
   const getAvailableStepTypes = () => stageToStepTypes[selectedStage] || [];
   const getAvailableSteps = () => stepTypeToSteps[selectedStepType] || [];

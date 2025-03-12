@@ -7,9 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { AIAgent } from "@/components/ai-agent";
+import { StepEditor } from "@/components/step-editor";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Home() {
   const [editorOnRight, setEditorOnRight] = useState(false);
+  const [selectedStep, setSelectedStep] = useState<string | null>(null);
 
   return (
     <div className="h-screen flex flex-col">
@@ -51,11 +54,23 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right Side - Project Workspace */}
+        {/* Right Side - Project Workspace and Step Editor */}
         <div className="flex-1 p-6">
-          <div className="h-full rounded-lg overflow-hidden">
-            <ProjectWorkspace />
-          </div>
+          <ScrollArea className="h-full rounded-lg">
+            <div className="space-y-6">
+              {/* Project Workspace */}
+              <div className="min-h-[400px]">
+                <ProjectWorkspace onStepSelect={setSelectedStep} />
+              </div>
+              
+              {/* Step Editor */}
+              {selectedStep && (
+                <div className="bg-background rounded-lg">
+                  <StepEditor />
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </div>
     </div>
