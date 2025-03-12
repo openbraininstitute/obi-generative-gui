@@ -11,7 +11,7 @@ export function AIAgent() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your AI assistant. How can I help you with your neuroscience research today?",
+      content: "Hi! I'm your assistant. I can help you configure the simulation parameters and explain what each option means. What would you like to know?",
       isUser: false
     }
   ]);
@@ -48,7 +48,7 @@ export function AIAgent() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card">
+    <div className="flex flex-col h-full bg-white dark:bg-card rounded-lg">
       <div className="flex-none p-4 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-6 h-6 text-blue-500" />
