@@ -20,8 +20,20 @@ export function WorkspaceColumns({
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
 
-  // Define hierarchical relationships
-  const levelToStages: Record<string, ModelingItem[]> = {
+  // Define hierarchical relationships with state management
+  const [levels, setLevels] = useState<ModelingItem[]>([
+    { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
+    { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
+    { title: 'Neuron morphologies', icon: <Network className="w-6 h-6" /> },
+    { title: 'Neuron placement', icon: <Box className="w-6 h-6" /> },
+    { title: 'Connectivity', icon: <Activity className="w-6 h-6" /> },
+    { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
+    { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
+    { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
+    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
+  ]);
+
+  const [levelToStages, setLevelToStages] = useState<Record<string, ModelingItem[]>>({
     'Circuit Activity': [
       { title: 'Feeding Initiation', icon: <Brain className="w-6 h-6" /> },
       { title: 'Walking sideways', icon: <Activity className="w-6 h-6" /> },
@@ -35,9 +47,9 @@ export function WorkspaceColumns({
       { title: 'Action Potential', icon: <Zap className="w-6 h-6" /> },
       { title: 'Membrane Dynamics', icon: <Activity className="w-6 h-6" /> }
     ]
-  };
+  });
 
-  const stageToStepTypes: Record<string, ModelingItem[]> = {
+  const [stageToStepTypes, setStageToStepTypes] = useState<Record<string, ModelingItem[]>>({
     'Feeding Initiation': [
       { title: 'Perform', icon: <Play className="w-6 h-6" /> },
       { title: 'Validate', icon: <Eye className="w-6 h-6" /> },
@@ -47,9 +59,9 @@ export function WorkspaceColumns({
       { title: 'Simulate', icon: <Play className="w-6 h-6" /> },
       { title: 'Analyze', icon: <Eye className="w-6 h-6" /> }
     ]
-  };
+  });
 
-  const stepTypeToSteps: Record<string, ModelingItem[]> = {
+  const [stepTypeToSteps, setStepTypeToSteps] = useState<Record<string, ModelingItem[]>>({
     'Perform': [
       { title: 'Excitatory neuron stimulation', icon: <Brain className="w-6 h-6" /> },
       { title: 'Inhibitory response', icon: <Activity className="w-6 h-6" /> },
@@ -59,19 +71,7 @@ export function WorkspaceColumns({
       { title: 'Compare with experimental data', icon: <Activity className="w-6 h-6" /> },
       { title: 'Statistical analysis', icon: <Network className="w-6 h-6" /> }
     ]
-  };
-
-  const [levels] = useState<ModelingItem[]>([
-    { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
-    { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
-    { title: 'Neuron morphologies', icon: <Network className="w-6 h-6" /> },
-    { title: 'Neuron placement', icon: <Box className="w-6 h-6" /> },
-    { title: 'Connectivity', icon: <Activity className="w-6 h-6" /> },
-    { title: 'Neuron Physiology', icon: <Flask className="w-6 h-6" /> },
-    { title: 'Synaptic Physiology', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit', icon: <Network className="w-6 h-6" /> },
-    { title: 'Circuit Activity', icon: <Activity className="w-6 h-6" /> }
-  ]);
+  });
 
   // Get available items based on parent selection
   const getAvailableStages = () => levelToStages[selectedModelingLevel] || [];
@@ -186,6 +186,46 @@ export function WorkspaceColumns({
 
   const handleAddNewItem = () => {
     if (!newItemName.trim()) return;
+
+    const newItem: ModelingItem = {
+      title: newItemName,
+      icon: <Activity className="w-6 h-6" />
+    };
+
+    switch (isAddingTo) {
+      case 'level':
+        setLevels(prev => [...prev, newItem]);
+        handleModelingLevelChange(newItem.title);
+        break;
+      case 'stage':
+        if (selectedModelingLevel) {
+          setLevelToStages(prev => ({
+            ...prev,
+            [selectedModelingLevel]: [...(prev[selectedModelingLevel] || []), newItem]
+          }));
+          handleStageChange(newItem.title);
+        }
+        break;
+      case 'stepType':
+        if (selectedStage) {
+          setStageToStepTypes(prev => ({
+            ...prev,
+            [selectedStage]: [...(prev[selectedStage] || []), newItem]
+          }));
+          handleStepTypeChange(newItem.title);
+        }
+        break;
+      case 'step':
+        if (selectedStepType) {
+          setStepTypeToSteps(prev => ({
+            ...prev,
+            [selectedStepType]: [...(prev[selectedStepType] || []), newItem]
+          }));
+          handleStepChange(newItem.title);
+        }
+        break;
+    }
+
     setNewItemName('');
     setIsAddingTo(null);
   };
