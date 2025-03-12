@@ -147,9 +147,7 @@ export function StepEditor() {
               spec={spec} 
               onSubmit={handleSubmit}
             />
-          ) : (
-            <p className="text-lg text-muted-foreground">Select a lab to begin</p>
-          )
+          ) : null
         )}
       </div>
     </div>
