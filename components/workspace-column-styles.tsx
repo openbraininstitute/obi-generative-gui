@@ -92,12 +92,18 @@ export function DraggableItem({
       {...provided.draggableProps}
       {...provided.dragHandleProps}
       className={cn(
-        "p-3 rounded cursor-pointer transition-all duration-300 mb-2",
+        "p-3 rounded cursor-pointer mb-2",
         isSelected 
           ? "bg-white text-[#002766]" 
           : "bg-transparent border border-[#1890FF] text-white/70 hover:bg-blue-800/30"
       )}
       onClick={onClick}
+      style={{
+        ...provided.draggableProps.style,
+        transition: provided.draggableProps.style?.transition
+          ? `${provided.draggableProps.style.transition}, background-color 0.2s ease-in-out`
+          : 'background-color 0.2s ease-in-out'
+      }}
     >
       <div className="flex items-center space-x-3">
         <div className={isSelected ? "text-[#002766]" : "text-white/70"}>
