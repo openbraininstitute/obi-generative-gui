@@ -456,7 +456,7 @@ export function ModelingInterface() {
             <h2 className="text-sm text-gray-400 mb-4">MODELING LEVEL</h2>
             <Droppable droppableId="modelingLevels">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
                   {getFilteredItems(modelingLevels, selectedModelingLevel).map((item, index) => 
                     renderDraggableItem(
                       item,
@@ -476,7 +476,7 @@ export function ModelingInterface() {
             <h2 className="text-sm text-gray-400 mb-4">STAGE</h2>
             <Droppable droppableId="stages">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
                   {getFilteredItems(currentStages, selectedStage).map((item, index) =>
                     renderDraggableItem(
                       item,
@@ -496,7 +496,7 @@ export function ModelingInterface() {
             <h2 className="text-sm text-gray-400 mb-4">STEP TYPE</h2>
             <Droppable droppableId="stepTypes">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
                   {getFilteredItems(currentStepTypes, selectedStepType).map((item, index) =>
                     renderDraggableItem(
                       item,
@@ -516,7 +516,7 @@ export function ModelingInterface() {
             <h2 className="text-sm text-gray-400 mb-4">STEP</h2>
             <Droppable droppableId="steps">
               {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 mb-2">
                   {getFilteredItems(currentSteps, selectedStep).map((item, index) =>
                     renderDraggableItem(
                       item,
