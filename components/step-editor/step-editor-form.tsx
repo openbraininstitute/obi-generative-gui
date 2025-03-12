@@ -16,10 +16,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
 
-interface SchemaFormProps {
+interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
   onSubmit: (data: any) => void;
+  editorOnRight: boolean;
 }
 
 interface BlockData {
@@ -28,7 +29,7 @@ interface BlockData {
   displayName: string;
 }
 
-export function StepEditorForm({ schema, spec, onSubmit }: SchemaFormProps) {
+export function StepEditorForm({ schema, spec, onSubmit, editorOnRight }: StepEditorFormProps) {
   const { register, handleSubmit, setValue, watch, reset } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
@@ -226,80 +227,94 @@ export function StepEditorForm({ schema, spec, onSubmit }: SchemaFormProps) {
     }
   };
 
+  const renderPanels = () => {
+    const panels = [
+      // Block List Panel
+      <ResizablePanel key="blocklist" defaultSize={20} minSize={15} maxSize={30}>
+        <div className="h-full flex flex-col">
+          <BlockList
+            sections={sections}
+            blocks={blocks}
+            selectedSection={selectedSection}
+            selectedBlock={selectedBlock}
+            onSectionSelect={(section, block) => {
+              setSelectedSection(section);
+              setSelectedBlock(block);
+            }}
+            onAddBlock={handleAddBlock}
+            onUpdateBlockName={handleUpdateBlockName}
+            onDeleteBlock={handleDeleteBlock}
+            onGenerate={handleSubmit(handleFormSubmit)}
+          />
+        </div>
+      </ResizablePanel>,
+
+      // Form Panel
+      <ResizablePanel key="form" defaultSize={50} minSize={30}>
+        <div className="h-full flex flex-col">
+          {selectedSection && selectedBlock && (
+            <>
+              <div className="flex-none flex items-center px-6 py-4">
+                <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+                  {selectedBlock}
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <form>
+                  <div className="divide-y">
+                    {(() => {
+                      const blockSchema = getBlockSchema();
+                      if (!blockSchema?.properties) return null;
+                      
+                      return Object.entries(blockSchema.properties).map(([name, property]) => (
+                        <FormField
+                          key={name}
+                          name={name}
+                          property={property as OpenAPIV3.SchemaObject}
+                          register={register}
+                          setValue={setValue}
+                          watch={watch}
+                          resolveSchema={resolveSchema}
+                          arrayFields={arrayFields}
+                          setArrayFields={setArrayFields}
+                          setFormData={handleFormDataUpdate}
+                          blocks={blocks}
+                        />
+                      ));
+                    })()}
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+        </div>
+      </ResizablePanel>,
+
+      // Image Viewer Panel
+      <ResizablePanel key="imageviewer" defaultSize={30} minSize={20}>
+        <div className="h-full">
+          <ImageViewer 
+            src="/images/Microcircuits.png"
+            alt="Microcircuits visualization"
+          />
+        </div>
+      </ResizablePanel>
+    ];
+
+    // Add handles between panels
+    const panelsWithHandles = panels.reduce((acc, panel, index) => {
+      if (index === panels.length - 1) return [...acc, panel];
+      return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
+    }, [] as React.ReactNode[]);
+
+    return editorOnRight ? [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[2], panelsWithHandles[3], panelsWithHandles[4]] : 
+                          [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[4], panelsWithHandles[3], panelsWithHandles[2]];
+  };
+
   return (
     <div className="h-full">
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-          <div className="h-full flex flex-col">
-            <BlockList
-              sections={sections}
-              blocks={blocks}
-              selectedSection={selectedSection}
-              selectedBlock={selectedBlock}
-              onSectionSelect={(section, block) => {
-                setSelectedSection(section);
-                setSelectedBlock(block);
-              }}
-              onAddBlock={handleAddBlock}
-              onUpdateBlockName={handleUpdateBlockName}
-              onDeleteBlock={handleDeleteBlock}
-              onGenerate={handleSubmit(handleFormSubmit)}
-            />
-          </div>
-        </ResizablePanel>
-        
-        <ResizableHandle withHandle className="bg-border" />
-        
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col">
-            {selectedSection && selectedBlock && (
-              <>
-                <div className="flex-none flex items-center px-6 py-4">
-                  <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
-                    {selectedBlock}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <form>
-                    <div className="divide-y">
-                      {(() => {
-                        const blockSchema = getBlockSchema();
-                        if (!blockSchema?.properties) return null;
-                        
-                        return Object.entries(blockSchema.properties).map(([name, property]) => (
-                          <FormField
-                            key={name}
-                            name={name}
-                            property={property as OpenAPIV3.SchemaObject}
-                            register={register}
-                            setValue={setValue}
-                            watch={watch}
-                            resolveSchema={resolveSchema}
-                            arrayFields={arrayFields}
-                            setArrayFields={setArrayFields}
-                            setFormData={handleFormDataUpdate}
-                            blocks={blocks}
-                          />
-                        ));
-                      })()}
-                    </div>
-                  </form>
-                </div>
-              </>
-            )}
-          </div>
-        </ResizablePanel>
-        
-        <ResizableHandle withHandle className="bg-border" />
-        
-        <ResizablePanel defaultSize={30} minSize={20}>
-          <div className="h-full">
-            <ImageViewer 
-              src="/images/Microcircuits.png"
-              alt="Microcircuits visualization"
-            />
-          </div>
-        </ResizablePanel>
+        {renderPanels()}
       </ResizablePanelGroup>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

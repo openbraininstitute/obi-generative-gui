@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, Plus, LayoutTemplate } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -34,6 +35,7 @@ export function StepEditor() {
   const [selectedTask, setSelectedTask] = useState<string>("");
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
+  const [editorOnRight, setEditorOnRight] = useState(false);
 
   useEffect(() => {
     loadSpec();
@@ -184,6 +186,15 @@ export function StepEditor() {
               <Plus className="h-4 w-4" />
             </Button>
           </div>
+
+          <div className="flex items-center gap-2">
+            <LayoutTemplate className="h-4 w-4" />
+            <Switch
+              checked={editorOnRight}
+              onCheckedChange={setEditorOnRight}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -202,6 +213,7 @@ export function StepEditor() {
             schema={schema} 
             spec={spec} 
             onSubmit={handleSubmit}
+            editorOnRight={editorOnRight}
           />
         )}
       </div>
