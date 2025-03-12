@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { SchemaForm } from "@/lib/schema-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, ChevronDown, ChevronUp, LayoutTemplate, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, LayoutTemplate } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ChatAgent } from "@/components/chat-agent";
 import { ModelingInterface } from "@/components/modeling-interface";
 
 const API_URL = "http://127.0.0.1:8000";
@@ -22,12 +21,12 @@ export default function Home() {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
+  const [selectedTask, setSelectedTask] = useState("a");
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
   const [editorOnRight, setEditorOnRight] = useState(false);
-  const [showChat, setShowChat] = useState(true);
 
   useEffect(() => {
     loadSpec();
@@ -114,96 +113,94 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col">
       <ModelingInterface />
-      <div className="flex-1 p-8 flex gap-8">
-        <div 
-          className={cn(
-            "transition-all duration-300 ease-in-out",
-            showChat ? "w-[400px]" : "w-0 opacity-0"
-          )}
-        >
-          <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden">
-            <ChatAgent />
-          </div>
-        </div>
-        <div className="flex-1 relative">
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-50 rounded-full border h-6 w-6 bg-background shadow-md"
-            onClick={() => setShowChat(!showChat)}
-          >
-            {showChat ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </Button>
-          <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden flex flex-col">
-            <div className="flex-none px-6 py-4 border-b">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                  <Label>Lab:</Label>
-                  <div className="w-[240px]">
-                    <Select
-                      value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
-                      onValueChange={(value) => {
-                        const [path, method] = value.split('|');
-                        setSelectedPath(path);
-                        setSelectedMethod(method);
-                        setResponse(null);
-                        setError(null);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select lab" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {endpoints.map(({ path, methods }) => (
-                          methods.map(({ method, operation, displayName }) => (
-                            <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                              {displayName}
-                            </SelectItem>
-                          ))
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
-                    <Switch
-                      checked={editorOnRight}
-                      onCheckedChange={setEditorOnRight}
-                      size="sm"
-                    />
-                  </div>
-                  <ThemeToggle />
+      <div className="flex-1 p-8">
+        <div className="h-[calc(100vh-4rem)] rounded-lg border shadow-lg bg-background overflow-hidden">
+          <div className="flex-none px-6 py-4 border-b">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <Label>Lab:</Label>
+                <div className="w-[240px]">
+                  <Select
+                    value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
+                    onValueChange={(value) => {
+                      const [path, method] = value.split('|');
+                      setSelectedPath(path);
+                      setSelectedMethod(method);
+                      setResponse(null);
+                      setError(null);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select lab" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {endpoints.map(({ path, methods }) => (
+                        methods.map(({ method, operation, displayName }) => (
+                          <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
+                            {displayName}
+                          </SelectItem>
+                        ))
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            </div>
-
-            {error && (
-              <div className="flex-none px-6 py-4">
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+              <div className="flex items-center gap-3">
+                <Label>Task:</Label>
+                <div className="w-[100px]">
+                  <Select
+                    value={selectedTask}
+                    onValueChange={setSelectedTask}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="a">A</SelectItem>
+                      <SelectItem value="b">B</SelectItem>
+                      <SelectItem value="c">C</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            )}
-
-            <div className="flex-1">
-              {spec && (
-                selectedOperation && schema ? (
-                  <SchemaForm 
-                    schema={schema} 
-                    spec={spec} 
-                    onSubmit={handleSubmit}
-                    editorOnRight={editorOnRight}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
+                  <Switch
+                    checked={editorOnRight}
+                    onCheckedChange={setEditorOnRight}
+                    size="sm"
                   />
-                ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-lg text-muted-foreground">Select a lab to begin</p>
-                  </div>
-                )
-              )}
+                </div>
+                <ThemeToggle />
+              </div>
             </div>
+          </div>
+
+          {error && (
+            <div className="flex-none px-6 py-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <div className="flex-1">
+            {spec && (
+              selectedOperation && schema ? (
+                <SchemaForm 
+                  schema={schema} 
+                  spec={spec} 
+                  onSubmit={handleSubmit}
+                  editorOnRight={editorOnRight}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-lg text-muted-foreground">Select a lab to begin</p>
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>
