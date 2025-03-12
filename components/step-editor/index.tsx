@@ -121,14 +121,14 @@ export function StepEditor() {
 
   if (loading && !spec) {
     return (
-      <div className="bg-background rounded-lg shadow-lg border p-6 h-full">
+      <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 p-6 h-full">
         <p className="text-lg text-muted-foreground">Loading API specification...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-background rounded-lg shadow-lg border h-full flex flex-col">
+    <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       <div className="px-6 py-4 border-b">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">

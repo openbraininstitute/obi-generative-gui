@@ -35,7 +35,7 @@ export default function Home() {
       <div className="flex-1 bg-[#002766] dark:bg-[#121212] flex">
         {/* Left Side - AI Agent */}
         <div className="w-[400px] p-6">
-          <div className="h-full rounded-lg shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-background">
+          <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
             <AIAgent />
           </div>
         </div>
