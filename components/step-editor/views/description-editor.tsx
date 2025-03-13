@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import { useTheme } from 'next-themes';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -13,6 +14,9 @@ interface DescriptionEditorProps {
 }
 
 export function DescriptionEditor({ value, onChange }: DescriptionEditorProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <div className="h-full p-4 bg-background">
       <CodeEditor
@@ -26,7 +30,8 @@ export function DescriptionEditor({ value, onChange }: DescriptionEditorProps) {
           backgroundColor: "transparent",
           fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
           height: '100%',
-          overflow: 'auto'
+          overflow: 'auto',
+          color: isDark ? '#ffffff' : '#000000'
         }}
       />
     </div>
