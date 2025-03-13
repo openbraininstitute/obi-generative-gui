@@ -19,6 +19,7 @@ import { useTheme } from 'next-themes';
 import { FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
+import { LatexPreview } from './views/latex-preview';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -313,13 +314,17 @@ export function StepEditorForm({
         )}
       </ResizablePanel>,
 
-      // Right Panel (Image Viewer)
+      // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel key="right" defaultSize={30} minSize={20}>
         <div className="h-full">
-          <ImageViewer 
-            src="/images/Microcircuits.png"
-            alt="Microcircuits visualization"
-          />
+          {selectedTab === "description" && selectedFile ? (
+            <LatexPreview content={files[selectedFile] || ''} className="h-full" />
+          ) : (
+            <ImageViewer 
+              src="/images/Microcircuits.png"
+              alt="Microcircuits visualization"
+            />
+          )}
         </div>
       </ResizablePanel>
     ];
