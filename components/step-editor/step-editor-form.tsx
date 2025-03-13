@@ -335,6 +335,12 @@ export function StepEditorForm({
       return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
+    // Reorder panels based on editorOnRight
+    if (editorOnRight && selectedTab !== "description") {
+      const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
+      return [left, leftHandle, right, rightHandle, center];
+    }
+
     return panelsWithHandles;
   };
 

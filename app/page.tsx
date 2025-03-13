@@ -25,16 +25,12 @@ export default function Home() {
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Label htmlFor="ai-position" className="text-white">AI Position</Label>
-            <div className="flex items-center space-x-2">
-              <span className="text-white text-sm">Left</span>
-              <Switch
-                id="ai-position"
-                checked={isAIAgentOnRight}
-                onCheckedChange={setIsAIAgentOnRight}
-              />
-              <span className="text-white text-sm">Right</span>
-            </div>
+            <Label htmlFor="ai-position" className="text-white">SimAI Position</Label>
+            <Switch
+              id="ai-position"
+              checked={isAIAgentOnRight}
+              onCheckedChange={setIsAIAgentOnRight}
+            />
           </div>
           <ThemeToggle />
         </div>
