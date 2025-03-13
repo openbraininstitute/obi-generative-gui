@@ -79,7 +79,7 @@ export function StepEditorForm({
   const renderFileList = () => (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="space-y-1 p-6 pt-12">
+        <div className="space-y-1 p-4">
           {fileList.map((file) => (
             <button
               key={file}
