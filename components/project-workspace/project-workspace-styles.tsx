@@ -11,7 +11,7 @@ interface ColumnHeaderProps {
 
 export function ColumnHeader({ title }: ColumnHeaderProps) {
   return (
-    <h2 className="text-sm text-[#40A9FF] mb-4 text-center font-medium">{title}</h2>
+    <h2 className="text-sm text-[#40A9FF] font-medium">{title}</h2>
   );
 }
 

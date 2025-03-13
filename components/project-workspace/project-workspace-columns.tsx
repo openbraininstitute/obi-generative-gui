@@ -31,6 +31,18 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
     onStepSelect(selectedStep);
   }, [selectedStep, onStepSelect]);
 
+  useEffect(() => {
+    if (selectedStep) {
+      setIsCollapsed(true);
+    }
+  }, [selectedStep]);
+
+  useEffect(() => {
+    if (isAddingTo) {
+      setIsCollapsed(false);
+    }
+  }, [isAddingTo]);
+
   const [levels, setLevels] = useState<ModelingItem[]>([
     { title: 'Atlas', icon: <Brain className="w-6 h-6" /> },
     { title: 'Ion Channels', icon: <Zap className="w-6 h-6" /> },
@@ -82,18 +94,6 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
       { title: 'Statistical analysis', icon: <Network className="w-6 h-6" /> }
     ]
   });
-
-  useEffect(() => {
-    if (selectedStep) {
-      setIsCollapsed(true);
-    }
-  }, [selectedStep]);
-
-  useEffect(() => {
-    if (isAddingTo) {
-      setIsCollapsed(false);
-    }
-  }, [isAddingTo]);
 
   const getAvailableStages = () => levelToStages[selectedModelingLevel] || [];
   const getAvailableStepTypes = () => stageToStepTypes[selectedStage] || [];
@@ -258,7 +258,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-4 gap-4 py-4">
+      <div className="grid grid-cols-4 gap-4">
         <div className="space-y-2">
           <ColumnHeader title="STAGE" />
           <Droppable droppableId="modelingLevels">

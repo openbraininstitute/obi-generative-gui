@@ -52,7 +52,7 @@ export function AIAgent() {
       <div className="flex-none p-4 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-6 h-6 text-blue-500" />
-          <h2 className="text-lg font-semibold">AI Assistant</h2>
+          <h2 className="text-lg font-semibold">SimAI</h2>
         </div>
       </div>
 
