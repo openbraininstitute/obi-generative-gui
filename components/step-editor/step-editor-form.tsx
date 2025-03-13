@@ -26,6 +26,12 @@ const CodeEditor = dynamic(
   { ssr: false }
 );
 
+interface BlockData {
+  id: string;
+  type: string;
+  displayName: string;
+}
+
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
@@ -38,12 +44,6 @@ interface StepEditorFormProps {
   files: Record<string, string>;
   onFileSelect: (file: string) => void;
   onFileChange: (file: string, content: string) => void;
-}
-
-interface BlockData {
-  id: string;
-  type: string;
-  displayName: string;
 }
 
 export function StepEditorForm({ 
@@ -80,7 +80,6 @@ export function StepEditorForm({
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="space-y-1 p-6 pt-12">
-          <h3 className="text-sm font-medium text-muted-foreground px-3 mb-4">Files</h3>
           {fileList.map((file) => (
             <button
               key={file}
