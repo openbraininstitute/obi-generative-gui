@@ -267,14 +267,16 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <LayoutTemplate className="h-4 w-4" />
-              <Switch
-                checked={editorOnRight}
-                onCheckedChange={setEditorOnRight}
-                size="sm"
-              />
-            </div>
+            {selectedTab !== "description" && (
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4" />
+                <Switch
+                  checked={editorOnRight}
+                  onCheckedChange={setEditorOnRight}
+                  size="sm"
+                />
+              </div>
+            )}
 
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
               <TabsList className="grid w-full grid-cols-3">
