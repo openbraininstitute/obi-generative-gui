@@ -15,12 +15,21 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
+import dynamic from 'next/dynamic';
+
+const CodeEditor = dynamic(
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;
   spec: OpenAPIV3.Document;
   onSubmit: (data: any) => void;
   editorOnRight: boolean;
+  selectedTab: string;
+  description: string;
+  onDescriptionChange: (value: string) => void;
 }
 
 interface BlockData {
@@ -29,7 +38,15 @@ interface BlockData {
   displayName: string;
 }
 
-export function StepEditorForm({ schema, spec, onSubmit, editorOnRight }: StepEditorFormProps) {
+export function StepEditorForm({ 
+  schema, 
+  spec, 
+  onSubmit, 
+  editorOnRight,
+  selectedTab,
+  description,
+  onDescriptionChange
+}: StepEditorFormProps) {
   const { register, handleSubmit, setValue, watch, reset } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
@@ -290,13 +307,32 @@ export function StepEditorForm({ schema, spec, onSubmit, editorOnRight }: StepEd
         </div>
       </ResizablePanel>,
 
-      // Image Viewer Panel
+      // Image Viewer or Description Editor Panel
       <ResizablePanel key="imageviewer" defaultSize={30} minSize={20}>
         <div className="h-full">
-          <ImageViewer 
-            src="/images/Microcircuits.png"
-            alt="Microcircuits visualization"
-          />
+          {selectedTab === "description" ? (
+            <div className="h-full p-4 bg-background">
+              <CodeEditor
+                value={description}
+                language="markdown"
+                placeholder="Enter description in markdown format"
+                onChange={(e) => onDescriptionChange(e.target.value)}
+                padding={15}
+                style={{
+                  fontSize: 14,
+                  backgroundColor: "transparent",
+                  fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                  height: '100%',
+                  overflow: 'auto'
+                }}
+              />
+            </div>
+          ) : (
+            <ImageViewer 
+              src="/images/Microcircuits.png"
+              alt="Microcircuits visualization"
+            />
+          )}
         </div>
       </ResizablePanel>
     ];

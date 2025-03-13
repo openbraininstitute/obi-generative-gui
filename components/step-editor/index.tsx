@@ -13,6 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import dynamic from 'next/dynamic';
+
+const CodeEditor = dynamic(
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -38,6 +44,22 @@ export function StepEditor() {
   const [newTaskName, setNewTaskName] = useState("");
   const [editorOnRight, setEditorOnRight] = useState(false);
   const [selectedTab, setSelectedTab] = useState("configure");
+  const [description, setDescription] = useState(
+`# Step Description
+
+## Overview
+Describe the purpose and functionality of this step.
+
+## Parameters
+- List and explain the parameters
+- Describe their effects
+
+## Expected Behavior
+Explain what should happen when this step is executed.
+
+## Notes
+Any additional information or considerations.`
+  );
 
   useEffect(() => {
     loadSpec();
@@ -235,6 +257,9 @@ export function StepEditor() {
             spec={spec} 
             onSubmit={handleSubmit}
             editorOnRight={editorOnRight}
+            selectedTab={selectedTab}
+            description={description}
+            onDescriptionChange={setDescription}
           />
         )}
       </div>
