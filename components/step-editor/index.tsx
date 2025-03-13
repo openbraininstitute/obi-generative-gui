@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 
 const CodeEditor = dynamic(
@@ -44,8 +45,9 @@ export function StepEditor() {
   const [newTaskName, setNewTaskName] = useState("");
   const [editorOnRight, setEditorOnRight] = useState(false);
   const [selectedTab, setSelectedTab] = useState("configure");
-  const [description, setDescription] = useState(
-`# Step Description
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [files, setFiles] = useState<Record<string, string>>({
+    'Method.tex': `# Step Description
 
 ## Overview
 Describe the purpose and functionality of this step.
@@ -58,8 +60,10 @@ Describe the purpose and functionality of this step.
 Explain what should happen when this step is executed.
 
 ## Notes
-Any additional information or considerations.`
-  );
+Any additional information or considerations.`,
+    'Rational.tex': '',
+    'ResultsSummary.tex': ''
+  });
 
   useEffect(() => {
     loadSpec();
@@ -112,6 +116,13 @@ Any additional information or considerations.`
     setSelectedTask(newTask.id);
     setNewTaskName("");
     setIsNewTaskDialogOpen(false);
+  };
+
+  const handleFileChange = (file: string, content: string) => {
+    setFiles(prev => ({
+      ...prev,
+      [file]: content
+    }));
   };
 
   const selectedOperation = spec && selectedPath && selectedMethod
@@ -258,8 +269,12 @@ Any additional information or considerations.`
             onSubmit={handleSubmit}
             editorOnRight={editorOnRight}
             selectedTab={selectedTab}
-            description={description}
-            onDescriptionChange={setDescription}
+            description={files['Method.tex']}
+            onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
+            selectedFile={selectedFile}
+            files={files}
+            onFileSelect={setSelectedFile}
+            onFileChange={handleFileChange}
           />
         )}
       </div>

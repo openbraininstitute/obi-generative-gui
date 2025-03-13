@@ -7,7 +7,7 @@ import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
-import { StepView } from "./views/step-view";
+import { ImageViewer } from "./views/image-viewer";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -15,6 +15,15 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
+import { useTheme } from 'next-themes';
+import { FileText } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import dynamic from 'next/dynamic';
+
+const CodeEditor = dynamic(
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -24,6 +33,10 @@ interface StepEditorFormProps {
   selectedTab: string;
   description: string;
   onDescriptionChange: (value: string) => void;
+  selectedFile: string | null;
+  files: Record<string, string>;
+  onFileSelect: (file: string) => void;
+  onFileChange: (file: string, content: string) => void;
 }
 
 interface BlockData {
@@ -35,11 +48,15 @@ interface BlockData {
 export function StepEditorForm({ 
   schema, 
   spec, 
-  onSubmit, 
+  onSubmit,
   editorOnRight,
   selectedTab,
   description,
-  onDescriptionChange
+  onDescriptionChange,
+  selectedFile,
+  files,
+  onFileSelect,
+  onFileChange
 }: StepEditorFormProps) {
   const { register, handleSubmit, setValue, watch, reset } = useForm();
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
@@ -49,6 +66,37 @@ export function StepEditorForm({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const fileList = [
+    'Method.tex',
+    'Rational.tex',
+    'ResultsSummary.tex'
+  ];
+
+  const renderFileList = () => (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="space-y-1 p-6 pt-12">
+          <h3 className="text-sm font-medium text-muted-foreground px-3 mb-4">Files</h3>
+          {fileList.map((file) => (
+            <button
+              key={file}
+              className={cn(
+                "w-full flex items-center gap-2 px-3 py-1.5 text-sm rounded-sm hover:bg-muted",
+                selectedFile === file ? "text-primary bg-muted" : "text-muted-foreground"
+              )}
+              onClick={() => onFileSelect(file)}
+            >
+              <FileText className="h-4 w-4" />
+              {file}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
@@ -79,23 +127,6 @@ export function StepEditorForm({
     });
 
     return blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null;
-  };
-
-  const getAvailableBlocks = (section: string) => {
-    if (section === 'initialize') {
-      return ['Initialize'];
-    }
-
-    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
-    if (!sectionSchema.additionalProperties) return [];
-
-    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
-                        [sectionSchema.additionalProperties];
-    
-    return blockSchemas.map(schema => {
-      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      return resolved.title || resolved.const || 'Unnamed Block';
-    });
   };
 
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
@@ -151,83 +182,6 @@ export function StepEditorForm({
     });
   };
 
-  const toSnakeCase = (str: string): string => {
-    return str
-      .replace(/([A-Z])/g, '_$1')
-      .toLowerCase()
-      .replace(/^_/, '');
-  };
-
-  const getNextBlockIndex = (section: string, blockType: string): number => {
-    const sectionBlocks = blocks[section] || [];
-    const typeBlocks = sectionBlocks.filter(block => 
-      block.displayName.startsWith(toSnakeCase(blockType))
-    );
-    return typeBlocks.length;
-  };
-
-  const handleAddBlock = (section: string) => {
-    setDialogSection(section);
-    setIsDialogOpen(true);
-  };
-
-  const handleSelectBlock = (blockType: string) => {
-    const nextIndex = getNextBlockIndex(dialogSection, blockType);
-    const snakeCaseName = `${toSnakeCase(blockType)}_${nextIndex}`;
-    
-    const newBlock = {
-      id: nanoid(),
-      type: blockType,
-      displayName: snakeCaseName
-    };
-    
-    setBlocks(prev => ({
-      ...prev,
-      [dialogSection]: [...(prev[dialogSection] || []), newBlock]
-    }));
-    
-    setSelectedSection(dialogSection);
-    setSelectedBlock(blockType);
-    setIsDialogOpen(false);
-  };
-
-  const handleUpdateBlockName = (section: string, blockId: string, newName: string) => {
-    if (section === 'initialize') return;
-    
-    setBlocks(prev => ({
-      ...prev,
-      [section]: prev[section]?.map(block => 
-        block.id === blockId 
-          ? { ...block, displayName: newName }
-          : block
-      ) || []
-    }));
-  };
-
-  const handleDeleteBlock = (section: string, blockId: string) => {
-    if (section === 'initialize') return;
-
-    setBlocks(prev => ({
-      ...prev,
-      [section]: prev[section]?.filter(block => block.id !== blockId) || []
-    }));
-
-    const deletedBlock = blocks[section]?.find(block => block.id === blockId);
-    if (deletedBlock) {
-      const blockKey = `${section}-${deletedBlock.type}`;
-      setFormData(prev => {
-        const newFormData = { ...prev };
-        delete newFormData[blockKey];
-        return newFormData;
-      });
-    }
-
-    if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
-      setSelectedSection('initialize');
-      setSelectedBlock('Initialize');
-    }
-  };
-
   const handleFormDataUpdate = (newData: any) => {
     if (selectedSection && selectedBlock) {
       const blockKey = `${selectedSection}-${selectedBlock}`;
@@ -240,9 +194,9 @@ export function StepEditorForm({
 
   const renderPanels = () => {
     const panels = [
-      // Block List Panel
-      <ResizablePanel key="blocklist" defaultSize={20} minSize={15} maxSize={30}>
-        <div className="h-full flex flex-col">
+      // Left Panel (Block List or File List)
+      <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={30}>
+        {selectedTab === "description" ? renderFileList() : (
           <BlockList
             sections={sections}
             blocks={blocks}
@@ -252,62 +206,122 @@ export function StepEditorForm({
               setSelectedSection(section);
               setSelectedBlock(block);
             }}
-            onAddBlock={handleAddBlock}
-            onUpdateBlockName={handleUpdateBlockName}
-            onDeleteBlock={handleDeleteBlock}
+            onAddBlock={(section) => {
+              setDialogSection(section);
+              setIsDialogOpen(true);
+            }}
+            onUpdateBlockName={(section, blockId, newName) => {
+              if (section === 'initialize') return;
+              setBlocks(prev => ({
+                ...prev,
+                [section]: prev[section]?.map(block => 
+                  block.id === blockId 
+                    ? { ...block, displayName: newName }
+                    : block
+                ) || []
+              }));
+            }}
+            onDeleteBlock={(section, blockId) => {
+              if (section === 'initialize') return;
+              setBlocks(prev => ({
+                ...prev,
+                [section]: prev[section]?.filter(block => block.id !== blockId) || []
+              }));
+              const deletedBlock = blocks[section]?.find(block => block.id === blockId);
+              if (deletedBlock) {
+                const blockKey = `${section}-${deletedBlock.type}`;
+                setFormData(prev => {
+                  const newFormData = { ...prev };
+                  delete newFormData[blockKey];
+                  return newFormData;
+                });
+              }
+              if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
+                setSelectedSection('initialize');
+                setSelectedBlock('Initialize');
+              }
+            }}
             onGenerate={handleSubmit(handleFormSubmit)}
           />
-        </div>
+        )}
       </ResizablePanel>,
 
-      // Form Panel
-      <ResizablePanel key="form" defaultSize={50} minSize={30}>
-        <div className="h-full flex flex-col">
-          {selectedSection && selectedBlock && (
-            <>
-              <div className="flex-none flex items-center px-6 py-4">
-                <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
-                  {selectedBlock}
-                </div>
+      // Center Panel (Form or Editor)
+      <ResizablePanel key="center" defaultSize={50} minSize={30}>
+        {selectedTab === "description" ? (
+          <div className="h-full p-4 bg-background">
+            {selectedFile ? (
+              <CodeEditor
+                value={files[selectedFile] || ''}
+                language="latex"
+                placeholder="Enter LaTeX content..."
+                onChange={(e) => onFileChange(selectedFile, e.target.value)}
+                padding={15}
+                style={{
+                  fontSize: 14,
+                  backgroundColor: "transparent",
+                  fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                  height: '100%',
+                  overflow: 'auto',
+                  color: isDark ? '#ffffff' : '#000000'
+                }}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                Select a file to edit
               </div>
-              <div className="flex-1 overflow-y-auto">
-                <form>
-                  <div className="divide-y">
-                    {(() => {
-                      const blockSchema = getBlockSchema();
-                      if (!blockSchema?.properties) return null;
-                      
-                      return Object.entries(blockSchema.properties).map(([name, property]) => (
-                        <FormField
-                          key={name}
-                          name={name}
-                          property={property as OpenAPIV3.SchemaObject}
-                          register={register}
-                          setValue={setValue}
-                          watch={watch}
-                          resolveSchema={resolveSchema}
-                          arrayFields={arrayFields}
-                          setArrayFields={setArrayFields}
-                          setFormData={handleFormDataUpdate}
-                          blocks={blocks}
-                        />
-                      ));
-                    })()}
+            )}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col">
+            {selectedSection && selectedBlock && (
+              <>
+                <div className="flex-none flex items-center px-6 py-4">
+                  <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+                    {selectedBlock}
                   </div>
-                </form>
-              </div>
-            </>
-          )}
-        </div>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <form>
+                    <div className="divide-y">
+                      {(() => {
+                        const blockSchema = getBlockSchema();
+                        if (!blockSchema?.properties) return null;
+                        
+                        return Object.entries(blockSchema.properties).map(([name, property]) => (
+                          <FormField
+                            key={name}
+                            name={name}
+                            property={property as OpenAPIV3.SchemaObject}
+                            register={register}
+                            setValue={setValue}
+                            watch={watch}
+                            resolveSchema={resolveSchema}
+                            arrayFields={arrayFields}
+                            setArrayFields={setArrayFields}
+                            setFormData={handleFormDataUpdate}
+                            blocks={blocks}
+                          />
+                        ));
+                      })()}
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </ResizablePanel>,
 
-      // Step View Panel
-      <StepView
-        key="stepview"
-        selectedTab={selectedTab}
-        description={description}
-        onDescriptionChange={onDescriptionChange}
-      />
+      // Right Panel (Image Viewer)
+      <ResizablePanel key="right" defaultSize={30} minSize={20}>
+        <div className="h-full">
+          <ImageViewer 
+            src="/images/Microcircuits.png"
+            alt="Microcircuits visualization"
+          />
+        </div>
+      </ResizablePanel>
     ];
 
     // Add handles between panels
@@ -316,7 +330,7 @@ export function StepEditorForm({
       return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
-    return editorOnRight ? panelsWithHandles : [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[4], panelsWithHandles[3], panelsWithHandles[2]];
+    return panelsWithHandles;
   };
 
   return (
@@ -328,19 +342,51 @@ export function StepEditorForm({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Select</DialogTitle>
+            <DialogTitle>Select Block Type</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {getAvailableBlocks(dialogSection).map((blockName) => (
-              <Button
-                key={blockName}
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => handleSelectBlock(blockName)}
-              >
-                {blockName}
-              </Button>
-            ))}
+            {(() => {
+              if (!dialogSection) return null;
+              const sectionSchema = resolveSchema(schema.properties?.[dialogSection] as OpenAPIV3.SchemaObject);
+              if (!sectionSchema.additionalProperties) return null;
+
+              const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                                [sectionSchema.additionalProperties];
+              
+              return blockSchemas.map(schema => {
+                const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+                const blockType = resolved.title || resolved.const || 'Unnamed Block';
+                return (
+                  <Button
+                    key={blockType}
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      const nextIndex = blocks[dialogSection]?.filter(block => 
+                        block.displayName.startsWith(blockType.toLowerCase())
+                      ).length || 0;
+                      
+                      const newBlock = {
+                        id: nanoid(),
+                        type: blockType,
+                        displayName: `${blockType.toLowerCase()}_${nextIndex}`
+                      };
+                      
+                      setBlocks(prev => ({
+                        ...prev,
+                        [dialogSection]: [...(prev[dialogSection] || []), newBlock]
+                      }));
+                      
+                      setSelectedSection(dialogSection);
+                      setSelectedBlock(blockType);
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    {blockType}
+                  </Button>
+                );
+              });
+            })()}
           </div>
         </DialogContent>
       </Dialog>
