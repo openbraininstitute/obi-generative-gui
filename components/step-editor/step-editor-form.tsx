@@ -7,7 +7,7 @@ import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
-import { ImageViewer } from "./image-viewer";
+import { StepView } from "./views/step-view";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -15,12 +15,6 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
-import dynamic from 'next/dynamic';
-
-const CodeEditor = dynamic(
-  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
-  { ssr: false }
-);
 
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;
@@ -307,34 +301,13 @@ export function StepEditorForm({
         </div>
       </ResizablePanel>,
 
-      // Image Viewer or Description Editor Panel
-      <ResizablePanel key="imageviewer" defaultSize={30} minSize={20}>
-        <div className="h-full">
-          {selectedTab === "description" ? (
-            <div className="h-full p-4 bg-background">
-              <CodeEditor
-                value={description}
-                language="markdown"
-                placeholder="Enter description in markdown format"
-                onChange={(e) => onDescriptionChange(e.target.value)}
-                padding={15}
-                style={{
-                  fontSize: 14,
-                  backgroundColor: "transparent",
-                  fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-                  height: '100%',
-                  overflow: 'auto'
-                }}
-              />
-            </div>
-          ) : (
-            <ImageViewer 
-              src="/images/Microcircuits.png"
-              alt="Microcircuits visualization"
-            />
-          )}
-        </div>
-      </ResizablePanel>
+      // Step View Panel
+      <StepView
+        key="stepview"
+        selectedTab={selectedTab}
+        description={description}
+        onDescriptionChange={onDescriptionChange}
+      />
     ];
 
     // Add handles between panels
@@ -343,8 +316,7 @@ export function StepEditorForm({
       return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
-    return editorOnRight ? [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[2], panelsWithHandles[3], panelsWithHandles[4]] : 
-                          [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[4], panelsWithHandles[3], panelsWithHandles[2]];
+    return editorOnRight ? panelsWithHandles : [panelsWithHandles[0], panelsWithHandles[1], panelsWithHandles[4], panelsWithHandles[3], panelsWithHandles[2]];
   };
 
   return (
