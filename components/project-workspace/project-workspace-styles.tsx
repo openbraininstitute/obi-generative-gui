@@ -94,7 +94,7 @@ export function DraggableItem({
       className={cn(
         "p-3 rounded cursor-pointer mb-2",
         isSelected 
-          ? "bg-white dark:bg-black text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700" 
+          ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700" 
           : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
       )}
       onClick={onClick}
