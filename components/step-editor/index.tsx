@@ -107,6 +107,12 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
     loadSpec();
   }, []);
 
+  useEffect(() => {
+    if (selectedTab === "description" && !selectedFile) {
+      setSelectedFile('Method.tex');
+    }
+  }, [selectedTab]);
+
   const loadSpec = async () => {
     setLoading(true);
     setError(null);
