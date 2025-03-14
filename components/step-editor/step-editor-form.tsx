@@ -195,7 +195,7 @@ export function StepEditorForm({
   const renderPanels = () => {
     const panels = [
       // Left Panel (Block List or File List)
-      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={30}>
+      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={28}>
         {selectedTab === "description" ? renderFileList() : (
           <BlockList
             sections={sections}
