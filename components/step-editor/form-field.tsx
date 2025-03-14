@@ -107,8 +107,8 @@ export function FormField({
 
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[70%]">{name}</Label>
-        <div className="w-[30%] space-y-1">
+        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <div className="w-[35%] space-y-1">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-1">
               {isBlockReference(itemSchema) ? (
@@ -232,8 +232,8 @@ export function FormField({
     
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-        <div className="w-[60%]">
+        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <div className="w-[35%]">
           <Select 
             value={currentValue?.type ? `${currentValue.type}|${currentValue.name}` : undefined}
             onValueChange={(value) => {
@@ -265,8 +265,8 @@ export function FormField({
   if (resolvedProperty.const) {
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-        <div className="w-[60%]">
+        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <div className="w-[35%]">
           <Input 
             value={resolvedProperty.const} 
             disabled 
@@ -280,7 +280,7 @@ export function FormField({
 
   if (resolvedProperty.type === 'object' && resolvedProperty.properties) {
     return (
-      <div className="border-t border-b">
+      <div>
         <div className="px-3 py-1.5">
           <Label className="text-sm font-medium text-muted-foreground">{name}</Label>
         </div>
@@ -308,8 +308,8 @@ export function FormField({
       if (resolvedProperty.enum) {
         return (
           <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-            <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-            <div className="w-[60%]">
+            <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+            <div className="w-[35%]">
               <Select 
                 value={currentValue}
                 onValueChange={(value) => {
@@ -334,8 +334,8 @@ export function FormField({
       }
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-          <div className="w-[60%]">
+          <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+          <div className="w-[35%]">
             <Input 
               value={currentValue || ''}
               {...register(name)}
@@ -354,8 +354,8 @@ export function FormField({
     case 'integer':
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-          <div className="w-[60%]">
+          <Label className="text-sm text-muted-foreground w-[35%]">{name}</Label>
+          <div className="w-[65%]">
             <Input
               type="number"
               value={currentValue || ''}
@@ -379,8 +379,8 @@ export function FormField({
     case 'boolean':
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[40%]">{name}</Label>
-          <div className="w-[60%]">
+          <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+          <div className="w-[35%]">
             <Checkbox
               id={name}
               checked={currentValue || false}
