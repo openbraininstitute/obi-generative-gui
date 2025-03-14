@@ -106,117 +106,119 @@ export function FormField({
     const values = watch(name) || [];
 
     return (
-      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground">{name}</Label>
-        <div className="flex-1 space-y-1">
-          {Array.from({ length: fieldCount }).map((_, index) => (
-            <div key={`${name}-${index}`} className="flex gap-1">
-              {isBlockReference(itemSchema) ? (
-                <Select 
-                  value={values[index]?.type ? `${values[index].type}|${values[index].name}` : undefined}
-                  onValueChange={(value) => {
-                    const [type, displayName] = value.split('|');
-                    const newValues = [...values];
-                    newValues[index] = { type, name: displayName };
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                  }}
-                >
-                  <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableBlocks(getAvailableBlockTypes(itemSchema)).map((block) => (
-                      <SelectItem 
-                        key={block.id} 
-                        value={`${block.type}|${block.displayName}`}
-                        className="text-sm"
-                      >
-                        {block.displayName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : type === 'number' || type === 'integer' ? (
-                <Input
-                  type="number"
-                  value={values[index] || ''}
-                  {...register(`${name}.${index}`, { valueAsNumber: true })}
-                  className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
-                  onChange={(e) => {
-                    const value = e.target.value ? Number(e.target.value) : null;
-                    const newValues = [...values];
-                    newValues[index] = value;
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                  }}
-                />
-              ) : type === 'string' && itemSchema.enum ? (
-                <Select 
-                  value={values[index]}
-                  onValueChange={(value) => {
-                    const newValues = [...values];
-                    newValues[index] = value;
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                  }}
-                >
-                  <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itemSchema.enum.map((option) => (
-                      <SelectItem key={option} value={option} className="text-sm">
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input
-                  value={values[index] || ''}
-                  {...register(`${name}.${index}`)}
-                  className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
-                  onChange={(e) => {
-                    const newValues = [...values];
-                    newValues[index] = e.target.value;
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                  }}
-                />
-              )}
-              {index === fieldCount - 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
-                >
-                  <PlusCircle className="h-3 w-3" />
-                </Button>
-              )}
-              {fieldCount > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => {
-                    const newValues = [...values];
-                    newValues.splice(index, 1);
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                    if (index === fieldCount - 1) {
-                      setArrayFields(prev => ({ ...prev, [name]: prev[name] - 1 }));
-                    }
-                  }}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          ))}
+      <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+        <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+        <div className="flex-1 flex justify-end">
+          <div className="w-[50%] space-y-1">
+            {Array.from({ length: fieldCount }).map((_, index) => (
+              <div key={`${name}-${index}`} className="flex gap-1">
+                {isBlockReference(itemSchema) ? (
+                  <Select 
+                    value={values[index]?.type ? `${values[index].type}|${values[index].name}` : undefined}
+                    onValueChange={(value) => {
+                      const [type, displayName] = value.split('|');
+                      const newValues = [...values];
+                      newValues[index] = { type, name: displayName };
+                      setValue(name, newValues);
+                      setFormData({ [name]: newValues });
+                    }}
+                  >
+                    <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableBlocks(getAvailableBlockTypes(itemSchema)).map((block) => (
+                        <SelectItem 
+                          key={block.id} 
+                          value={`${block.type}|${block.displayName}`}
+                          className="text-sm"
+                        >
+                          {block.displayName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : type === 'number' || type === 'integer' ? (
+                  <Input
+                    type="number"
+                    value={values[index] || ''}
+                    {...register(`${name}.${index}`, { valueAsNumber: true })}
+                    className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
+                    onChange={(e) => {
+                      const value = e.target.value ? Number(e.target.value) : null;
+                      const newValues = [...values];
+                      newValues[index] = value;
+                      setValue(name, newValues);
+                      setFormData({ [name]: newValues });
+                    }}
+                  />
+                ) : type === 'string' && itemSchema.enum ? (
+                  <Select 
+                    value={values[index]}
+                    onValueChange={(value) => {
+                      const newValues = [...values];
+                      newValues[index] = value;
+                      setValue(name, newValues);
+                      setFormData({ [name]: newValues });
+                    }}
+                  >
+                    <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {itemSchema.enum.map((option) => (
+                        <SelectItem key={option} value={option} className="text-sm">
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={values[index] || ''}
+                    {...register(`${name}.${index}`)}
+                    className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
+                    onChange={(e) => {
+                      const newValues = [...values];
+                      newValues[index] = e.target.value;
+                      setValue(name, newValues);
+                      setFormData({ [name]: newValues });
+                    }}
+                  />
+                )}
+                {index === fieldCount - 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => setArrayFields(prev => ({ ...prev, [name]: prev[name] + 1 || 2 }))}
+                  >
+                    <PlusCircle className="h-3 w-3" />
+                  </Button>
+                )}
+                {fieldCount > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      const newValues = [...values];
+                      newValues.splice(index, 1);
+                      setValue(name, newValues);
+                      setFormData({ [name]: newValues });
+                      if (index === fieldCount - 1) {
+                        setArrayFields(prev => ({ ...prev, [name]: prev[name] - 1 }));
+                      }
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -231,45 +233,53 @@ export function FormField({
     const availableBlocks = getAvailableBlocks(blockTypes);
     
     return (
-      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground">{name}</Label>
-        <Select 
-          value={currentValue?.type ? `${currentValue.type}|${currentValue.name}` : undefined}
-          onValueChange={(value) => {
-            const [type, displayName] = value.split('|');
-            setValue(name, { type, name: displayName });
-            setFormData({ [name]: { type, name: displayName } });
-          }}
-        >
-          <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableBlocks.map((block) => (
-              <SelectItem 
-                key={block.id} 
-                value={`${block.type}|${block.displayName}`}
-                className="text-sm"
-              >
-                {block.displayName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+        <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+        <div className="flex-1 flex justify-end">
+          <div className="w-[50%]">
+            <Select 
+              value={currentValue?.type ? `${currentValue.type}|${currentValue.name}` : undefined}
+              onValueChange={(value) => {
+                const [type, displayName] = value.split('|');
+                setValue(name, { type, name: displayName });
+                setFormData({ [name]: { type, name: displayName } });
+              }}
+            >
+              <SelectTrigger className="h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableBlocks.map((block) => (
+                  <SelectItem 
+                    key={block.id} 
+                    value={`${block.type}|${block.displayName}`}
+                    className="text-sm"
+                  >
+                    {block.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (resolvedProperty.const) {
     return (
-      <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground">{name}</Label>
-        <Input 
-          value={resolvedProperty.const} 
-          disabled 
-          {...register(name)}
-          className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
-        />
+      <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+        <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+        <div className="flex-1 flex justify-end">
+          <div className="w-[50%]">
+            <Input 
+              value={resolvedProperty.const} 
+              disabled 
+              {...register(name)}
+              className="h-6 text-sm bg-muted/70 dark:bg-muted/40"
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -303,83 +313,97 @@ export function FormField({
     case 'string':
       if (resolvedProperty.enum) {
         return (
-          <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-            <Label className="text-sm text-muted-foreground">{name}</Label>
-            <Select 
-              value={currentValue}
-              onValueChange={(value) => {
-                setValue(name, value);
-                setFormData({ [name]: value });
-              }}
-            >
-              <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                {resolvedProperty.enum.map((option) => (
-                  <SelectItem key={option} value={option} className="text-sm">
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+            <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+            <div className="flex-1 flex justify-end">
+              <div className="w-[50%]">
+                <Select 
+                  value={currentValue}
+                  onValueChange={(value) => {
+                    setValue(name, value);
+                    setFormData({ [name]: value });
+                  }}
+                >
+                  <SelectTrigger className="h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resolvedProperty.enum.map((option) => (
+                      <SelectItem key={option} value={option} className="text-sm">
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         );
       }
       return (
-        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground">{name}</Label>
-          <Input 
-            value={currentValue || ''}
-            {...register(name)}
-            className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
-            onChange={(e) => {
-              setValue(name, e.target.value);
-              setFormData({ [name]: e.target.value });
-            }}
-            placeholder={resolvedProperty.description}
-          />
+        <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+          <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+          <div className="flex-1 flex justify-end">
+            <div className="w-[50%]">
+              <Input 
+                value={currentValue || ''}
+                {...register(name)}
+                className="h-6 text-sm bg-muted/70 dark:bg-muted/40"
+                onChange={(e) => {
+                  setValue(name, e.target.value);
+                  setFormData({ [name]: e.target.value });
+                }}
+                placeholder={resolvedProperty.description}
+              />
+            </div>
+          </div>
         </div>
       );
     
     case 'number':
     case 'integer':
       return (
-        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground">{name}</Label>
-          <Input
-            type="number"
-            value={currentValue || ''}
-            {...register(name, { 
-              valueAsNumber: true,
-              min: resolvedProperty.minimum,
-              max: resolvedProperty.maximum
-            })}
-            className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40"
-            onChange={(e) => {
-              const value = e.target.value ? Number(e.target.value) : null;
-              setValue(name, value);
-              setFormData({ [name]: value });
-            }}
-            placeholder={resolvedProperty.description}
-          />
+        <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+          <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+          <div className="flex-1 flex justify-end">
+            <div className="w-[50%]">
+              <Input
+                type="number"
+                value={currentValue || ''}
+                {...register(name, { 
+                  valueAsNumber: true,
+                  min: resolvedProperty.minimum,
+                  max: resolvedProperty.maximum
+                })}
+                className="h-6 text-sm bg-muted/70 dark:bg-muted/40"
+                onChange={(e) => {
+                  const value = e.target.value ? Number(e.target.value) : null;
+                  setValue(name, value);
+                  setFormData({ [name]: value });
+                }}
+                placeholder={resolvedProperty.description}
+              />
+            </div>
+          </div>
         </div>
       );
     
     case 'boolean':
       return (
-        <div className="flex items-center gap-4 px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground">{name}</Label>
-          <div className="flex-1">
-            <Checkbox
-              id={name}
-              checked={currentValue || false}
-              className="h-4 w-4"
-              onCheckedChange={(checked) => {
-                setValue(name, checked);
-                setFormData({ [name]: checked });
-              }}
-            />
+        <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+          <Label className="text-sm text-muted-foreground min-w-[100px]">{name}</Label>
+          <div className="flex-1 flex justify-end">
+            <div className="w-[50%]">
+              <Checkbox
+                id={name}
+                checked={currentValue || false}
+                className="h-4 w-4"
+                onCheckedChange={(checked) => {
+                  setValue(name, checked);
+                  setFormData({ [name]: checked });
+                }}
+              />
+            </div>
           </div>
         </div>
       );
