@@ -1,7 +1,13 @@
 # Installation
+Install node.js and npm
 
 ```
 brew install node
+```
+
+Install dependencies
+```
+npm install
 ```
 
 # Launch GUI
