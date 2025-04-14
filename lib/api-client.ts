@@ -16,7 +16,7 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
     }
 
     if (!isValidUrl(url)) {
-      throw new Error('Please provide a valid URL (e.g., http://localhost:8000)');
+      throw new Error('Please provide a valid URL (e.g., http://localhost:8100)');
     }
 
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -59,7 +59,7 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
   } catch (error) {
     console.error('Error fetching OpenAPI spec:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to the server. Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8000)\n3. Your network connection');
+      throw new Error('Cannot connect to the server. Please check:\n1. The server is running\n2. The URL is correct (e.g., http://localhost:8100)\n3. Your network connection');
     }
     if (error instanceof Error) {
       throw error;
@@ -75,7 +75,7 @@ export async function callEndpoint(url: string, method: string, path: string, da
     }
 
     if (!isValidUrl(url)) {
-      throw new Error('Please provide a valid URL (e.g., http://localhost:8000)');
+      throw new Error('Please provide a valid URL (e.g., http://localhost:8100)');
     }
 
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;

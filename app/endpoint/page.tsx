@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:8100";
 
 export default function EndpointPage() {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
