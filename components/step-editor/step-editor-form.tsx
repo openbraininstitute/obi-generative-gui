@@ -7,7 +7,7 @@ import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
-import { ImageViewer } from "./views/image-viewer";
+import { ImageViewer } from "./image-viewer";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -19,7 +19,7 @@ import { useTheme } from 'next-themes';
 import { FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
-import { LatexPreview } from './views/latex-preview';
+import { LatexPreview } from './latex-preview';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
