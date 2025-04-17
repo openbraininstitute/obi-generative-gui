@@ -26,9 +26,7 @@ interface Task {
   name: string;
 }
 
-const API_URL = "http://127.0.0.1:8100";
-
-export function StepEditor() {
+export function StepEditor({ API_URL }: { API_URL: string }) {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
