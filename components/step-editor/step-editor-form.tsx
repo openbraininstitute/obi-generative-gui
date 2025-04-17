@@ -21,29 +21,32 @@ import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import { LatexPreview } from './latex-preview';
 
+// Dynamically import the code editor to avoid SSR issues
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
   { ssr: false }
 );
 
+// Type definition for block data structure
 interface BlockData {
   id: string;
   type: string;
   displayName: string;
 }
 
+// Props interface for the StepEditorForm component
 interface StepEditorFormProps {
-  schema: OpenAPIV3.SchemaObject;
-  spec: OpenAPIV3.Document;
-  onSubmit: (data: any) => void;
-  editorOnRight: boolean;
-  selectedTab: string;
-  description: string;
-  onDescriptionChange: (value: string) => void;
-  selectedFile: string | null;
-  files: Record<string, string>;
-  onFileSelect: (file: string) => void;
-  onFileChange: (file: string, content: string) => void;
+  schema: OpenAPIV3.SchemaObject;           // OpenAPI schema for form generation
+  spec: OpenAPIV3.Document;                 // Complete OpenAPI specification
+  onSubmit: (data: any) => void;           // Callback for form submission
+  editorOnRight: boolean;                   // Layout control for editor position
+  selectedTab: string;                      // Current active tab
+  description: string;                      // LaTeX description content
+  onDescriptionChange: (value: string) => void;  // Handler for description updates
+  selectedFile: string | null;              // Currently selected file
+  files: Record<string, string>;            // Map of file names to contents
+  onFileSelect: (file: string) => void;     // Handler for file selection
+  onFileChange: (file: string, content: string) => void;  // Handler for file content changes
 }
 
 export function StepEditorForm({ 
@@ -59,7 +62,10 @@ export function StepEditorForm({
   onFileSelect,
   onFileChange
 }: StepEditorFormProps) {
+  // Form handling hooks from react-hook-form
   const { register, handleSubmit, setValue, watch, reset } = useForm();
+  
+  // State management for various form aspects
   const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
@@ -67,15 +73,19 @@ export function StepEditorForm({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  
+  // Theme management
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // List of available LaTeX files
   const fileList = [
     'Method.tex',
     'Rational.tex',
     'ResultsSummary.tex'
   ];
 
+  // Renders the file list sidebar
   const renderFileList = () => (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -98,6 +108,7 @@ export function StepEditorForm({
     </div>
   );
 
+  // Helper function to resolve OpenAPI schema references
   const resolveSchema = (schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject => {
     if (!schema) {
       return { type: 'object', properties: {} };
@@ -108,6 +119,7 @@ export function StepEditorForm({
     return schema;
   };
 
+  // Gets the schema for the currently selected block
   const getBlockSchema = () => {
     if (!selectedSection || !selectedBlock) return null;
     
@@ -129,6 +141,7 @@ export function StepEditorForm({
     return blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null;
   };
 
+  // Extract sections from the schema, ensuring 'initialize' is first
   const sections = Object.entries(schema.properties || {}).reduce((acc, [key, value]) => {
     if (key === 'type') return acc;
     if (key === 'initialize') {
@@ -139,6 +152,7 @@ export function StepEditorForm({
     return acc;
   }, {} as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>);
 
+  // Initialize blocks state when schema changes
   useEffect(() => {
     const initialBlocks: Record<string, BlockData[]> = {};
     Object.keys(sections).forEach(section => {
@@ -151,6 +165,7 @@ export function StepEditorForm({
     setBlocks(initialBlocks);
   }, [schema]);
 
+  // Reset form when selection changes
   useEffect(() => {
     if (selectedSection && selectedBlock) {
       const blockKey = `${selectedSection}-${selectedBlock}`;
@@ -163,6 +178,7 @@ export function StepEditorForm({
     }
   }, [selectedSection, selectedBlock]);
 
+  // Process and submit form data
   const handleFormSubmit = (data: any) => {
     const processedData = Object.entries(data).reduce((acc, [key, value]) => {
       if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
@@ -182,6 +198,7 @@ export function StepEditorForm({
     });
   };
 
+  // Update form data state
   const handleFormDataUpdate = (newData: any) => {
     if (selectedSection && selectedBlock) {
       const blockKey = `${selectedSection}-${selectedBlock}`;
@@ -192,6 +209,7 @@ export function StepEditorForm({
     }
   };
 
+  // Render the main panels of the editor
   const renderPanels = () => {
     const panels = [
       // Left Panel (Block List or File List)
@@ -334,7 +352,7 @@ export function StepEditorForm({
       return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
-    // Reorder panels based on editorOnRight
+    // Reorder panels based on editorOnRight setting
     if (editorOnRight && selectedTab !== "description") {
       const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
       return [left, leftHandle, right, rightHandle, center];
@@ -349,6 +367,7 @@ export function StepEditorForm({
         {renderPanels()}
       </ResizablePanelGroup>
 
+      {/* Block Type Selection Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
