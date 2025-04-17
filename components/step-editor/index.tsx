@@ -35,6 +35,7 @@ export function StepEditor() {
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [tasks, setTasks] = useState<Task[]>([
     { id: '1', name: 'Task 1' },
     { id: '2', name: 'Task 2' },
@@ -105,6 +106,7 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
 
   useEffect(() => {
     loadSpec();
+    fetchAvailableEndpoints();
   }, []);
 
   useEffect(() => {
@@ -112,6 +114,28 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
       setSelectedFile('Method.tex');
     }
   }, [selectedTab]);
+
+  const fetchAvailableEndpoints = async () => {
+    try {
+      const response = await fetch(`${API_URL}/forms`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch available endpoints');
+      }
+      const data = await response.json();
+      
+      // Check if data has the forms property and it's an array
+      if (data && Array.isArray(data.forms)) {
+        const formattedEndpoints = data.forms.map((endpoint: string) => `/${endpoint}`);
+        setAvailableEndpoints(formattedEndpoints);
+      } else {
+        setError('Invalid response format from /forms endpoint');
+        setAvailableEndpoints([]);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
+      setAvailableEndpoints([]);
+    }
+  };
 
   const loadSpec = async () => {
     setLoading(true);
@@ -169,6 +193,15 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
     }));
   };
 
+  const getEndpointDisplayName = (path: string) => {
+    return path
+      .slice(1) // Remove leading slash
+      .replace(/form$/, '') // Remove 'form' suffix
+      .split(/(?=[A-Z])/) // Split on capital letters
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const selectedOperation = spec && selectedPath && selectedMethod
     ? (spec.paths[selectedPath]?.[selectedMethod.toLowerCase()] as OpenAPIV3.OperationObject)
     : null;
@@ -176,27 +209,6 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
   const schema = spec && selectedPath && selectedMethod
     ? getSchemaFromPath(spec, selectedPath, selectedMethod)
     : null;
-
-  const getEndpointDisplayName = (path: string, method: string, operation: OpenAPIV3.OperationObject) => {
-    const pathParts = path.split('/').filter(Boolean);
-    const lastPart = pathParts[pathParts.length - 1];
-    
-    return lastPart
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  };
-
-  const endpoints = spec ? Object.entries(spec.paths).map(([path, pathItem]) => ({
-    path,
-    methods: Object.entries(pathItem as OpenAPIV3.PathItemObject)
-      .filter(([method]) => method !== 'parameters')
-      .map(([method, operation]) => ({
-        method,
-        operation: operation as OpenAPIV3.OperationObject,
-        displayName: getEndpointDisplayName(path, method, operation as OpenAPIV3.OperationObject)
-      }))
-  })) : [];
 
   if (loading && !spec) {
     return (
@@ -214,11 +226,10 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
             <Label>Lab:</Label>
             <div className="w-[240px]">
               <Select
-                value={selectedPath && selectedMethod ? `${selectedPath}|${selectedMethod}` : undefined}
-                onValueChange={(value) => {
-                  const [path, method] = value.split('|');
+                value={selectedPath}
+                onValueChange={(path) => {
                   setSelectedPath(path);
-                  setSelectedMethod(method);
+                  setSelectedMethod('post');
                   setResponse(null);
                   setError(null);
                 }}
@@ -227,12 +238,10 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
                   <SelectValue placeholder="Select lab" />
                 </SelectTrigger>
                 <SelectContent>
-                  {endpoints.map(({ path, methods }) => (
-                    methods.map(({ method, operation, displayName }) => (
-                      <SelectItem key={`${path}|${method}`} value={`${path}|${method}`}>
-                        {displayName}
-                      </SelectItem>
-                    ))
+                  {availableEndpoints.map((path) => (
+                    <SelectItem key={path} value={path}>
+                      {getEndpointDisplayName(path)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
