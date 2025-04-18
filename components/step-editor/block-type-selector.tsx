@@ -1,7 +1,7 @@
 "use client";
 
 import { BlockType } from './types';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Check } from 'lucide-react';
 
 interface BlockTypeSelectorProps {
   blockTypes: BlockType[];
@@ -10,32 +10,31 @@ interface BlockTypeSelectorProps {
 
 export function BlockTypeSelector({ blockTypes, onSelect }: BlockTypeSelectorProps) {
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto">
-        <Table>
-          <TableHeader className="sticky top-0 bg-background">
-            <TableRow>
-              <TableHead>Block Type</TableHead>
-              <TableHead>Description</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {blockTypes.map((blockType, index) => (
-              <TableRow
-                key={index}
-                className="cursor-pointer hover:bg-muted/50 transition-colors group"
-                onClick={() => onSelect(blockType)}
-              >
-                <TableCell className="font-medium group-hover:text-primary">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto overscroll-contain px-6">
+        <div className="divide-y">
+          {blockTypes.map((blockType, index) => (
+            <button
+              key={index}
+              className="flex items-start gap-4 py-4 w-full hover:bg-muted/50 transition-colors text-left group"
+              onClick={() => onSelect(blockType)}
+            >
+              <div className="flex-1">
+                <h3 className="font-medium">
                   {blockType.title.replace(/([A-Z])/g, ' $1').trim()}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   {blockType.description}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </p>
+              </div>
+              <div className="flex-none">
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

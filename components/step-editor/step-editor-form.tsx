@@ -7,8 +7,6 @@ import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
 import { ImageViewer } from "./image-viewer";
-import { BlockTypeSelector } from "./block-type-selector";
-import { BlockType } from "./types";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -17,8 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
 import { useTheme } from 'next-themes';
-import { FileText } from 'lucide-react';
-import { Check } from 'lucide-react';
+import { FileText, Check } from 'lucide-react';
+import { BlockType } from './types';
+import { BlockTypeSelector } from './block-type-selector';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import { LatexPreview } from './latex-preview';
