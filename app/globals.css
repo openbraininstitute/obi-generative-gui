@@ -79,6 +79,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  [title] {
+    transition: none !important;
+  }
 }
 
 .image-viewer {

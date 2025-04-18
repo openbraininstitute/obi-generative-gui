@@ -126,22 +126,32 @@ export function StepEditorForm({
   const getBlockSchema = () => {
     if (!selectedSection || !selectedBlock) return null;
     
+    let description = '';
     if (selectedSection === 'initialize') {
-      return resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
+      const initSchema = resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
+      description = initSchema.description || '';
+      return { schema: initSchema, description };
     }
 
     const sectionSchema = resolveSchema(schema.properties?.[selectedSection] as OpenAPIV3.SchemaObject);
-    if (!sectionSchema.additionalProperties) return null;
+    if (!sectionSchema.additionalProperties) return { schema: null, description: '' };
 
     const blockSchemas = sectionSchema.additionalProperties.anyOf || 
                         [sectionSchema.additionalProperties];
     
     const blockSchema = blockSchemas.find(schema => {
       const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      return resolved.title === selectedBlock || resolved.const === selectedBlock;
+      const matches = resolved.title === selectedBlock || resolved.const === selectedBlock;
+      if (matches) {
+        description = resolved.description || '';
+      }
+      return matches;
     });
 
-    return blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null;
+    return {
+      schema: blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null,
+      description
+    };
   };
 
   // Extract sections from the schema, ensuring 'initialize' is first
@@ -357,8 +367,11 @@ export function StepEditorForm({
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
         ) : selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
-            <div className="flex-none flex items-center px-6 py-4">
-              <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+            <div className="flex-none flex items-center px-6 py-4 relative group">
+              <div 
+                className="text-sm px-2 py-1 rounded-md border text-muted-foreground"
+                title={getBlockSchema()?.schema?.description || "No description"}
+              >
                 {selectedBlock}
               </div>
             </div>
@@ -367,9 +380,9 @@ export function StepEditorForm({
                 <div className="divide-y">
                   {(() => {
                     const blockSchema = getBlockSchema();
-                    if (!blockSchema?.properties) return null;
+                    if (!blockSchema?.schema?.properties) return null;
                     
-                    return Object.entries(blockSchema.properties).map(([name, property]) => (
+                    return Object.entries(blockSchema.schema.properties).map(([name, property]) => (
                       <FormField
                         key={name}
                         name={name}
