@@ -38,14 +38,14 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 bg-[#002766] flex">
+      <div className="flex-1 bg-[#002766] flex overflow-hidden">
         {!isAIAgentOnRight && (
           <div className={cn(
             "relative transition-all duration-300 ease-in-out",
             isAIAgentCollapsed ? "w-0" : "w-[400px]"
           )}>
             <div className={cn(
-              "absolute inset-0 p-6 transition-all duration-300",
+              "absolute inset-0 p-6 pb-8 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0" : "opacity-100"
             )}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
@@ -63,11 +63,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         )}
 
         {/* Right Side - Project Workspace and Step Editor */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 pb-8 overflow-hidden">
           <div className="h-full flex flex-col">
             <ProjectWorkspace onStepSelect={setSelectedStep} />
             {selectedStep && (
-              <div className="px-8 mt-6 flex-1">
+              <div className="px-8 mt-6 flex-1 overflow-hidden">
                 <StepEditor API_URL={config.API_URL}/>
               </div>
             )}
@@ -80,7 +80,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             isAIAgentCollapsed ? "w-0" : "w-[400px]"
           )}>
             <div className={cn(
-              "absolute inset-0 p-6 transition-all duration-300",
+              "absolute inset-0 p-6 pb-8 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0" : "opacity-100"
             )}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">

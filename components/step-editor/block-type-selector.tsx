@@ -9,12 +9,12 @@ interface BlockTypeSelectorProps {
 
 export function BlockTypeSelector({ blockTypes, onSelect }: BlockTypeSelectorProps) {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-none p-6 border-b">
         <h2 className="text-lg font-semibold">Select Block Type</h2>
         <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="p-6">
           <div className="space-y-4">
             {blockTypes.map((blockType, index) => (

@@ -409,7 +409,7 @@ export function StepEditorForm({
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full overflow-hidden">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {renderPanels()}
       </ResizablePanelGroup>
