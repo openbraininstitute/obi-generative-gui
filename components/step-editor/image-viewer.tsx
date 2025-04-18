@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-import { ZoomIn, ZoomOut, Video, Image as ImageIcon } from "lucide-react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 interface ImageViewerProps {
   src: string;
@@ -60,25 +60,13 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
         "flex-none p-4 border-t",
         isDark ? "bg-background" : "bg-white"
       )}>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {showVideo ? (
-                <Video className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ImageIcon className="h-4 w-4 text-muted-foreground" />
-              )}
-              <span className="text-sm text-muted-foreground">
-                {showVideo ? 'Video' : 'Image'}
-              </span>
-            </div>
-            <Switch
-              checked={showVideo}
-              onCheckedChange={setShowVideo}
-            />
-          </div>
+        <div className="flex items-center justify-between">
+          <Switch
+            checked={showVideo}
+            onCheckedChange={setShowVideo}
+          />
           {!showVideo && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1 ml-4">
               <ZoomOut className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[zoom]}
