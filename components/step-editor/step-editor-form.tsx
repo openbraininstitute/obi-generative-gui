@@ -75,6 +75,7 @@ export function StepEditorForm({
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
   const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
+  const [hasSingleBlock, setHasSingleBlock] = useState(false);
   
   // Theme management
   const { theme } = useTheme();
@@ -167,6 +168,20 @@ export function StepEditorForm({
     setBlocks(initialBlocks);
   }, [schema]);
 
+  // Determine if form has only a single block
+  useEffect(() => {
+    const hasOnlyInitialize = Object.entries(sections).every(([key, value]) => {
+      if (key === 'initialize') return true;
+      const sectionSchema = resolveSchema(value as OpenAPIV3.SchemaObject);
+      return !sectionSchema.additionalProperties;
+    });
+    setHasSingleBlock(hasOnlyInitialize);
+    if (hasOnlyInitialize) {
+      setSelectedSection('initialize');
+      setSelectedBlock('Initialize');
+    }
+  }, [sections]);
+
   // Reset form when selection changes
   useEffect(() => {
     if (selectedSection && selectedBlock) {
@@ -252,7 +267,7 @@ export function StepEditorForm({
   const renderPanels = () => {
     const panels = [
       // Left Panel (Block List or File List)
-      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
+      !hasSingleBlock && <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
         {selectedTab === "description" ? renderFileList() : (
           <BlockList
             sections={sections}
@@ -308,7 +323,12 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Center Panel (Form or Editor)
-      <ResizablePanel key="center" defaultSize={isAddingBlock ? 76.5 : 46.5} minSize={20} maxSize={isAddingBlock ? 76.5 : 46.5}>
+      <ResizablePanel 
+        key="center" 
+        defaultSize={hasSingleBlock ? 70 : (isAddingBlock ? 76.5 : 46.5)} 
+        minSize={20} 
+        maxSize={hasSingleBlock ? 70 : (isAddingBlock ? 76.5 : 46.5)}
+      >
         {selectedTab === "description" ? (
           <div className="h-full p-4 bg-background">
             {selectedFile ? (
@@ -366,6 +386,17 @@ export function StepEditorForm({
                     ));
                   })()}
                 </div>
+                {hasSingleBlock && (
+                  <div className="p-4 border-t">
+                    <Button 
+                      onClick={handleSubmit(handleFormSubmit)}
+                      className="w-full"
+                      size="sm"
+                    >
+                      Generate
+                    </Button>
+                  </div>
+                )}
               </form>
             </div>
           </div>
@@ -392,7 +423,7 @@ export function StepEditorForm({
     // Add handles between panels
     const panelsWithHandles = panels.reduce((acc, panel, index) => {
       if (index === panels.length - 1) return [...acc, panel];
-      if (panel) {
+      if (panel !== false) {
         return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
       }
       return acc;
