@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { OpenAPIV3 } from "openapi-types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
 import { useTheme } from 'next-themes';
 import { FileText } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import { LatexPreview } from './latex-preview';
@@ -32,6 +32,11 @@ interface BlockData {
   id: string;
   type: string;
   displayName: string;
+}
+
+interface BlockType {
+  title: string;
+  description: string;
 }
 
 // Props interface for the StepEditorForm component
@@ -70,9 +75,10 @@ export function StepEditorForm({
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
+  const [isAddingBlock, setIsAddingBlock] = useState(false);
   
   // Theme management
   const { theme } = useTheme();
@@ -209,6 +215,76 @@ export function StepEditorForm({
     }
   };
 
+  const getBlockTypes = (section: string) => {
+    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
+    if (!sectionSchema.additionalProperties) return [];
+
+    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                        [sectionSchema.additionalProperties];
+    
+    return blockSchemas.map(schema => {
+      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+      return {
+        title: resolved.title || resolved.const || 'Unnamed Block',
+        description: resolved.description || 'No description available'
+      };
+    });
+  };
+
+  // Render the block selection table
+  const renderBlockSelection = () => {
+    if (!dialogSection || !isAddingBlock) return null;
+
+    const handleAddBlock = (blockType: BlockType) => {
+      const nextIndex = blocks[dialogSection]?.filter(block => 
+        block.displayName.startsWith(blockType.title.toLowerCase())
+      ).length || 0;
+      
+      const newBlock = {
+        id: nanoid(),
+        type: blockType.title,
+        displayName: `${blockType.title.toLowerCase()}_${nextIndex}`
+      };
+      
+      setBlocks(prev => ({
+        ...prev,
+        [dialogSection]: [...(prev[dialogSection] || []), newBlock]
+      }));
+      
+      setSelectedSection(dialogSection);
+      setSelectedBlock(blockType.title);
+      setIsAddingBlock(false);
+    };
+
+    return (
+      <div className="p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold">Add Block</h2>
+          <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
+        </div>
+        <div className="grid gap-4">
+          {blockTypes.map((blockType, index) => (
+            <button
+              key={index}
+              className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+              onClick={() => handleAddBlock(blockType)}
+            >
+              <div className="flex-1">
+                <h3 className="font-medium">{blockType.title.replace(/([A-Z])/g, ' $1').trim()}</h3>
+                <p className="text-sm text-muted-foreground">{blockType.description}</p>
+              </div>
+              <div className="flex-none">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-primary" />
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // Render the main panels of the editor
   const renderPanels = () => {
     const panels = [
@@ -219,14 +295,18 @@ export function StepEditorForm({
             sections={sections}
             blocks={blocks}
             selectedSection={selectedSection}
-            selectedBlock={selectedBlock}
+            selectedBlock={isAddingBlock ? null : selectedBlock}
             onSectionSelect={(section, block) => {
               setSelectedSection(section);
-              setSelectedBlock(block);
+              if (!isAddingBlock) {
+                setSelectedBlock(block);
+              }
             }}
             onAddBlock={(section) => {
               setDialogSection(section);
-              setIsDialogOpen(true);
+              setBlockTypes(getBlockTypes(section));
+              setSelectedSection(section);
+              setIsAddingBlock(true);
             }}
             onUpdateBlockName={(section, blockId, newName) => {
               if (section === 'initialize') return;
@@ -292,7 +372,7 @@ export function StepEditorForm({
           </div>
         ) : (
           <div className="h-full flex flex-col">
-            {selectedSection && selectedBlock && (
+            {isAddingBlock ? renderBlockSelection() : selectedSection && selectedBlock && (
               <>
                 <div className="flex-none flex items-center px-6 py-4">
                   <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
@@ -366,59 +446,6 @@ export function StepEditorForm({
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {renderPanels()}
       </ResizablePanelGroup>
-
-      {/* Block Type Selection Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Block Type</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {(() => {
-              if (!dialogSection) return null;
-              const sectionSchema = resolveSchema(schema.properties?.[dialogSection] as OpenAPIV3.SchemaObject);
-              if (!sectionSchema.additionalProperties) return null;
-
-              const blockSchemas = sectionSchema.additionalProperties.anyOf || 
-                                [sectionSchema.additionalProperties];
-              
-              return blockSchemas.map(schema => {
-                const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-                const blockType = resolved.title || resolved.const || 'Unnamed Block';
-                return (
-                  <Button
-                    key={blockType}
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      const nextIndex = blocks[dialogSection]?.filter(block => 
-                        block.displayName.startsWith(blockType.toLowerCase())
-                      ).length || 0;
-                      
-                      const newBlock = {
-                        id: nanoid(),
-                        type: blockType,
-                        displayName: `${blockType.toLowerCase()}_${nextIndex}`
-                      };
-                      
-                      setBlocks(prev => ({
-                        ...prev,
-                        [dialogSection]: [...(prev[dialogSection] || []), newBlock]
-                      }));
-                      
-                      setSelectedSection(dialogSection);
-                      setSelectedBlock(blockType);
-                      setIsDialogOpen(false);
-                    }}
-                  >
-                    {blockType}
-                  </Button>
-                );
-              });
-            })()}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
