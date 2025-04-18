@@ -258,10 +258,6 @@ export function StepEditorForm({
 
     return (
       <div className="p-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold">Add Block</h2>
-          <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
-        </div>
         <div className="space-y-2">
           {blockTypes.map((blockType, index) => (
             <button
