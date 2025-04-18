@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
 import { ImageViewer } from "./image-viewer";
+import { BlockTypeSelector } from "./block-type-selector";
+import { BlockType } from "./types";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -32,11 +34,6 @@ interface BlockData {
   id: string;
   type: string;
   displayName: string;
-}
-
-interface BlockType {
-  title: string;
-  description: string;
 }
 
 // Props interface for the StepEditorForm component
@@ -231,49 +228,25 @@ export function StepEditorForm({
     });
   };
 
-  // Render the block selection table
-  const renderBlockSelection = () => {
-    if (!dialogSection || !isAddingBlock) return null;
-
-    const handleAddBlock = (blockType: BlockType) => {
-      const nextIndex = blocks[dialogSection]?.filter(block => 
-        block.displayName.startsWith(blockType.title.toLowerCase())
-      ).length || 0;
-      
-      const newBlock = {
-        id: nanoid(),
-        type: blockType.title,
-        displayName: `${blockType.title.toLowerCase()}_${nextIndex}`
-      };
-      
-      setBlocks(prev => ({
-        ...prev,
-        [dialogSection]: [...(prev[dialogSection] || []), newBlock]
-      }));
-      
-      setSelectedSection(dialogSection);
-      setSelectedBlock(blockType.title);
-      setIsAddingBlock(false);
+  const handleAddBlock = (blockType: BlockType) => {
+    const nextIndex = blocks[dialogSection]?.filter(block => 
+      block.displayName.startsWith(blockType.title.toLowerCase())
+    ).length || 0;
+    
+    const newBlock = {
+      id: nanoid(),
+      type: blockType.title,
+      displayName: `${blockType.title.toLowerCase()}_${nextIndex}`
     };
-
-    return (
-      <div className="p-6">
-        <div className="space-y-2">
-          {blockTypes.map((blockType, index) => (
-            <button
-              key={index}
-              className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors text-left border-b last:border-b-0"
-              onClick={() => handleAddBlock(blockType)}
-            >
-              <div className="flex-1">
-                <h3 className="font-medium">{blockType.title.replace(/([A-Z])/g, ' $1').trim()}</h3>
-                <p className="text-sm text-muted-foreground">{blockType.description}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+    
+    setBlocks(prev => ({
+      ...prev,
+      [dialogSection]: [...(prev[dialogSection] || []), newBlock]
+    }));
+    
+    setSelectedSection(dialogSection);
+    setSelectedBlock(blockType.title);
+    setIsAddingBlock(false);
   };
 
   // Render the main panels of the editor
@@ -361,43 +334,41 @@ export function StepEditorForm({
               </div>
             )}
           </div>
-        ) : (
+        ) : isAddingBlock ? (
+          <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
+        ) : selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
-            {isAddingBlock ? renderBlockSelection() : selectedSection && selectedBlock && (
-              <>
-                <div className="flex-none flex items-center px-6 py-4">
-                  <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
-                    {selectedBlock}
-                  </div>
+            <div className="flex-none flex items-center px-6 py-4">
+              <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
+                {selectedBlock}
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <form>
+                <div className="divide-y">
+                  {(() => {
+                    const blockSchema = getBlockSchema();
+                    if (!blockSchema?.properties) return null;
+                    
+                    return Object.entries(blockSchema.properties).map(([name, property]) => (
+                      <FormField
+                        key={name}
+                        name={name}
+                        property={property as OpenAPIV3.SchemaObject}
+                        register={register}
+                        setValue={setValue}
+                        watch={watch}
+                        resolveSchema={resolveSchema}
+                        arrayFields={arrayFields}
+                        setArrayFields={setArrayFields}
+                        setFormData={handleFormDataUpdate}
+                        blocks={blocks}
+                      />
+                    ));
+                  })()}
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                  <form>
-                    <div className="divide-y">
-                      {(() => {
-                        const blockSchema = getBlockSchema();
-                        if (!blockSchema?.properties) return null;
-                        
-                        return Object.entries(blockSchema.properties).map(([name, property]) => (
-                          <FormField
-                            key={name}
-                            name={name}
-                            property={property as OpenAPIV3.SchemaObject}
-                            register={register}
-                            setValue={setValue}
-                            watch={watch}
-                            resolveSchema={resolveSchema}
-                            arrayFields={arrayFields}
-                            setArrayFields={setArrayFields}
-                            setFormData={handleFormDataUpdate}
-                            blocks={blocks}
-                          />
-                        ));
-                      })()}
-                    </div>
-                  </form>
-                </div>
-              </>
-            )}
+              </form>
+            </div>
           </div>
         )}
       </ResizablePanel>,
