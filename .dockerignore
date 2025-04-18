@@ -1,8 +1,15 @@
-node_modules
-npm-debug.log
-Dockerfile
-docker-compose.yml
-.git
-.gitignore
-.next
-.env
+# Ignore everything
+*
+# Except what is needed for building the app
+!app
+!components
+!hooks
+!lib
+!public
+!types
+
+!*.config.*
+!.eslintrc.json
+!package.json
+!package-lock.json
+!tsconfig.json
