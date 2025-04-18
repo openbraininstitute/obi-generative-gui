@@ -345,7 +345,7 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Center Panel (Form or Editor)
-      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={30}>
+      <ResizablePanel key="center" defaultSize={isAddingBlock ? 76.5 : 30} minSize={20} maxSize={isAddingBlock ? 76.5 : 30}>
         {selectedTab === "description" ? (
           <div className="h-full p-4 bg-background">
             {selectedFile ? (
@@ -412,30 +412,35 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      <ResizablePanel key="right" defaultSize={30} minSize={20}>
-        <div className="h-full">
-          {selectedTab === "description" && selectedFile ? (
-            <LatexPreview content={files[selectedFile] || ''} className="h-full" />
-          ) : (
-            <ImageViewer 
-              src="/images/Microcircuits.png"
-              alt="Microcircuits visualization"
-            />
-          )}
-        </div>
-      </ResizablePanel>
+      !isAddingBlock ? (
+        <ResizablePanel key="right" defaultSize={30} minSize={20}>
+          <div className="h-full">
+            {selectedTab === "description" && selectedFile ? (
+              <LatexPreview content={files[selectedFile] || ''} className="h-full" />
+            ) : (
+              <ImageViewer 
+                src="/images/Microcircuits.png"
+                alt="Microcircuits visualization"
+              />
+            )}
+          </div>
+        </ResizablePanel>
+      ) : null
     ];
 
     // Add handles between panels
     const panelsWithHandles = panels.reduce((acc, panel, index) => {
       if (index === panels.length - 1) return [...acc, panel];
-      return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
+      if (panel) {
+        return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
+      }
+      return acc;
     }, [] as React.ReactNode[]);
 
     // Reorder panels based on editorOnRight setting
     if (editorOnRight && selectedTab !== "description") {
       const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
-      return [left, leftHandle, right, rightHandle, center];
+      return right ? [left, leftHandle, right, rightHandle, center] : [left, leftHandle, center];
     }
 
     return panelsWithHandles;
