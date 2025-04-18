@@ -33,11 +33,11 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
     )}>
       <div className="flex-1 relative overflow-hidden">
         {showVideo ? (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 scale-150">
             <video
               ref={videoRef}
               src="/videos/neurons_reverse_low.mov"
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-cover"
               loop
               muted
               playsInline
