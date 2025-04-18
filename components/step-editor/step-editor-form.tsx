@@ -325,9 +325,9 @@ export function StepEditorForm({
       // Center Panel (Form or Editor)
       <ResizablePanel 
         key="center" 
-        defaultSize={hasSingleBlock ? 70 : (isAddingBlock ? 76.5 : 46.5)} 
+        defaultSize={30}
         minSize={20} 
-        maxSize={hasSingleBlock ? 70 : (isAddingBlock ? 76.5 : 46.5)}
+        maxSize={40}
       >
         {selectedTab === "description" ? (
           <div className="h-full p-4 bg-background">
@@ -405,7 +405,7 @@ export function StepEditorForm({
 
       // Right Panel (LaTeX Preview or Image Viewer)
       !isAddingBlock ? (
-        <ResizablePanel key="right" defaultSize={30} minSize={20}>
+        <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
           <div className="h-full">
             {selectedTab === "description" && selectedFile ? (
               <LatexPreview content={files[selectedFile] || ''} className="h-full" />
