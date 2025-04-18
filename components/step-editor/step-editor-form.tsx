@@ -262,21 +262,16 @@ export function StepEditorForm({
           <h2 className="text-lg font-semibold">Add Block</h2>
           <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
         </div>
-        <div className="grid gap-4">
+        <div className="space-y-2">
           {blockTypes.map((blockType, index) => (
             <button
               key={index}
-              className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+              className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors text-left border-b last:border-b-0"
               onClick={() => handleAddBlock(blockType)}
             >
               <div className="flex-1">
                 <h3 className="font-medium">{blockType.title.replace(/([A-Z])/g, ' $1').trim()}</h3>
                 <p className="text-sm text-muted-foreground">{blockType.description}</p>
-              </div>
-              <div className="flex-none">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-primary" />
-                </div>
               </div>
             </button>
           ))}
