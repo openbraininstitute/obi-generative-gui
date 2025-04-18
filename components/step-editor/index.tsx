@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, Plus, LayoutTemplate, Settings, FileBox, FileText } from "lucide-react";
+import { AlertCircle, Plus, LayoutTemplate, Settings, FileBox, FileText, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { latexExamples } from "@/lib/latex-examples";
 import dynamic from 'next/dynamic';
 
 const CodeEditor = dynamic(
@@ -24,6 +25,11 @@ const CodeEditor = dynamic(
 interface Task {
   id: string;
   name: string;
+}
+
+interface BlockType {
+  title: string;
+  description: string;
 }
 
 export function StepEditor({ API_URL }: { API_URL: string }) {
@@ -45,62 +51,10 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   const [editorOnRight, setEditorOnRight] = useState(false);
   const [selectedTab, setSelectedTab] = useState("configure");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [files, setFiles] = useState<Record<string, string>>({
-    'Method.tex': `\\section{Neuron Stimulation Protocol}
-
-\\subsection{Experimental Setup}
-The stimulation protocol follows a precise temporal pattern:
-
-\\[
-V(t) = V_0 + A \\cdot \\sin(2\\pi f t)
-\\]
-
-where:
-\\begin{align*}
-V_0 &= \\text{baseline voltage (-70mV)} \\\\
-A &= \\text{amplitude (20mV)} \\\\
-f &= \\text{frequency (50Hz)}
-\\end{align*}
-
-\\subsection{Response Analysis}
-The neuronal response is characterized by the firing rate:
-
-\\[
-r(t) = \\frac{n(t)}{\\Delta t}
-\\]
-
-where $n(t)$ represents spike count in time window $\\Delta t$.`,
-    'Rational.tex': `\\section{Theoretical Framework}
-
-The membrane potential dynamics follow the Hodgkin-Huxley model:
-
-\\[
-C_m \\frac{dV}{dt} = -\\sum_i g_i(V - E_i) + I_{ext}
-\\]
-
-where:
-\\begin{align*}
-C_m &= \\text{membrane capacitance} \\\\
-g_i &= \\text{ionic conductances} \\\\
-E_i &= \\text{reversal potentials} \\\\
-I_{ext} &= \\text{external current}
-\\end{align*}`,
-    'ResultsSummary.tex': `\\section{Key Findings}
-
-\\subsection{Spike Timing}
-The interspike interval (ISI) distribution follows:
-
-\\[
-P(\\text{ISI}) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{(\\text{ISI}-\\mu)^2}{2\\sigma^2}}
-\\]
-
-\\subsection{Network Effects}
-The correlation between neurons $i$ and $j$:
-
-\\[
-C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_i \\sigma_j}
-\\]`
-  });
+  const [isAddingBlock, setIsAddingBlock] = useState(false);
+  const [addingBlockSection, setAddingBlockSection] = useState<string>("");
+  const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
+  const [files, setFiles] = useState<Record<string, string>>(latexExamples);
 
   useEffect(() => {
     loadSpec();
@@ -121,7 +75,6 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
       }
       const data = await response.json();
       
-      // Check if data has the forms property and it's an array
       if (data && Array.isArray(data.forms)) {
         const formattedEndpoints = data.forms.map((endpoint: string) => `/${endpoint}`);
         setAvailableEndpoints(formattedEndpoints);
@@ -193,11 +146,33 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
 
   const getEndpointDisplayName = (path: string) => {
     return path
-      .slice(1) // Remove leading slash
-      .replace(/form$/, '') // Remove 'form' suffix
-      .split(/(?=[A-Z])/) // Split on capital letters
+      .slice(1)
+      .replace(/form$/, '')
+      .split(/(?=[A-Z])/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  };
+
+  const handleAddBlock = (section: string) => {
+    if (!spec) return;
+    
+    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
+    if (!sectionSchema?.additionalProperties) return;
+
+    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                        [sectionSchema.additionalProperties];
+    
+    const types = blockSchemas.map(schema => {
+      const resolved = schema as OpenAPIV3.SchemaObject;
+      return {
+        title: resolved.title || resolved.const || 'Unnamed Block',
+        description: resolved.description || 'No description available'
+      };
+    });
+
+    setBlockTypes(types);
+    setAddingBlockSection(section);
+    setIsAddingBlock(true);
   };
 
   const selectedOperation = spec && selectedPath && selectedMethod
@@ -274,7 +249,7 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
           </div>
 
           <div className="flex items-center gap-4">
-            {selectedTab !== "description" && (
+            {selectedTab !== "description" && !isAddingBlock && (
               <div className="flex items-center gap-2">
                 <LayoutTemplate className="h-4 w-4" />
                 <Switch
@@ -315,20 +290,70 @@ C_{ij} = \\frac{\\langle (r_i - \\bar{r_i})(r_j - \\bar{r_j}) \\rangle}{\\sigma_
       )}
 
       <div className="flex-1">
-        {spec && selectedOperation && schema && (
-          <StepEditorForm 
-            schema={schema} 
-            spec={spec} 
-            onSubmit={handleSubmit}
-            editorOnRight={editorOnRight}
-            selectedTab={selectedTab}
-            description={files['Method.tex']}
-            onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
-            selectedFile={selectedFile}
-            files={files}
-            onFileSelect={setSelectedFile}
-            onFileChange={handleFileChange}
-          />
+        {isAddingBlock ? (
+          <div className="grid grid-cols-[23.5%_auto] h-full">
+            <div className="border-r">
+              <BlockList
+                sections={sections}
+                blocks={blocks}
+                selectedSection={selectedSection}
+                selectedBlock={selectedBlock}
+                onSectionSelect={(section, block) => {
+                  setSelectedSection(section);
+                  setSelectedBlock(block);
+                }}
+                onAddBlock={handleAddBlock}
+                onUpdateBlockName={handleUpdateBlockName}
+                onDeleteBlock={handleDeleteBlock}
+                onGenerate={handleSubmit(handleFormSubmit)}
+              />
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold">Select Block Type</h2>
+                <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
+              </div>
+              <div className="grid gap-4">
+                {blockTypes.map((blockType, index) => (
+                  <button
+                    key={index}
+                    className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+                    onClick={() => {
+                      setIsAddingBlock(false);
+                      // Add your block creation logic here
+                    }}
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-medium">{blockType.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{blockType.description}</p>
+                    </div>
+                    <div className="flex-none">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-primary" />
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          spec && selectedOperation && schema && (
+            <StepEditorForm 
+              schema={schema} 
+              spec={spec} 
+              onSubmit={handleSubmit}
+              editorOnRight={editorOnRight}
+              selectedTab={selectedTab}
+              description={files['Method.tex']}
+              onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
+              selectedFile={selectedFile}
+              files={files}
+              onFileSelect={setSelectedFile}
+              onFileChange={handleFileChange}
+              isAddingBlock={isAddingBlock}
+            />
+          )
         )}
       </div>
 
