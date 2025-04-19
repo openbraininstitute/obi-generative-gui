@@ -183,7 +183,7 @@ export function StepEditorForm({
   // Determine if form has only a single block
   useEffect(() => {
     const hasOnlyInitialize = Object.entries(sections).every(([key, value]) => {
-      if (key === 'initialize') return true;
+      if (key === 'type' || key === 'initialize') return true;
       const sectionSchema = resolveSchema(value as OpenAPIV3.SchemaObject);
       return !sectionSchema.additionalProperties;
     });
@@ -327,9 +327,9 @@ export function StepEditorForm({
     }
 
     const configPanels = [
-      // Left Panel (Block List)
-      <ResizablePanel key="left" defaultSize={23.5} minSize={20} maxSize={30}>
-        {!hasSingleBlock && (
+      // Left Panel (Block List) - Only shown when there are multiple blocks
+      !hasSingleBlock ? (
+        <ResizablePanel key="left" defaultSize={23.5} minSize={20} maxSize={30}>
           <BlockList
             sections={sections}
             blocks={blocks}
@@ -379,11 +379,16 @@ export function StepEditorForm({
             }}
             onGenerate={handleSubmit(handleFormSubmit)}
           />
-        )}
-      </ResizablePanel>,
+        </ResizablePanel>
+      ) : null,
 
       // Center Panel (Form or Editor)
-      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={50}>
+      <ResizablePanel 
+        key="center" 
+        defaultSize={hasSingleBlock ? 40 : 30} 
+        minSize={20} 
+        maxSize={50}
+      >
         {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
         ) : selectedSection && selectedBlock && (
@@ -444,7 +449,11 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      <ResizablePanel key="right" defaultSize={46.5} minSize={20}>
+      <ResizablePanel 
+        key="right" 
+        defaultSize={hasSingleBlock ? 60 : 46.5} 
+        minSize={20}
+      >
         <div className="h-full">
           <ImageViewer 
             src="/images/Microcircuits.png"
@@ -456,23 +465,34 @@ export function StepEditorForm({
 
     // Add handles between panels
     const panelsWithHandles = configPanels.reduce((acc, panel, index) => {
+      if (!panel) return acc;
       if (index === configPanels.length - 1) return [...acc, panel];
-      return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
+      const nextPanel = configPanels.slice(index + 1).find(Boolean);
+      return nextPanel 
+        ? [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />]
+        : [...acc, panel];
     }, [] as React.ReactNode[]);
 
     // Reorder panels based on editorOnRight setting
     if (editorOnRight) {
-      const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
-      return right ? [left, leftHandle, right, rightHandle, center] : [left, leftHandle, center];
+      if (hasSingleBlock) {
+        const [center, handle, right] = panelsWithHandles.filter(Boolean);
+        return right ? [right, handle, center] : [center];
+      } else {
+        const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
+        return [left, leftHandle, right, rightHandle, center];
+      }
     }
 
-    return panelsWithHandles;
-  };
+    return hasSingleBlock
+      ? panelsWithHandles.filter(Boolean)
+      : panelsWithHandles;
+  }
 
   return (
     <div className="h-full overflow-hidden">
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        {renderPanels()}
+        {renderPanels()?.filter(Boolean)}
       </ResizablePanelGroup>
     </div>
   );
