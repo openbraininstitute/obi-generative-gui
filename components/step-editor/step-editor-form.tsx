@@ -72,6 +72,7 @@ export function StepEditorForm({
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [dialogSection, setDialogSection] = useState<string>("");
+  const [addingBlockSection, setAddingBlockSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
   const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
@@ -260,15 +261,15 @@ export function StepEditorForm({
     const newBlock = {
       id: nanoid(),
       type: blockType.title,
-      displayName: `${blockType.title.toLowerCase()}_${nextIndex}`
+      displayName: `${blockType.title.toLowerCase()}_${nextIndex}`,
     };
     
     setBlocks(prev => ({
       ...prev,
-      [dialogSection]: [...(prev[dialogSection] || []), newBlock]
+      [addingBlockSection]: [...(prev[addingBlockSection] || []), newBlock]
     }));
     
-    setSelectedSection(dialogSection);
+    setSelectedSection(addingBlockSection);
     setSelectedBlock(blockType.title);
     setIsAddingBlock(false);
   };
@@ -283,15 +284,14 @@ export function StepEditorForm({
             sections={sections}
             blocks={blocks}
             selectedSection={selectedSection}
-            selectedBlock={isAddingBlock ? null : selectedBlock}
+            selectedBlock={selectedBlock}
             onSectionSelect={(section, block) => {
               setSelectedSection(section);
-              if (!isAddingBlock) {
-                setSelectedBlock(block);
-              }
+              setSelectedBlock(block);
+              setIsAddingBlock(false);
             }}
             onAddBlock={(section) => {
-              setDialogSection(section);
+              setAddingBlockSection(section);
               setBlockTypes(getBlockTypes(section));
               setSelectedSection(section);
               setIsAddingBlock(true);
