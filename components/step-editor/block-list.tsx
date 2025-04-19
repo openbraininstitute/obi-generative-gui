@@ -96,8 +96,8 @@ export function BlockList({
                 <div className="flex items-center justify-between px-3 mb-1">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger asChild className="cursor-pointer">
-                        <span className="text-sm font-medium text-muted-foreground">
+                      <TooltipTrigger asChild>
+                        <span className="text-sm font-medium text-muted-foreground cursor-pointer">
                           {sectionName.toUpperCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>
