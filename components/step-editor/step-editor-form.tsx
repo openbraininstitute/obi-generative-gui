@@ -439,10 +439,10 @@ export function StepEditorForm({
       // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
         <div className="h-full">
-          {!isAddingBlock && <ImageViewer 
+          <ImageViewer 
             src="/images/Microcircuits.png"
             alt="Microcircuits visualization"
-          />}
+          />
         </div>
       </ResizablePanel>
     ];
