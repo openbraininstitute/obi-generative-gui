@@ -276,10 +276,59 @@ export function StepEditorForm({
 
   // Render the main panels of the editor
   const renderPanels = () => {
-    const panels = [
-      // Left Panel (Block List or File List)
+    if (selectedTab === "description") {
+      return [
+        // Left Panel (File List)
+        <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
+          {renderFileList()}
+        </ResizablePanel>,
+        <ResizableHandle key="handle-1" withHandle className="bg-border" />,
+        // Center Panel (Editor)
+        <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={40}>
+          <div className="h-full p-4 bg-background">
+            {selectedFile ? (
+              <CodeEditor
+                value={files[selectedFile] || ''}
+                language="latex"
+                placeholder="Enter LaTeX content..."
+                onChange={(e) => onFileChange(selectedFile, e.target.value)}
+                padding={15}
+                style={{
+                  fontSize: 14,
+                  backgroundColor: "transparent",
+                  fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                  height: '100%',
+                  overflow: 'auto',
+                  color: isDark ? '#ffffff' : '#000000'
+                }}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                Select a file to edit
+              </div>
+            )}
+          </div>
+        </ResizablePanel>,
+        <ResizableHandle key="handle-2" withHandle className="bg-border" />,
+        // Right Panel (LaTeX Preview)
+        <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
+          <div className="h-full">
+            {selectedFile ? (
+              <LatexPreview content={files[selectedFile] || ''} className="h-full" />
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                Select a file to preview
+              </div>
+            )}
+          </div>
+        </ResizablePanel>
+      ];
+    }
+
+    const configPanels = [
+      // Left Panel (Block List)
       !hasSingleBlock && <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
-        {selectedTab === "description" ? renderFileList() : (
+        {(
           <BlockList
             sections={sections}
             blocks={blocks}
@@ -333,37 +382,8 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Center Panel (Form or Editor)
-      <ResizablePanel 
-        key="center" 
-        defaultSize={30}
-        minSize={20} 
-        maxSize={40}
-      >
-        {selectedTab === "description" ? (
-          <div className="h-full p-4 bg-background">
-            {selectedFile ? (
-              <CodeEditor
-                value={files[selectedFile] || ''}
-                language="latex"
-                placeholder="Enter LaTeX content..."
-                onChange={(e) => onFileChange(selectedFile, e.target.value)}
-                padding={15}
-                style={{
-                  fontSize: 14,
-                  backgroundColor: "transparent",
-                  fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-                  height: '100%',
-                  overflow: 'auto',
-                  color: isDark ? '#ffffff' : '#000000'
-                }}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                Select a file to edit
-              </div>
-            )}
-          </div>
-        ) : isAddingBlock ? (
+      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={40}>
+        {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
         ) : selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
@@ -417,25 +437,19 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      !isAddingBlock ? (
-        <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
-          <div className="h-full">
-            {selectedTab === "description" && selectedFile ? (
-              <LatexPreview content={files[selectedFile] || ''} className="h-full" />
-            ) : (
-              <ImageViewer 
-                src="/images/Microcircuits.png"
-                alt="Microcircuits visualization"
-              />
-            )}
-          </div>
-        </ResizablePanel>
-      ) : null
+      !isAddingBlock && <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
+        <div className="h-full">
+          <ImageViewer 
+            src="/images/Microcircuits.png"
+            alt="Microcircuits visualization"
+          />
+        </div>
+      </ResizablePanel>
     ];
 
     // Add handles between panels
-    const panelsWithHandles = panels.reduce((acc, panel, index) => {
-      if (index === panels.length - 1) return [...acc, panel];
+    const panelsWithHandles = configPanels.reduce((acc, panel, index) => {
+      if (index === configPanels.length - 1) return [...acc, panel];
       if (panel !== false) {
         return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
       }
@@ -443,7 +457,7 @@ export function StepEditorForm({
     }, [] as React.ReactNode[]);
 
     // Reorder panels based on editorOnRight setting
-    if (editorOnRight && selectedTab !== "description") {
+    if (editorOnRight) {
       const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
       return right ? [left, leftHandle, right, rightHandle, center] : [left, leftHandle, center];
     }
