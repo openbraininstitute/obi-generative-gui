@@ -205,6 +205,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                   setSelectedMethod('post');
                   setResponse(null);
                   setError(null);
+                  setIsAddingBlock(false);
                 }}
               >
                 <SelectTrigger>

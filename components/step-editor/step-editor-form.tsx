@@ -191,6 +191,7 @@ export function StepEditorForm({
     if (hasOnlyInitialize) {
       setSelectedSection('initialize');
       setSelectedBlock('Initialize');
+      setIsAddingBlock(false);
     }
   }, [sections]);
 
@@ -204,6 +205,7 @@ export function StepEditorForm({
       } else {
         reset({});
       }
+      setIsAddingBlock(false);
     }
   }, [selectedSection, selectedBlock]);
 
@@ -273,6 +275,8 @@ export function StepEditorForm({
     setSelectedSection(addingBlockSection);
     setSelectedBlock(blockType.title);
     setIsAddingBlock(false);
+    setDialogSection("");
+    setAddingBlockSection("");
   };
 
   // Render the main panels of the editor
@@ -341,10 +345,12 @@ export function StepEditorForm({
               setIsAddingBlock(false);
             }}
             onAddBlock={(section) => {
-              setAddingBlockSection(section);
               setBlockTypes(getBlockTypes(section));
-              setSelectedSection(section);
+              setAddingBlockSection(section);
+              setDialogSection(section);
               setIsAddingBlock(true);
+              setSelectedSection(null);
+              setSelectedBlock(null);
             }}
             onUpdateBlockName={(section, blockId, newName) => {
               if (section === 'initialize') return;
