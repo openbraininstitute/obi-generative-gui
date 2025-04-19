@@ -327,8 +327,8 @@ export function StepEditorForm({
 
     const configPanels = [
       // Left Panel (Block List)
-      !hasSingleBlock && <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
-        {(
+      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
+        {!hasSingleBlock && (
           <BlockList
             sections={sections}
             blocks={blocks}
@@ -437,12 +437,12 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      !isAddingBlock && <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
+      <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
         <div className="h-full">
-          <ImageViewer 
+          {!isAddingBlock && <ImageViewer 
             src="/images/Microcircuits.png"
             alt="Microcircuits visualization"
-          />
+          />}
         </div>
       </ResizablePanel>
     ];
@@ -450,10 +450,7 @@ export function StepEditorForm({
     // Add handles between panels
     const panelsWithHandles = configPanels.reduce((acc, panel, index) => {
       if (index === configPanels.length - 1) return [...acc, panel];
-      if (panel !== false) {
-        return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
-      }
-      return acc;
+      return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
     // Reorder panels based on editorOnRight setting
