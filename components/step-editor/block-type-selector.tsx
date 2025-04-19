@@ -10,13 +10,13 @@ interface BlockTypeSelectorProps {
 
 export function BlockTypeSelector({ blockTypes, onSelect }: BlockTypeSelectorProps) {
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-[90%] flex flex-col overflow-hidden mt-4">
       <div className="flex-1 overflow-y-auto overscroll-contain px-6">
         <div className="divide-y">
           {blockTypes.map((blockType, index) => (
             <button
               key={index}
-              className="flex items-start gap-4 py-4 w-full hover:bg-muted/50 transition-colors text-left group"
+              className="flex items-start gap-4 py-4 w-full hover:bg-muted/50 transition-colors text-left group first:pt-4 last:pb-4"
               onClick={() => onSelect(blockType)}
             >
               <div className="flex-1">
