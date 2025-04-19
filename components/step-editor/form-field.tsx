@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PlusCircle, X } from "lucide-react";
 import { UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
@@ -107,7 +108,16 @@ export function FormField({
 
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{resolvedProperty.description || 'No description available'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <div className="w-[35%] space-y-1">
           {Array.from({ length: fieldCount }).map((_, index) => (
             <div key={`${name}-${index}`} className="flex gap-1">
@@ -232,7 +242,16 @@ export function FormField({
     
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{resolvedProperty.description || 'No description available'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <div className="w-[35%]">
           <Select 
             value={currentValue?.type ? `${currentValue.type}|${currentValue.name}` : undefined}
@@ -265,7 +284,16 @@ export function FormField({
   if (resolvedProperty.const) {
     return (
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-        <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{resolvedProperty.description || 'No description available'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <div className="w-[35%]">
           <Input 
             value={resolvedProperty.const} 
@@ -282,7 +310,16 @@ export function FormField({
     return (
       <div>
         <div className="px-3 py-1.5">
-          <Label className="text-sm font-medium text-muted-foreground">{name}</Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Label className="text-sm font-medium text-muted-foreground cursor-help">{name}</Label>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{resolvedProperty.description || 'No description available'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {Object.entries(resolvedProperty.properties).map(([propName, propSchema]) => (
           <FormField
@@ -308,7 +345,16 @@ export function FormField({
       if (resolvedProperty.enum) {
         return (
           <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-            <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{resolvedProperty.description || 'No description available'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div className="w-[35%]">
               <Select 
                 value={currentValue}
@@ -334,7 +380,16 @@ export function FormField({
       }
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{resolvedProperty.description || 'No description available'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="w-[35%]">
             <Input 
               value={currentValue || ''}
@@ -354,7 +409,16 @@ export function FormField({
     case 'integer':
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[35%]">{name}</Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Label className="text-sm text-muted-foreground w-[35%] cursor-help">{name}</Label>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{resolvedProperty.description || 'No description available'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="w-[65%]">
             <Input
               type="number"
@@ -379,7 +443,16 @@ export function FormField({
     case 'boolean':
       return (
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
-          <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{resolvedProperty.description || 'No description available'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="w-[35%]">
             <Checkbox
               id={name}

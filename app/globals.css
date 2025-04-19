@@ -80,6 +80,10 @@
     @apply bg-background text-foreground;
   }
   [title] {
+    position: relative;
+    cursor: help;
+  }
+  [title] {
     transition: none !important;
   }
 }
