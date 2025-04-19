@@ -327,7 +327,7 @@ export function StepEditorForm({
 
     const configPanels = [
       // Left Panel (Block List)
-      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
+      <ResizablePanel key="left" defaultSize={23.5} minSize={20} maxSize={30}>
         {!hasSingleBlock && (
           <BlockList
             sections={sections}
@@ -382,7 +382,7 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Center Panel (Form or Editor)
-      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={40}>
+      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={50}>
         {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
         ) : selectedSection && selectedBlock && (
@@ -437,7 +437,7 @@ export function StepEditorForm({
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
+      <ResizablePanel key="right" defaultSize={46.5} minSize={20}>
         <div className="h-full">
           <ImageViewer 
             src="/images/Microcircuits.png"
