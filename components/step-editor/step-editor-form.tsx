@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
 import { ImageViewer } from "./image-viewer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -388,12 +389,18 @@ export function StepEditorForm({
         ) : selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
             <div className="flex-none flex items-center px-6 py-4 relative group">
-              <div 
-                className="text-sm px-2 py-1 rounded-md border text-muted-foreground"
-                title={getBlockSchema()?.schema?.description || "No description"}
-              >
-                {selectedBlock}
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-help">
+                      {selectedBlock}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{getBlockSchema()?.description || "No description available"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <div className="flex-1 overflow-y-auto">
               <form>
