@@ -403,7 +403,7 @@ export function StepEditorForm({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-help">
+                    <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-pointer">
                       {selectedBlock}
                     </div>
                   </TooltipTrigger>

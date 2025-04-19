@@ -96,8 +96,8 @@ export function BlockList({
                 <div className="flex items-center justify-between px-3 mb-1">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-sm font-medium text-muted-foreground cursor-help">
+                      <TooltipTrigger asChild className="cursor-pointer">
+                        <span className="text-sm font-medium text-muted-foreground">
                           {sectionName.toUpperCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>
@@ -150,7 +150,7 @@ export function BlockList({
                         <div className="flex items-center min-w-0">
                           <button
                             className={cn(
-                              "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
+                              "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm cursor-pointer",
                               selectedSection === sectionName && selectedBlock === block.type
                                 ? "text-primary"
                                 : "text-muted-foreground"

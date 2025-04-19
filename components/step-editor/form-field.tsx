@@ -110,8 +110,8 @@ export function FormField({
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            <TooltipTrigger asChild className="cursor-pointer">
+              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -244,8 +244,8 @@ export function FormField({
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            <TooltipTrigger asChild className="cursor-pointer">
+              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -286,8 +286,8 @@ export function FormField({
       <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+            <TooltipTrigger asChild className="cursor-pointer">
+              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -312,8 +312,8 @@ export function FormField({
         <div className="px-3 py-1.5">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Label className="text-sm font-medium text-muted-foreground cursor-help">{name}</Label>
+              <TooltipTrigger asChild className="cursor-pointer">
+                <Label className="text-sm font-medium text-muted-foreground">{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
@@ -347,8 +347,8 @@ export function FormField({
           <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+                <TooltipTrigger asChild className="cursor-pointer">
+                  <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{resolvedProperty.description || 'No description available'}</p>
@@ -382,8 +382,8 @@ export function FormField({
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+              <TooltipTrigger asChild className="cursor-pointer">
+                <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
@@ -411,8 +411,8 @@ export function FormField({
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Label className="text-sm text-muted-foreground w-[35%] cursor-help">{name}</Label>
+              <TooltipTrigger asChild className="cursor-pointer">
+                <Label className="text-sm text-muted-foreground w-[35%]">{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
@@ -445,8 +445,8 @@ export function FormField({
         <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Label className="text-sm text-muted-foreground w-[65%] cursor-help">{name}</Label>
+              <TooltipTrigger asChild className="cursor-pointer">
+                <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
