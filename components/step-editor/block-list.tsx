@@ -3,6 +3,7 @@
 import { OpenAPIV3 } from "openapi-types";
 import { Button } from "@/components/ui/button";
 import { Edit2, PlusCircle, Check, X, Trash2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -22,6 +23,11 @@ interface BlockListProps {
   onUpdateBlockName: (section: string, blockId: string, newName: string) => void;
   onDeleteBlock: (section: string, blockId: string) => void;
   onGenerate: () => void;
+}
+
+function getSectionDescription(section: string, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string {
+  if ('$ref' in schema) return 'No description available';
+  return schema.description || 'No description available';
 }
 
 export function BlockList({
@@ -64,24 +70,42 @@ export function BlockList({
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="space-y-1 p-4">
-          <button
-            className={cn(
-              "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
-              selectedSection === 'initialize'
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
-            onClick={() => onSectionSelect('initialize', 'Initialize')}
-          >
-            Initialize
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className={cn(
+                    "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
+                    selectedSection === 'initialize'
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                  onClick={() => onSectionSelect('initialize', 'Initialize')}
+                >
+                  Initialize
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{getSectionDescription('initialize', sections.initialize)}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {Object.entries(sections).map(([sectionName]) => (
             sectionName !== 'initialize' && (
               <div key={sectionName} className="mt-4">
                 <div className="flex items-center justify-between px-3 mb-1">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {sectionName.toUpperCase().replace(/_/g, ' ')}
-                  </span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-sm font-medium text-muted-foreground cursor-help">
+                          {sectionName.toUpperCase().replace(/_/g, ' ')}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{getSectionDescription(sectionName, sections[sectionName])}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <Button
                     variant="ghost"
                     size="icon"
