@@ -332,64 +332,76 @@ export function StepEditorForm({
       // Left Panel (Block List) - Only shown when there are multiple blocks
       !hasSingleBlock ? (
         <ResizablePanel key="left" defaultSize={23.5} minSize={20} maxSize={30}>
-          <BlockList
-            sections={sections}
-            blocks={blocks}
-            selectedSection={selectedSection}
-            selectedBlock={selectedBlock}
-            onSectionSelect={(section, block) => {
-              setSelectedSection(section);
-              setSelectedBlock(block);
-              setIsAddingBlock(false);
-            }}
-            onAddBlock={(section) => {
-              setBlockTypes(getBlockTypes(section));
-              setAddingBlockSection(section);
-              setDialogSection(section);
-              setIsAddingBlock(true);
-              setSelectedSection(null);
-              setSelectedBlock(null);
-            }}
-            onUpdateBlockName={(section, blockId, newName) => {
-              if (section === 'initialize') return;
-              setBlocks(prev => ({
-                ...prev,
-                [section]: prev[section]?.map(block => 
-                  block.id === blockId 
-                    ? { ...block, displayName: newName }
-                    : block
-                ) || []
-              }));
-            }}
-            onDeleteBlock={(section, blockId) => {
-              if (section === 'initialize') return;
-              setBlocks(prev => ({
-                ...prev,
-                [section]: prev[section]?.filter(block => block.id !== blockId) || []
-              }));
-              const deletedBlock = blocks[section]?.find(block => block.id === blockId);
-              if (deletedBlock) {
-                const blockKey = `${section}-${deletedBlock.type}`;
-                setFormData(prev => {
-                  const newFormData = { ...prev };
-                  delete newFormData[blockKey];
-                  return newFormData;
-                });
-              }
-              if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
-                setSelectedSection('initialize');
-                setSelectedBlock('Initialize');
-              }
-            }}
-            onGenerate={handleSubmit(handleFormSubmit)}
-          />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              <BlockList
+                sections={sections}
+                blocks={blocks}
+                selectedSection={selectedSection}
+                selectedBlock={selectedBlock}
+                onSectionSelect={(section, block) => {
+                  setSelectedSection(section);
+                  setSelectedBlock(block);
+                  setIsAddingBlock(false);
+                }}
+                onAddBlock={(section) => {
+                  setBlockTypes(getBlockTypes(section));
+                  setAddingBlockSection(section);
+                  setDialogSection(section);
+                  setIsAddingBlock(true);
+                  setSelectedSection(null);
+                  setSelectedBlock(null);
+                }}
+                onUpdateBlockName={(section, blockId, newName) => {
+                  if (section === 'initialize') return;
+                  setBlocks(prev => ({
+                    ...prev,
+                    [section]: prev[section]?.map(block => 
+                      block.id === blockId 
+                        ? { ...block, displayName: newName }
+                        : block
+                    ) || []
+                  }));
+                }}
+                onDeleteBlock={(section, blockId) => {
+                  if (section === 'initialize') return;
+                  setBlocks(prev => ({
+                    ...prev,
+                    [section]: prev[section]?.filter(block => block.id !== blockId) || []
+                  }));
+                  const deletedBlock = blocks[section]?.find(block => block.id === blockId);
+                  if (deletedBlock) {
+                    const blockKey = `${section}-${deletedBlock.type}`;
+                    setFormData(prev => {
+                      const newFormData = { ...prev };
+                      delete newFormData[blockKey];
+                      return newFormData;
+                    });
+                  }
+                  if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
+                    setSelectedSection('initialize');
+                    setSelectedBlock('Initialize');
+                  }
+                }}
+              />
+              <div className="p-4 border-t">
+                <Button 
+                  onClick={handleSubmit(handleFormSubmit)}
+                  className="w-full"
+                  size="sm"
+                >
+                  Generate
+                </Button>
+              </div>
+            </div>
+          </div>
         </ResizablePanel>
       ) : null,
 
       // Center Panel (Form or Editor)
       <ResizablePanel 
         key="center" 
-        defaultSize={hasSingleBlock ? 40 : 30} 
+        defaultSize={hasSingleBlock ? 40 : 30}
         minSize={20} 
         maxSize={50}
       >
@@ -412,8 +424,8 @@ export function StepEditorForm({
               </TooltipProvider>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <form>
-                <div className="divide-y">
+              <form className="h-full flex flex-col">
+                <div className="flex-1 divide-y">
                   {(() => {
                     const blockSchema = getBlockSchema();
                     if (!blockSchema?.schema?.properties) return null;
@@ -436,15 +448,15 @@ export function StepEditorForm({
                   })()}
                 </div>
                 {hasSingleBlock && (
-                  <div className="p-4 border-t">
-                    <Button 
-                      onClick={handleSubmit(handleFormSubmit)}
-                      className="w-full"
-                      size="sm"
-                    >
-                      Generate
-                    </Button>
-                  </div>
+                <div className="flex-none p-4 border-t">
+                  <Button 
+                    onClick={handleSubmit(handleFormSubmit)}
+                    className="w-full"
+                    size="sm"
+                  >
+                    Generate
+                  </Button>
+                </div>
                 )}
               </form>
             </div>
@@ -455,8 +467,8 @@ export function StepEditorForm({
       // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel 
         key="right" 
-        defaultSize={hasSingleBlock ? 60 : 46.5} 
-        minSize={20}
+        defaultSize={hasSingleBlock ? 60 : 46.5}
+        minSize={30}
       >
         <div className="h-full">
           <ImageViewer 
