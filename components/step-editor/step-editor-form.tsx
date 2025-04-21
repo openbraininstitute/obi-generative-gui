@@ -41,7 +41,6 @@ interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;           // OpenAPI schema for form generation
   spec: OpenAPIV3.Document;                 // Complete OpenAPI specification
   onSubmit: (data: any) => void;           // Callback for form submission
-  editorOnRight: boolean;                   // Layout control for editor position
   selectedTab: string;                      // Current active tab
   description: string;                      // LaTeX description content
   onDescriptionChange: (value: string) => void;  // Handler for description updates
@@ -55,7 +54,6 @@ export function StepEditorForm({
   schema, 
   spec, 
   onSubmit,
-  editorOnRight,
   selectedTab,
   description,
   onDescriptionChange,
@@ -478,17 +476,6 @@ export function StepEditorForm({
         ? [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />]
         : [...acc, panel];
     }, [] as React.ReactNode[]);
-
-    // Reorder panels based on editorOnRight setting
-    if (editorOnRight) {
-      if (hasSingleBlock) {
-        const [center, handle, right] = panelsWithHandles.filter(Boolean);
-        return right ? [right, handle, center] : [center];
-      } else {
-        const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
-        return [left, leftHandle, right, rightHandle, center];
-      }
-    }
 
     return hasSingleBlock
       ? panelsWithHandles.filter(Boolean)

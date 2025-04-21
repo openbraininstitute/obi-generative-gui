@@ -48,7 +48,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   const [selectedTask, setSelectedTask] = useState<string>("");
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
-  const [editorOnRight, setEditorOnRight] = useState(false);
   const [selectedTab, setSelectedTab] = useState("configure");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
@@ -250,17 +249,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
           </div>
 
           <div className="flex items-center gap-4">
-            {selectedTab !== "description" && !isAddingBlock && (
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4" />
-                <Switch
-                  checked={editorOnRight}
-                  onCheckedChange={setEditorOnRight}
-                  size="sm"
-                />
-              </div>
-            )}
-
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="configure" className="flex items-center gap-2">
@@ -344,7 +332,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
               schema={schema} 
               spec={spec} 
               onSubmit={handleSubmit}
-              editorOnRight={editorOnRight}
               selectedTab={selectedTab}
               description={files['Method.tex']}
               onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
