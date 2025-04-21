@@ -195,7 +195,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
       <div className="px-6 py-4 border-b flex items-center">
         {!selectedPath ? (
           <div className="flex items-center gap-3">
-            <Label>Lab:</Label>
             <div className="w-[240px]">
               <Select
                 value={selectedPath}
@@ -219,11 +218,9 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                 </SelectContent>
               </Select>
             </div>
-            <p className="text-sm text-muted-foreground ml-2">Select a lab to start configuring parameters</p>
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <Label>Lab:</Label>
             <div className="w-[240px]">
               <Select value={selectedPath} onValueChange={(path) => {
                 setSelectedPath(path);
