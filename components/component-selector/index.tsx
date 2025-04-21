@@ -66,7 +66,7 @@ export function ComponentSelector({
   };
 
   return (
-    <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mb-6 mx-8", className)}>
+    <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mx-8", className)}>
       {/* Selected Components Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">

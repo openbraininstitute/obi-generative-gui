@@ -67,14 +67,14 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         <div className="flex-1 p-6 pb-8 overflow-hidden">
           <div className="h-full flex flex-col">
             <ProjectWorkspace onStepSelect={setSelectedStep} />
-            {selectedStep && (
+            {selectedStep && <div className="mt-6">
               <ComponentSelector
                 API_URL={config.API_URL}
                 selectedComponents={selectedComponents} 
                 onComponentSelect={(path) => setSelectedComponents(prev => [...prev, path])}
                 onComponentRemove={(path) => setSelectedComponents(prev => prev.filter(p => p !== path))}
               />
-            )}
+            </div>}
             {selectedStep && (
               <div className="px-8 mt-6 flex-1 overflow-hidden">
                 <StepEditor 
