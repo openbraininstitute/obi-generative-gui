@@ -51,15 +51,15 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]")}>
             <div className={cn("absolute inset-0 p-6 pb-8 transition-all duration-300",
-              isAIAgentCollapsed ? "opacity-0" : "opacity-100")}>
+              isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
                 <AIAgent />
               </div>
             </div>
             <ChevronLeft 
               className={cn(
-                "absolute top-1/2 transform -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200",
-                isAIAgentCollapsed ? "-right-10 rotate-180" : "-right-3"
+                "absolute top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200 z-50",
+                isAIAgentCollapsed ? "-right-8 rotate-180" : "-right-3"
               )}
               onClick={() => setIsAIAgentCollapsed(!isAIAgentCollapsed)}
             />
@@ -112,15 +112,15 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]")}>
             <div className={cn("absolute inset-0 p-6 pb-8 transition-all duration-300",
-              isAIAgentCollapsed ? "opacity-0" : "opacity-100")}>
+              isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
                 <AIAgent />
               </div>
             </div>
             <ChevronLeft 
               className={cn(
-                "absolute top-1/2 transform -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200",
-                isAIAgentCollapsed ? "-left-10" : "-left-3",
+                "absolute top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200 z-50",
+                isAIAgentCollapsed ? "-left-8" : "-left-3",
                 "rotate-180"
               )}
               onClick={() => setIsAIAgentCollapsed(!isAIAgentCollapsed)}
