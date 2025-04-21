@@ -75,7 +75,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 onComponentRemove={(path) => setSelectedComponents(prev => prev.filter(p => p !== path))}
               />
             </div>}
-            {selectedStep && (
+            {selectedStep && selectedComponents.length > 0 && (
               <div className="px-8 mt-6 flex-1 overflow-hidden">
                 <StepEditor 
                   API_URL={config.API_URL}
