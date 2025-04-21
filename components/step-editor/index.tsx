@@ -217,27 +217,25 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
         ) : (
           <>
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               onClick={() => setShowLabSelector(true)}
             >
-              <Plus className="h-4 w-4" />
+              Add component +
             </Button>
           </>
         )}
       </div>
 
       {showLabSelector && !selectedPath && (
-        <div className="flex-1 px-6 py-4">
+        <div className="flex-1 px-6 py-4 overflow-auto">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lab</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Contributor</TableHead>
-              </TableRow>
-            </TableHeader>
             <TableBody>
+              <TableRow>
+                <TableCell className="font-bold">Lab</TableCell>
+                <TableCell className="font-bold">Description</TableCell>
+                <TableCell className="font-bold">Contributor</TableCell>
+              </TableRow>
               {availableEndpoints.map((path) => (
                 <TableRow
                   key={path}
