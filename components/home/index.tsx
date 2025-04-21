@@ -69,11 +69,10 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <ProjectWorkspace onStepSelect={setSelectedStep} />
             {selectedStep && (
               <ComponentSelector
-                selectedComponents={selectedComponents}
-                availableEndpoints={[]}
+                API_URL={config.API_URL}
+                selectedComponents={selectedComponents} 
                 onComponentSelect={(path) => setSelectedComponents(prev => [...prev, path])}
                 onComponentRemove={(path) => setSelectedComponents(prev => prev.filter(p => p !== path))}
-                spec={null}
               />
             )}
             {selectedStep && (

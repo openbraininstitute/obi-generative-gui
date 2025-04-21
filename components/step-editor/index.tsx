@@ -38,7 +38,7 @@ export function StepEditor({
   const [selectedTask, setSelectedTask] = useState<string>("1");
   const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
-  const [selectedMethod, setSelectedMethod] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState("POST");
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,6 +49,13 @@ export function StepEditor({
   const [addingBlockSection, setAddingBlockSection] = useState<string>("");
   const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
   const [files, setFiles] = useState<Record<string, string>>(latexExamples);
+
+  const handleAddVersion = () => {
+    const nextVersion = tasks.length + 1;
+    const newTask = { id: nextVersion.toString(), name: nextVersion.toString() };
+    setTasks(prev => [...prev, newTask]);
+    setSelectedTask(newTask.id);
+  };
 
   useEffect(() => {
     loadSpec();
@@ -285,6 +292,7 @@ export function StepEditor({
                 <StepEditorForm 
                   schema={schema} 
                   spec={spec} 
+                  selectedMethod={selectedMethod}
                   onSubmit={handleSubmit}
                   selectedTab={selectedTab}
                   description={files['Method.tex']}
@@ -294,6 +302,7 @@ export function StepEditor({
                   onFileSelect={setSelectedFile}
                   onFileChange={handleFileChange}
                   isAddingBlock={isAddingBlock}
+                  activeComponent={selectedComponents[0]}
                 />
               )
             )}

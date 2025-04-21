@@ -1,30 +1,62 @@
 "use client";
 
-import { X, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface ComponentSelectorProps {
   selectedComponents: string[];
-  availableEndpoints: string[];
   onComponentSelect: (path: string) => void;
   onComponentRemove: (path: string) => void;
-  spec: any;
+  API_URL: string;
 }
 
 export function ComponentSelector({
   selectedComponents,
-  availableEndpoints,
   onComponentSelect,
   onComponentRemove,
-  spec
+  API_URL
 }: ComponentSelectorProps) {
+  const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchAvailableEndpoints();
+  }, []);
+
+  const fetchAvailableEndpoints = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${API_URL}/forms`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch available endpoints');
+      }
+      const data = await response.json();
+      
+      if (data && Array.isArray(data.forms)) {
+        const formattedEndpoints = data.forms.map((endpoint: string) => `/${endpoint}`);
+        setAvailableEndpoints(formattedEndpoints);
+      } else {
+        setError('Invalid response format from /forms endpoint');
+        setAvailableEndpoints([]);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
+      setAvailableEndpoints([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getEndpointDisplayName = (path: string) => {
     return path
       .slice(1)
-      .replace(/form$/, '')
+      .replace(/Form$/, '')
       .split(/(?=[A-Z])/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
@@ -32,6 +64,7 @@ export function ComponentSelector({
 
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mb-6">
+      {/* Selected Components Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           {selectedComponents.map((path) => (
@@ -52,30 +85,50 @@ export function ComponentSelector({
           >
             Add component +
           </Button>
+          {error && (
+            <Alert variant="destructive" className="ml-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
         </div>
       </div>
+
+      {/* Components Table */}
       {selectedComponents.length === 0 && (
         <div className="p-6">
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-bold">Component</TableCell>
-                <TableCell className="font-bold">Description</TableCell>
-                <TableCell className="font-bold">Contributor</TableCell>
-              </TableRow>
-              {availableEndpoints.map((path) => (
-                <TableRow
-                  key={path}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onComponentSelect(path)}
-                >
-                  <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
-                  <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
-                  <TableCell>Open Brain Institute</TableCell>
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading available components...
+            </div>
+          ) : (
+            <Table>
+              <TableBody className="divide-y">
+                <TableRow>
+                  <TableCell className="font-bold">Component</TableCell>
+                  <TableCell className="font-bold">Description</TableCell>
+                  <TableCell className="font-bold">Contributor</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
+                  <TableRow
+                    key={path}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => onComponentSelect(path)}
+                  >
+                    <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
+                    <TableCell>Form component for {getEndpointDisplayName(path).toLowerCase()}</TableCell>
+                    <TableCell>Open Brain Institute</TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                      No components available. Please check your connection to the API server.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       )}
     </div>

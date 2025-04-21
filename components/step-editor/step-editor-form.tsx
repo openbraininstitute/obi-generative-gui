@@ -40,6 +40,7 @@ interface BlockData {
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;           // OpenAPI schema for form generation
   spec: OpenAPIV3.Document;                 // Complete OpenAPI specification
+  selectedMethod: string;                   // Selected HTTP method
   onSubmit: (data: any) => void;           // Callback for form submission
   selectedTab: string;                      // Current active tab
   description: string;                      // LaTeX description content
@@ -54,6 +55,7 @@ interface StepEditorFormProps {
 export function StepEditorForm({ 
   schema, 
   spec, 
+  selectedMethod,
   onSubmit,
   selectedTab,
   description,
