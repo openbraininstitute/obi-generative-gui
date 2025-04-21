@@ -232,7 +232,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell className="font-bold">Lab</TableCell>
+                <TableCell className="font-bold">Component</TableCell>
                 <TableCell className="font-bold">Description</TableCell>
                 <TableCell className="font-bold">Contributor</TableCell>
               </TableRow>
