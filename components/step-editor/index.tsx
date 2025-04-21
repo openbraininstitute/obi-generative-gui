@@ -234,6 +234,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
               <TableRow>
                 <TableHead>Lab</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>Contributor</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -252,6 +253,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                 >
                   <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
                   <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
+                  <TableCell>Open Brain Institute</TableCell>
                 </TableRow>
               ))}
             </TableBody>
