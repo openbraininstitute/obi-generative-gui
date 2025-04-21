@@ -253,17 +253,15 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
           <div className="px-6 py-4 border-b">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-[240px]">
+                <Label className="text-sm font-medium">Version</Label>
+                <div className="w-[80px]">
                   <Select
                     defaultValue="1"
                     value={selectedTask}
                     onValueChange={setSelectedTask}
                   >
                     <SelectTrigger>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">V</span>
-                        <SelectValue />
-                      </div>
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {tasks.map((task) => (
