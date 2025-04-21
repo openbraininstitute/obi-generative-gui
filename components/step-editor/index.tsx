@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, Plus, Settings, FileText, Check } from "lucide-react";
+import { AlertCircle, Plus, Settings, FileText, Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,7 +35,7 @@ interface BlockType {
 
 export function StepEditor({ API_URL }: { API_URL: string }) {
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
-  const [selectedPath, setSelectedPath] = useState("");
+  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [selectedMethod, setSelectedMethod] = useState("");
   const [response, setResponse] = useState<any>(null);
   const [showLabSelector, setShowLabSelector] = useState(false);
@@ -111,7 +111,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
     setError(null);
     
     try {
-      const result = await callEndpoint(API_URL, selectedMethod, selectedPath, data);
+      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0], data);
       setResponse(result);
       
       if (!result.ok) {
@@ -176,12 +176,12 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
     setIsAddingBlock(true);
   };
 
-  const selectedOperation = spec && selectedPath && selectedMethod
-    ? (spec.paths[selectedPath]?.[selectedMethod.toLowerCase()] as OpenAPIV3.OperationObject)
+  const selectedOperation = spec && selectedComponents[0] && selectedMethod
+    ? (spec.paths[selectedComponents[0]]?.[selectedMethod.toLowerCase()] as OpenAPIV3.OperationObject)
     : null;
 
-  const schema = spec && selectedPath && selectedMethod
-    ? getSchemaFromPath(spec, selectedPath, selectedMethod)
+  const schema = spec && selectedComponents[0] && selectedMethod
+    ? getSchemaFromPath(spec, selectedComponents[0], selectedMethod)
     : null;
 
   if (loading && !spec) {
@@ -195,39 +195,36 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       <div className="px-6 py-4 border-b flex items-center justify-between">
-        {selectedPath ? (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{getEndpointDisplayName(selectedPath)}</span>
-            </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {selectedComponents.map((path) => (
             <Button
-              variant="ghost"
+              key={path}
+              variant="secondary"
               size="sm"
+              className="flex items-center gap-2"
               onClick={() => {
-                setSelectedPath("");
-                setSelectedMethod("");
-                setResponse(null);
-                setError(null);
-                setShowLabSelector(false);
+                setSelectedComponents(prev => prev.filter(p => p !== path));
+                if (selectedComponents.length === 1) {
+                  setResponse(null);
+                  setError(null);
+                }
               }}
             >
-              Change Lab
+              {getEndpointDisplayName(path)}
+              <X className="h-4 w-4" />
             </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLabSelector(true)}
-            >
-              Add component +
-            </Button>
-          </>
-        )}
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowLabSelector(true)}
+          >
+            Add component +
+          </Button>
+        </div>
       </div>
 
-      {showLabSelector && !selectedPath && (
+      {showLabSelector && (
         <div className="flex-1 px-6 py-4 overflow-auto">
           <Table>
             <TableBody>
@@ -241,7 +238,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                   key={path}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => {
-                    setSelectedPath(path);
+                    setSelectedComponents(prev => [...prev, path]);
                     setSelectedMethod('post');
                     setResponse(null);
                     setError(null);
@@ -259,7 +256,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
         </div>
       )}
 
-      {selectedPath && (
+      {selectedComponents.length > 0 && (
         <>
           <div className="px-6 py-4 border-b">
             <div className="flex items-center gap-6">
