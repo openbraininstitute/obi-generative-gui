@@ -282,12 +282,12 @@ export function StepEditorForm({
     if (selectedTab === "description") {
       return [
         // Left Panel (File List)
-        <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={23.5}>
+        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={25}>
           {renderFileList()}
         </ResizablePanel>,
         <ResizableHandle key="handle-1" withHandle className="bg-border" />,
         // Center Panel (Editor)
-        <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={40}>
+        <ResizablePanel key="center" defaultSize={40} minSize={30} maxSize={50}>
           <div className="h-full p-4 bg-background">
             {selectedFile ? (
               <CodeEditor
@@ -314,7 +314,7 @@ export function StepEditorForm({
         </ResizablePanel>,
         <ResizableHandle key="handle-2" withHandle className="bg-border" />,
         // Right Panel (LaTeX Preview)
-        <ResizablePanel key="right" defaultSize={46.5} minSize={30}>
+        <ResizablePanel key="right" defaultSize={40} minSize={30} maxSize={50}>
           <div className="h-full">
             {selectedFile ? (
               <LatexPreview content={files[selectedFile] || ''} className="h-full" />
@@ -331,7 +331,7 @@ export function StepEditorForm({
     const configPanels = [
       // Left Panel (Block List) - Only shown when there are multiple blocks
       !hasSingleBlock ? (
-        <ResizablePanel key="left" defaultSize={23.5} minSize={20} maxSize={30}>
+        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={30}>
           <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto">
               <BlockList
@@ -387,7 +387,7 @@ export function StepEditorForm({
               <div className="p-4 border-t">
                 <Button 
                   onClick={handleSubmit(handleFormSubmit)}
-                  className="w-full"
+                  className="block"
                   size="sm"
                 >
                   Generate
@@ -401,8 +401,8 @@ export function StepEditorForm({
       // Center Panel (Form or Editor)
       <ResizablePanel 
         key="center" 
-        defaultSize={hasSingleBlock ? 40 : 30}
-        minSize={20} 
+        defaultSize={hasSingleBlock ? 40 : 35}
+        minSize={30}
         maxSize={50}
       >
         {isAddingBlock ? (
@@ -451,7 +451,7 @@ export function StepEditorForm({
                 <div className="flex-none p-4 border-t">
                   <Button 
                     onClick={handleSubmit(handleFormSubmit)}
-                    className="w-full"
+                    className="block"
                     size="sm"
                   >
                     Generate
@@ -467,8 +467,9 @@ export function StepEditorForm({
       // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel 
         key="right" 
-        defaultSize={hasSingleBlock ? 60 : 46.5}
+        defaultSize={hasSingleBlock ? 60 : 45} 
         minSize={30}
+        maxSize={50}
       >
         <div className="h-full">
           <ImageViewer 
@@ -482,21 +483,21 @@ export function StepEditorForm({
     // Add handles between panels
     const panelsWithHandles = configPanels.reduce((acc, panel, index) => {
       if (!panel) return acc;
-      if (index === configPanels.length - 1) return [...acc, panel];
-      const nextPanel = configPanels.slice(index + 1).find(Boolean);
-      return nextPanel 
-        ? [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />]
-        : [...acc, panel];
+      return index === configPanels.length - 1 
+        ? [...acc, panel]
+        : [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
-    return hasSingleBlock
-      ? panelsWithHandles.filter(Boolean)
-      : panelsWithHandles;
+    return panelsWithHandles.filter(Boolean);
   }
 
   return (
     <div className="h-full overflow-hidden">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
+      <ResizablePanelGroup
+        autoSaveId="step-editor-layout"
+        direction="horizontal"
+        className="h-full"
+      >
         {renderPanels()?.filter(Boolean)}
       </ResizablePanelGroup>
     </div>

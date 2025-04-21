@@ -255,8 +255,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                   <Settings className="h-4 w-4" />
                   Configure
                 </TabsTrigger>
-                <TabsTrigger value="artifacts" className="flex items-center gap-2">
-                  <FileBox className="h-4 w-4" />
+                <TabsTrigger value="artifacts">
                   Artifacts
                 </TabsTrigger>
                 <TabsTrigger value="description" className="flex items-center gap-2">
