@@ -38,7 +38,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [response, setResponse] = useState<any>(null);
-  const [isLabDialogOpen, setIsLabDialogOpen] = useState(false);
+  const [showLabSelector, setShowLabSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
@@ -194,203 +194,223 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
 
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
-      <div className="px-6 py-4 border-b flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground"
-          onClick={() => setIsLabDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4" />
-          {selectedPath && <span className="ml-2">{getEndpointDisplayName(selectedPath)}</span>}
-        </Button>
-      </div>
-
-      {selectedPath && <div className="px-6 py-4 border-b">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-[240px]">
-              <Select
-                value={selectedTask}
-                onValueChange={setSelectedTask}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select task" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tasks.map((task) => (
-                    <SelectItem key={task.id} value={task.id}>
-                      {task.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <div className="px-6 py-4 border-b flex items-center justify-between">
+        {selectedPath ? (
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">{getEndpointDisplayName(selectedPath)}</span>
             </div>
             <Button
               variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedPath("");
+                setSelectedMethod("");
+                setResponse(null);
+                setError(null);
+                setShowLabSelector(false);
+              }}
+            >
+              Change Lab
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
               size="icon"
-              onClick={() => setIsNewTaskDialogOpen(true)}
+              onClick={() => setShowLabSelector(true)}
             >
               <Plus className="h-4 w-4" />
             </Button>
-          </div>
-
-          <div className="flex-1 flex justify-end">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="configure" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Configure
-                </TabsTrigger>
-                <TabsTrigger value="artifacts">
-                  Artifacts
-                </TabsTrigger>
-                <TabsTrigger value="description" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Description
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-      </div>}
-
-      {error && (
-        <div className="px-6 py-4 border-b">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-hidden">
-        {isAddingBlock ? (
-          <div className="grid grid-cols-[23.5%_auto] h-full">
-            <div className="border-r">
-              <BlockList
-                sections={sections}
-                blocks={blocks}
-                selectedSection={selectedSection}
-                selectedBlock={selectedBlock}
-                onSectionSelect={(section, block) => {
-                  setSelectedSection(section);
-                  setSelectedBlock(block);
-                }}
-                onAddBlock={handleAddBlock}
-                onUpdateBlockName={handleUpdateBlockName}
-                onDeleteBlock={handleDeleteBlock}
-                onGenerate={handleSubmit(handleFormSubmit)}
-              />
-            </div>
-            <div className="p-6">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold">Select Block Type</h2>
-                <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
-              </div>
-              <div className="grid gap-4">
-                {blockTypes.map((blockType, index) => (
-                  <button
-                    key={index}
-                    className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
-                    onClick={() => {
-                      setIsAddingBlock(false);
-                      // Add your block creation logic here
-                    }}
-                  >
-                    <div className="flex-1">
-                      <h3 className="font-medium">{blockType.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{blockType.description}</p>
-                    </div>
-                    <div className="flex-none">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-primary" />
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          spec && selectedOperation && schema && (
-            <StepEditorForm 
-              schema={schema} 
-              spec={spec} 
-              onSubmit={handleSubmit}
-              selectedTab={selectedTab}
-              description={files['Method.tex']}
-              onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
-              selectedFile={selectedFile}
-              files={files}
-              onFileSelect={setSelectedFile}
-              onFileChange={handleFileChange}
-              isAddingBlock={isAddingBlock}
-            />
-          )
+          </>
         )}
       </div>
 
-      <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Task</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              placeholder="Enter task name"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateTask}>
-              Create
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    
-      <Dialog open={isLabDialogOpen} onOpenChange={setIsLabDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Select Lab</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Lab</TableHead>
-                  <TableHead>Description</TableHead>
+      {showLabSelector && !selectedPath && (
+        <div className="flex-1 px-6 py-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lab</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {availableEndpoints.map((path) => (
+                <TableRow
+                  key={path}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => {
+                    setSelectedPath(path);
+                    setSelectedMethod('post');
+                    setResponse(null);
+                    setError(null);
+                    setShowLabSelector(false);
+                    setIsAddingBlock(false);
+                  }}
+                >
+                  <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
+                  <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {availableEndpoints.map((path) => (
-                  <TableRow
-                    key={path}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => {
-                      setSelectedPath(path);
-                      setSelectedMethod('post');
-                      setResponse(null);
-                      setError(null);
-                      setIsAddingBlock(false);
-                      setIsLabDialogOpen(false);
-                    }}
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {selectedPath && (
+        <>
+          <div className="px-6 py-4 border-b">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-[240px]">
+                  <Select
+                    value={selectedTask}
+                    onValueChange={setSelectedTask}
                   >
-                    <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
-                    <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select task" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tasks.map((task) => (
+                        <SelectItem key={task.id} value={task.id}>
+                          {task.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsNewTaskDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex-1 flex justify-end">
+                <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="configure" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Configure
+                    </TabsTrigger>
+                    <TabsTrigger value="artifacts">
+                      Artifacts
+                    </TabsTrigger>
+                    <TabsTrigger value="description" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Description
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {error && (
+            <div className="px-6 py-4 border-b">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          <div className="flex-1 overflow-hidden">
+            {isAddingBlock ? (
+              <div className="grid grid-cols-[23.5%_auto] h-full">
+                <div className="border-r">
+                  <BlockList
+                    sections={sections}
+                    blocks={blocks}
+                    selectedSection={selectedSection}
+                    selectedBlock={selectedBlock}
+                    onSectionSelect={(section, block) => {
+                      setSelectedSection(section);
+                      setSelectedBlock(block);
+                    }}
+                    onAddBlock={handleAddBlock}
+                    onUpdateBlockName={handleUpdateBlockName}
+                    onDeleteBlock={handleDeleteBlock}
+                    onGenerate={handleSubmit(handleFormSubmit)}
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h2 className="text-lg font-semibold">Select Block Type</h2>
+                    <p className="text-sm text-muted-foreground">Choose a block type to add to your workflow</p>
+                  </div>
+                  <div className="grid gap-4">
+                    {blockTypes.map((blockType, index) => (
+                      <button
+                        key={index}
+                        className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+                        onClick={() => {
+                          setIsAddingBlock(false);
+                          // Add your block creation logic here
+                        }}
+                      >
+                        <div className="flex-1">
+                          <h3 className="font-medium">{blockType.title}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">{blockType.description}</p>
+                        </div>
+                        <div className="flex-none">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Check className="w-4 h-4 text-primary" />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              spec && selectedOperation && schema && (
+                <StepEditorForm 
+                  schema={schema} 
+                  spec={spec} 
+                  onSubmit={handleSubmit}
+                  selectedTab={selectedTab}
+                  description={files['Method.tex']}
+                  onDescriptionChange={(content) => handleFileChange('Method.tex', content)}
+                  selectedFile={selectedFile}
+                  files={files}
+                  onFileSelect={setSelectedFile}
+                  onFileChange={handleFileChange}
+                  isAddingBlock={isAddingBlock}
+                />
+              )
+            )}
+          </div>
+
+          <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Task</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <Input
+                  placeholder="Enter task name"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateTask}>
+                  Create
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }
