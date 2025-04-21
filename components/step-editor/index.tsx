@@ -23,29 +23,26 @@ const CodeEditor = dynamic(
   { ssr: false }
 );
 
-interface Task {
-  id: string;
-  name: string;
-}
-
 interface BlockType {
   title: string;
   description: string;
 }
 
-export function StepEditor({ API_URL }: { API_URL: string }) {
+export function StepEditor({ 
+  API_URL,
+  selectedComponents 
+}: { 
+  API_URL: string;
+  selectedComponents: string[];
+}) {
+  const [selectedTask, setSelectedTask] = useState<string>("1");
+  const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
-  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [selectedMethod, setSelectedMethod] = useState("");
   const [response, setResponse] = useState<any>(null);
-  const [showLabSelector, setShowLabSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', name: '1' }
-  ]);
-  const [selectedTask, setSelectedTask] = useState<string>("1");
   const [selectedTab, setSelectedTab] = useState("configure");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
@@ -120,16 +117,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
     }
   };
 
-  const handleAddVersion = () => {
-    const newTask: Task = {
-      id: String(tasks.length + 1),
-      name: String(tasks.length + 1)
-    };
-
-    setTasks(prev => [...prev, newTask]);
-    setSelectedTask(newTask.id);
-  };
-
   const handleFileChange = (file: string, content: string) => {
     setFiles(prev => ({
       ...prev,
@@ -186,77 +173,14 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
 
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
-      <div className="px-6 py-4 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2 flex-wrap">
-          {selectedComponents.map((path) => (
-            <Button
-              key={path}
-              variant="secondary"
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={() => {
-                setSelectedComponents(prev => prev.filter(p => p !== path));
-                if (selectedComponents.length === 1) {
-                  setResponse(null);
-                  setError(null);
-                }
-              }}
-            >
-              {getEndpointDisplayName(path)}
-              <X className="h-4 w-4" />
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowLabSelector(true)}
-          >
-            Add component +
-          </Button>
-        </div>
-      </div>
-
-      {showLabSelector && (
-        <div className="flex-1 px-6 py-4 overflow-auto">
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-bold">Component</TableCell>
-                <TableCell className="font-bold">Description</TableCell>
-                <TableCell className="font-bold">Contributor</TableCell>
-              </TableRow>
-              {availableEndpoints.map((path) => (
-                <TableRow
-                  key={path}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => {
-                    setSelectedComponents(prev => [...prev, path]);
-                    setSelectedMethod('post');
-                    setResponse(null);
-                    setError(null);
-                    setShowLabSelector(false);
-                    setIsAddingBlock(false);
-                  }}
-                >
-                  <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
-                  <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
-                  <TableCell>Open Brain Institute</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
       {selectedComponents.length > 0 && (
         <>
           <div className="px-6 py-4 border-b">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Label className="text-sm font-medium">Version</Label>
                 <div className="w-[80px]">
                   <Select
-                    defaultValue="1"
                     value={selectedTask}
                     onValueChange={setSelectedTask}
                   >
@@ -281,24 +205,21 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-
-              <div className="flex-1 flex justify-end">
-                <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="configure" className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      Configure
-                    </TabsTrigger>
-                    <TabsTrigger value="artifacts">
-                      Artifacts
-                    </TabsTrigger>
-                    <TabsTrigger value="description" className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Description
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="configure" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configure
+                  </TabsTrigger>
+                  <TabsTrigger value="artifacts">
+                    Artifacts
+                  </TabsTrigger>
+                  <TabsTrigger value="description" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Description
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 

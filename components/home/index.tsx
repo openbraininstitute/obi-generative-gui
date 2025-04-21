@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutTemplate, ChevronLeft, ArrowLeftRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ProjectWorkspace } from "@/components/project-workspace";
+import { ComponentSelector } from "@/components/component-selector";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicRuntimeConfig } from "@/lib/config.server";
 
 export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
+  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
 
@@ -67,8 +68,20 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           <div className="h-full flex flex-col">
             <ProjectWorkspace onStepSelect={setSelectedStep} />
             {selectedStep && (
+              <ComponentSelector
+                selectedComponents={selectedComponents}
+                availableEndpoints={[]}
+                onComponentSelect={(path) => setSelectedComponents(prev => [...prev, path])}
+                onComponentRemove={(path) => setSelectedComponents(prev => prev.filter(p => p !== path))}
+                spec={null}
+              />
+            )}
+            {selectedStep && (
               <div className="px-8 mt-6 flex-1 overflow-hidden">
-                <StepEditor API_URL={config.API_URL}/>
+                <StepEditor 
+                  API_URL={config.API_URL}
+                  selectedComponents={selectedComponents}
+                />
               </div>
             )}
           </div>
