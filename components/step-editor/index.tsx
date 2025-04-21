@@ -192,8 +192,8 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
 
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
-      <div className="px-6 py-4 border-b">
-        <div className="flex items-center gap-6">
+      <div className="px-6 py-4 border-b flex items-center">
+        {!selectedPath ? (
           <div className="flex items-center gap-3">
             <Label>Lab:</Label>
             <div className="w-[240px]">
@@ -219,8 +219,37 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                 </SelectContent>
               </Select>
             </div>
+            <p className="text-sm text-muted-foreground ml-2">Select a lab to start configuring parameters</p>
           </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Label>Lab:</Label>
+            <div className="w-[240px]">
+              <Select value={selectedPath} onValueChange={(path) => {
+                setSelectedPath(path);
+                setSelectedMethod('post');
+                setResponse(null);
+                setError(null);
+                setIsAddingBlock(false);
+              }}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableEndpoints.map((path) => (
+                    <SelectItem key={path} value={path}>
+                      {getEndpointDisplayName(path)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+      </div>
 
+      <div className="px-6 py-4 border-b">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <div className="w-[240px]">
               <Select
@@ -269,7 +298,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
       </div>
 
       {error && (
-        <div className="px-6 py-4">
+        <div className="px-6 py-4 border-b">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
@@ -277,7 +306,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
         </div>
       )}
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         {isAddingBlock ? (
           <div className="grid grid-cols-[23.5%_auto] h-full">
             <div className="border-r">
