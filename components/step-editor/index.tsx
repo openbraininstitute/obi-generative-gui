@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
-import { AlertCircle, Plus, LayoutTemplate, Settings, FileBox, FileText, Check } from "lucide-react";
+import { AlertCircle, Plus, Settings, FileText, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [response, setResponse] = useState<any>(null);
+  const [isLabDialogOpen, setIsLabDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
@@ -193,31 +195,15 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   return (
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       <div className="px-6 py-4 border-b flex items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-[240px]">
-            <Select
-              value={selectedPath}
-              onValueChange={(path) => {
-                setSelectedPath(path);
-                setSelectedMethod('post');
-                setResponse(null);
-                setError(null);
-                setIsAddingBlock(false);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select lab" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableEndpoints.map((path) => (
-                  <SelectItem key={path} value={path}>
-                    {getEndpointDisplayName(path)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground"
+          onClick={() => setIsLabDialogOpen(true)}
+        >
+          <Plus className="h-4 w-4" />
+          {selectedPath && <span className="ml-2">{getEndpointDisplayName(selectedPath)}</span>}
+        </Button>
       </div>
 
       {selectedPath && <div className="px-6 py-4 border-b">
@@ -366,6 +352,43 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
               Create
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    
+      <Dialog open={isLabDialogOpen} onOpenChange={setIsLabDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Select Lab</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lab</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {availableEndpoints.map((path) => (
+                  <TableRow
+                    key={path}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => {
+                      setSelectedPath(path);
+                      setSelectedMethod('post');
+                      setResponse(null);
+                      setError(null);
+                      setIsAddingBlock(false);
+                      setIsLabDialogOpen(false);
+                    }}
+                  >
+                    <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
+                    <TableCell>{spec?.paths[path]?.post?.description || 'No description available'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
