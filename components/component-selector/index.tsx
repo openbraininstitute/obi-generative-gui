@@ -26,6 +26,7 @@ export function ComponentSelector({
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAddingComponent, setIsAddingComponent] = useState(false);
 
   useEffect(() => {
     fetchAvailableEndpoints();
@@ -85,6 +86,7 @@ export function ComponentSelector({
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setIsAddingComponent(true)}
           >
             Add component +
           </Button>
@@ -98,7 +100,7 @@ export function ComponentSelector({
       </div>
 
       {/* Components Table */}
-      {selectedComponents.length === 0 && (
+      {selectedComponents.length === 0 && isAddingComponent && (
         <div className="p-6">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -116,7 +118,10 @@ export function ComponentSelector({
                   <TableRow
                     key={path}
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => onComponentSelect(path)}
+                    onClick={() => {
+                      onComponentSelect(path);
+                      setIsAddingComponent(false);
+                    }}
                   >
                     <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
                     <TableCell>Form component for {getEndpointDisplayName(path).toLowerCase()}</TableCell>
