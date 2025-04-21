@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ComponentSelectorProps {
+  className?: string;
   selectedComponents: string[];
   onComponentSelect: (path: string) => void;
   onComponentRemove: (path: string) => void;
@@ -15,6 +17,7 @@ interface ComponentSelectorProps {
 }
 
 export function ComponentSelector({
+  className,
   selectedComponents,
   onComponentSelect,
   onComponentRemove,
@@ -63,7 +66,7 @@ export function ComponentSelector({
   };
 
   return (
-    <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mb-6">
+    <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mb-6 mx-8", className)}>
       {/* Selected Components Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
