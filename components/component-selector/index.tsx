@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComponentSelectorProps {
@@ -107,35 +106,29 @@ export function ComponentSelector({
               Loading available components...
             </div>
           ) : (
-            <Table>
-              <TableBody className="divide-y">
-                <TableRow>
-                  <TableCell className="font-bold">Component</TableCell>
-                  <TableCell className="font-bold">Description</TableCell>
-                  <TableCell className="font-bold">Contributor</TableCell>
-                </TableRow>
-                {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
-                  <TableRow
-                    key={path}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => {
-                      onComponentSelect(path);
-                      setIsAddingComponent(false);
-                    }}
-                  >
-                    <TableCell className="font-medium">{getEndpointDisplayName(path)}</TableCell>
-                    <TableCell>Form component for {getEndpointDisplayName(path).toLowerCase()}</TableCell>
-                    <TableCell>Open Brain Institute</TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                      No components available. Please check your connection to the API server.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            <div className="divide-y">
+              {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
+                <button
+                  key={path}
+                  className="flex items-start gap-4 p-4 w-full hover:bg-muted/50 transition-colors text-left group"
+                  onClick={() => {
+                    onComponentSelect(path);
+                    setIsAddingComponent(false);
+                  }}
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium">{getEndpointDisplayName(path)}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Form component for {getEndpointDisplayName(path).toLowerCase()}
+                    </p>
+                  </div>
+                </button>
+              )) : (
+                <div className="text-center text-muted-foreground py-8">
+                  No components available. Please check your connection to the API server.
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
