@@ -48,6 +48,7 @@ interface StepEditorFormProps {
   files: Record<string, string>;            // Map of file names to contents
   onFileSelect: (file: string) => void;     // Handler for file selection
   onFileChange: (file: string, content: string) => void;  // Handler for file content changes
+  activeComponent: string;                  // Currently active component
 }
 
 export function StepEditorForm({ 
@@ -60,7 +61,8 @@ export function StepEditorForm({
   selectedFile,
   files,
   onFileSelect,
-  onFileChange
+  onFileChange,
+  activeComponent
 }: StepEditorFormProps) {
   // Form handling hooks from react-hook-form
   const { register, handleSubmit, setValue, watch, reset } = useForm();
