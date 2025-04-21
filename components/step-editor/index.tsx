@@ -248,7 +248,7 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
             </Button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex-1 flex justify-end">
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="configure" className="flex items-center gap-2">
