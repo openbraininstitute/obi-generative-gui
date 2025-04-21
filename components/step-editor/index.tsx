@@ -43,13 +43,9 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
   const [loading, setLoading] = useState(false);
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', name: 'Task 1' },
-    { id: '2', name: 'Task 2' },
-    { id: '3', name: 'Task 3' }
+    { id: '1', name: '1' }
   ]);
-  const [selectedTask, setSelectedTask] = useState<string>("");
-  const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
+  const [selectedTask, setSelectedTask] = useState<string>("1");
   const [selectedTab, setSelectedTab] = useState("configure");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
@@ -124,18 +120,14 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
     }
   };
 
-  const handleCreateTask = () => {
-    if (!newTaskName.trim()) return;
-
+  const handleAddVersion = () => {
     const newTask: Task = {
-      id: `task-${Date.now()}`,
-      name: newTaskName
+      id: String(tasks.length + 1),
+      name: String(tasks.length + 1)
     };
 
     setTasks(prev => [...prev, newTask]);
     setSelectedTask(newTask.id);
-    setNewTaskName("");
-    setIsNewTaskDialogOpen(false);
   };
 
   const handleFileChange = (file: string, content: string) => {
@@ -263,11 +255,15 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
               <div className="flex items-center gap-3">
                 <div className="w-[240px]">
                   <Select
+                    defaultValue="1"
                     value={selectedTask}
                     onValueChange={setSelectedTask}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select task" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">V</span>
+                        <SelectValue />
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
                       {tasks.map((task) => (
@@ -281,7 +277,8 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsNewTaskDialogOpen(true)}
+                  onClick={handleAddVersion}
+                  className="hover:bg-muted"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -382,30 +379,6 @@ export function StepEditor({ API_URL }: { API_URL: string }) {
               )
             )}
           </div>
-
-          <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Task</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <Input
-                  placeholder="Enter task name"
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
-                />
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateTask}>
-                  Create
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </>
       )}
     </div>
