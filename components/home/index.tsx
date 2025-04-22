@@ -49,8 +49,9 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
       <div className="flex-1 bg-[#002766] flex overflow-hidden">
         {!isAIAgentOnRight && (
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
-            isAIAgentCollapsed ? "w-0" : "w-[400px]")}>
-            <div className={cn("absolute inset-0 p-6 pb-8 transition-all duration-300",
+            isAIAgentCollapsed ? "w-0" : "w-[400px]"
+          )}>
+            <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
                 <AIAgent />
@@ -67,7 +68,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         )}
 
         {/* Right Side - Project Workspace and Step Editor */}
-        <div className="flex-1 p-6 pb-8 overflow-hidden h-full">
+        <div className="flex-1 p-6 overflow-hidden h-full">
           <div className="h-full flex flex-col">
             <div className={cn(
               "transition-all duration-300 ease-in-out",
@@ -97,18 +98,18 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               )}>
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                   <button
-                    className="p-1.5 bg-[#002766] hover:bg-[#003694] transition-colors"
+                    className="p-1.5 text-white hover:text-white/80 transition-colors"
                     onClick={() => setIsWorkspaceVisible(!isWorkspaceVisible)}
                   >
                     <ChevronLeft 
                       className={cn(
-                        "h-4 w-4 transform transition-transform text-white",
+                        "h-4 w-4 transform transition-transform",
                         isWorkspaceVisible ? "-rotate-90" : "rotate-90"
                       )}
                     />
                   </button>
                 </div>
-                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-12">
+                <div className="px-8 overflow-hidden h-[calc(100vh-10rem)]">
                   <div className="h-full">
                     <StepEditor 
                       API_URL={config.API_URL}
@@ -124,7 +125,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         {isAIAgentOnRight && (
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]")}>
-            <div className={cn("absolute inset-0 p-6 pb-8 transition-all duration-300",
+            <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
                 <AIAgent />
