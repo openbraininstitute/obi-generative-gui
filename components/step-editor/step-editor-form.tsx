@@ -28,40 +28,40 @@ const PANEL_SIZES = {
   DESCRIPTION: {
     FILE_LIST: {
       DEFAULT: 20,
-      MIN: 10,
+      MIN: 15,
       MAX: 25
     },
     EDITOR: {
       DEFAULT: 40,
       MIN: 30,
-      MAX: 50
+      MAX: 45
     },
     PREVIEW: {
       DEFAULT: 40,
       MIN: 30,
-      MAX: 50
+      MAX: 45
     }
   },
   BLOCK_LIST: {
     DEFAULT: 20,
     MIN: 15,
-    MAX: 30
+    MAX: 25
   },
   EDITOR: {
     DEFAULT: {
       SINGLE: 40,
-      MULTI: 40
+      MULTI: 35
     },
     MIN: 30,
-    MAX: 50
+    MAX: 45
   },
   PREVIEW: {
     DEFAULT: {
       SINGLE: 60,
-      MULTI: 40
+      MULTI: 45
     },
     MIN: 30,
-    MAX: 50
+    MAX: 45
   }
 };
 
@@ -559,8 +559,8 @@ export function StepEditorForm({
   return (
     <div className="h-full overflow-hidden">
       <ResizablePanelGroup
-        autoSaveId={`step-editor-${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}`}
-        autoSaveKey={`${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}`}
+        key={`${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}`}
+        autoSaveId={`step-editor-${selectedTab}`}
         direction="horizontal"
         className="h-full"
       >
