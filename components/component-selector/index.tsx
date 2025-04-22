@@ -10,16 +10,20 @@ import { cn } from "@/lib/utils";
 interface ComponentSelectorProps {
   className?: string;
   selectedComponents: string[];
-  onComponentSelect: (path: string) => void;
+  activeComponent: string | null;
+  onComponentSelect: (paths: string[]) => void;
   onComponentRemove: (path: string) => void;
+  onActiveComponentChange: (path: string) => void;
   API_URL: string;
 }
 
 export function ComponentSelector({
   className,
   selectedComponents,
+  activeComponent,
   onComponentSelect,
   onComponentRemove,
+  onActiveComponentChange,
   API_URL
 }: ComponentSelectorProps) {
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
@@ -69,13 +73,14 @@ export function ComponentSelector({
     <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mx-8", className)}>
       {/* Selected Components Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
           {selectedComponents.map((path) => (
             <Button
               key={path}
-              variant="outline"
+              variant={activeComponent === path ? "default" : "outline"}
               size="sm"
-              className="flex items-center gap-2 group relative pr-8"
+              className="flex items-center gap-2 group relative pr-8 flex-shrink-0"
+              onClick={() => onActiveComponentChange(path)}
             >
               {getEndpointDisplayName(path)}
               <div 
@@ -92,12 +97,13 @@ export function ComponentSelector({
           <Button
             variant="outline"
             size="sm"
+            className="flex-shrink-0"
             onClick={() => setIsAddingComponent(true)}
           >
             Add component +
           </Button>
           {error && (
-            <Alert variant="destructive" className="ml-4">
+            <Alert variant="destructive" className="ml-4 flex-shrink-0">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -106,7 +112,7 @@ export function ComponentSelector({
       </div>
 
       {/* Components Table */}
-      {selectedComponents.length === 0 && isAddingComponent && (
+      {isAddingComponent && (
         <div className="p-6">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -119,7 +125,9 @@ export function ComponentSelector({
                   key={path}
                   className="flex items-start gap-4 p-4 w-full hover:bg-muted/50 transition-colors text-left group"
                   onClick={() => {
-                    onComponentSelect(path);
+                    const newPaths = [...selectedComponents, path];
+                    onComponentSelect(newPaths);
+                    onActiveComponentChange(path);
                     setIsAddingComponent(false);
                   }}
                 >
