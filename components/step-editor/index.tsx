@@ -184,9 +184,9 @@ export function StepEditor({
         <>
           <div className="px-6 py-4 border-b">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium">Version</Label>
-                <div className="w-[80px]">
+                <div className="w-[48px]">
                   <Select
                     value={selectedTask}
                     onValueChange={setSelectedTask}
@@ -207,7 +207,7 @@ export function StepEditor({
                   variant="ghost"
                   size="icon"
                   onClick={handleAddVersion}
-                  className="hover:bg-muted"
+                  className="hover:bg-muted h-7 w-7"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
