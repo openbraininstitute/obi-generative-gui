@@ -73,7 +73,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               isWorkspaceVisible ? "flex-1" : "hidden"
             )}>
               <ProjectWorkspace onStepSelect={setSelectedStep} />
-              {selectedStep && <div className="mt-6">
+              {selectedStep && <div className="mt-4">
                 <ComponentSelector
                   API_URL={config.API_URL}
                   selectedComponents={selectedComponents} 
@@ -97,7 +97,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     />
                   </button>
                 </div>
-                <div className="px-8 h-[calc(100vh-8rem)] overflow-hidden">
+                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-4">
                   <div className="h-full">
                     <StepEditor 
                       API_URL={config.API_URL}
