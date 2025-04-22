@@ -57,17 +57,17 @@ const PANEL_SIZES = {
   THREE_PANEL: {
     BLOCK_LIST: {
       DEFAULT: 20,
-      MIN: 15,
-      MAX: 25
+      MIN: 20,
+      MAX: 35
     },
     EDITOR: {
-      DEFAULT: 35,
-      MIN: 30,
-      MAX: 45
+      DEFAULT: 30,
+      MIN: 20,
+      MAX: 55
     },
     PREVIEW: {
-      DEFAULT: 45,
-      MIN: 30,
+      DEFAULT: 50,
+      MIN: 20,
       MAX: 45
     }
   }
