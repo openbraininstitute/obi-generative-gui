@@ -183,7 +183,7 @@ export function StepEditor({
       {selectedComponents.length > 0 && (
         <>
           <div className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium">Version</Label>
                 <div className="w-[48px]">
@@ -212,21 +212,21 @@ export function StepEditor({
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-[300px]">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="configure" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Configure
-                  </TabsTrigger>
-                  <TabsTrigger value="artifacts">
-                    Artifacts
-                  </TabsTrigger>
-                  <TabsTrigger value="description" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Description
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="ml-8">
+                <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="configure">
+                      Configure
+                    </TabsTrigger>
+                    <TabsTrigger value="artifacts">
+                      Artifacts
+                    </TabsTrigger>
+                    <TabsTrigger value="description">
+                      Description
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
           </div>
 
