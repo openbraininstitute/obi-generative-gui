@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Check } from "lucide-react";
@@ -73,13 +73,20 @@ export function ComponentSelector({
           {selectedComponents.map((path) => (
             <Button
               key={path}
-              variant="secondary"
+              variant="outline"
               size="sm"
-              className="flex items-center gap-2"
-              onClick={() => onComponentRemove(path)}
+              className="flex items-center gap-2 group relative pr-8"
             >
               {getEndpointDisplayName(path)}
-              <X className="h-4 w-4" />
+              <div 
+                className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onComponentRemove(path);
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+              </div>
             </Button>
           ))}
           <Button
