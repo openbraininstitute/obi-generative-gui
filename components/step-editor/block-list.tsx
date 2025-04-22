@@ -99,7 +99,7 @@ export function BlockList({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="text-sm font-medium text-muted-foreground cursor-help">
+                        <span className="text-sm font-medium text-muted-foreground cursor-pointer">
                           {sectionName.toUpperCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>

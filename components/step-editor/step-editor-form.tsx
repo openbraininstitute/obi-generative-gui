@@ -21,7 +21,58 @@ import { BlockType } from './types';
 import { BlockTypeSelector } from './block-type-selector';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
+import { ArtifactsView } from './artifacts-view';
 import { LatexPreview } from './latex-preview';
+
+// Panel size configurations
+const PANEL_SIZES = {
+  DESCRIPTION: {
+    FILE_LIST: {
+      DEFAULT: 20,
+      MIN: 15,
+      MAX: 25
+    },
+    EDITOR: {
+      DEFAULT: 40,
+      MIN: 30,
+      MAX: 45
+    },
+    PREVIEW: {
+      DEFAULT: 40,
+      MIN: 30,
+      MAX: 45
+    }
+  },
+  TWO_PANEL: {
+    EDITOR: {
+      DEFAULT: 35,
+      MIN: 20,
+      MAX: 80
+    },
+    PREVIEW: {
+      DEFAULT: 65,
+      MIN: 20,
+      MAX: 80
+    }
+  },
+  THREE_PANEL: {
+    BLOCK_LIST: {
+      DEFAULT: 20,
+      MIN: 20,
+      MAX: 35
+    },
+    EDITOR: {
+      DEFAULT: 30,
+      MIN: 20,
+      MAX: 55
+    },
+    PREVIEW: {
+      DEFAULT: 50,
+      MIN: 20,
+      MAX: 45
+    }
+  }
+};
 
 // Dynamically import the code editor to avoid SSR issues
 const CodeEditor = dynamic(
@@ -283,15 +334,35 @@ export function StepEditorForm({
 
   // Render the main panels of the editor
   const renderPanels = () => {
+    if (selectedTab === "artifacts") {
+      return [
+        <ResizablePanel key="artifacts" defaultSize={100}>
+          <ArtifactsView />
+        </ResizablePanel>
+      ];
+    }
+
     if (selectedTab === "description") {
       return [
         // Left Panel (File List)
-        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={25}>
+        <ResizablePanel
+          key="left" 
+          defaultSize={PANEL_SIZES.DESCRIPTION.FILE_LIST.DEFAULT}
+          minSize={PANEL_SIZES.DESCRIPTION.FILE_LIST.MIN}
+          maxSize={PANEL_SIZES.DESCRIPTION.FILE_LIST.MAX}
+          collapsible={false}
+        >
           {renderFileList()}
         </ResizablePanel>,
         <ResizableHandle key="handle-1" withHandle className="bg-border" />,
         // Center Panel (Editor)
-        <ResizablePanel key="center" defaultSize={40} minSize={30} maxSize={50}>
+        <ResizablePanel 
+          key="center"
+          defaultSize={PANEL_SIZES.DESCRIPTION.EDITOR.DEFAULT}
+          minSize={PANEL_SIZES.DESCRIPTION.EDITOR.MIN}
+          maxSize={PANEL_SIZES.DESCRIPTION.EDITOR.MAX}
+          collapsible={false}
+        >
           <div className="h-full p-4 bg-background">
             {selectedFile ? (
               <CodeEditor
@@ -318,7 +389,13 @@ export function StepEditorForm({
         </ResizablePanel>,
         <ResizableHandle key="handle-2" withHandle className="bg-border" />,
         // Right Panel (LaTeX Preview)
-        <ResizablePanel key="right" defaultSize={40} minSize={30} maxSize={50}>
+        <ResizablePanel 
+          key="right"
+          defaultSize={PANEL_SIZES.DESCRIPTION.PREVIEW.DEFAULT}
+          minSize={PANEL_SIZES.DESCRIPTION.PREVIEW.MIN}
+          maxSize={PANEL_SIZES.DESCRIPTION.PREVIEW.MAX}
+          collapsible={false}
+        >
           <div className="h-full">
             {selectedFile ? (
               <LatexPreview content={files[selectedFile] || ''} className="h-full" />
@@ -335,9 +412,15 @@ export function StepEditorForm({
     const configPanels = [
       // Left Panel (Block List) - Only shown when there are multiple blocks
       !hasSingleBlock ? (
-        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={30}>
+        <ResizablePanel 
+          key="left"
+          defaultSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.DEFAULT}
+          minSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.MIN}
+          maxSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.MAX}
+          collapsible={false}
+        >
           <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto">
+            <div className="h-full overflow-y-auto">
               <BlockList
                 sections={sections}
                 blocks={blocks}
@@ -398,9 +481,10 @@ export function StepEditorForm({
       // Center Panel (Form or Editor)
       <ResizablePanel 
         key="center" 
-        defaultSize={hasSingleBlock ? 40 : 35}
-        minSize={30}
-        maxSize={50}
+        defaultSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.DEFAULT : PANEL_SIZES.THREE_PANEL.EDITOR.DEFAULT}
+        minSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.MIN : PANEL_SIZES.THREE_PANEL.EDITOR.MIN}
+        maxSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.MAX : PANEL_SIZES.THREE_PANEL.EDITOR.MAX}
+        collapsible={false}
       >
         {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
@@ -464,9 +548,10 @@ export function StepEditorForm({
       // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel 
         key="right" 
-        defaultSize={hasSingleBlock ? 60 : 45} 
-        minSize={30}
-        maxSize={50}
+        defaultSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.DEFAULT : PANEL_SIZES.THREE_PANEL.PREVIEW.DEFAULT}
+        minSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.MIN : PANEL_SIZES.THREE_PANEL.PREVIEW.MIN}
+        maxSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.MAX : PANEL_SIZES.THREE_PANEL.PREVIEW.MAX}
+        collapsible={false}
       >
         <div className="h-full">
           <ImageViewer 
@@ -491,7 +576,8 @@ export function StepEditorForm({
   return (
     <div className="h-full overflow-hidden">
       <ResizablePanelGroup
-        autoSaveId="step-editor-layout"
+        key={`${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}-layout`}
+        autoSaveId={`step-editor-${selectedTab}`}
         direction="horizontal"
         className="h-full"
       >

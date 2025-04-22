@@ -106,7 +106,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     <ChevronLeft 
                       className={cn(
                         "h-4 w-4 transform transition-transform",
-                        isWorkspaceVisible ? "-rotate-90" : "rotate-90"
+                        isWorkspaceVisible ? "rotate-90" : "-rotate-90"
                       )}
                     />
                   </button>
