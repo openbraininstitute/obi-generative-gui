@@ -108,7 +108,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     />
                   </button>
                 </div>
-                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-4">
+                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-8">
                   <div className="h-full">
                     <StepEditor 
                       API_URL={config.API_URL}
