@@ -68,12 +68,12 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         )}
 
         {/* Right Side - Project Workspace and Step Editor */}
-        <div className="flex-1 p-6 overflow-hidden h-full">
+        <div className="flex-1 p-6 pb-6 overflow-hidden h-full">
           <div className="h-full flex flex-col">
             <div className={cn(
               "transition-all duration-300 ease-in-out",
               isWorkspaceVisible 
-                ? "flex-1 opacity-100 transform translate-y-0 mb-6" 
+                ? "flex-1 opacity-100 transform translate-y-0 mb-2" 
                 : "h-0 opacity-0 transform -translate-y-4 pointer-events-none overflow-hidden"
             )}>
               <ProjectWorkspace onStepSelect={setSelectedStep} />
@@ -111,9 +111,14 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     />
                   </button>
                 </div>
-                <div className="px-8 overflow-hidden h-[calc(100vh-12rem)] mt-2 space-y-2">
+                <div className={cn(
+                  "px-8 overflow-hidden space-y-2",
+                  isWorkspaceVisible 
+                    ? "h-[calc(100vh-13.5rem)]" 
+                    : "h-[calc(100vh-7.5rem)]"
+                )}>
                   <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
-                  <div className="h-full">
+                  <div className="h-[calc(100%-1.75rem)]">
                     <StepEditor 
                       API_URL={config.API_URL}
                       selectedComponents={selectedComponents}

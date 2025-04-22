@@ -182,7 +182,7 @@ export function StepEditor({
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       {selectedComponents.length > 0 && (
         <>
-          <div className="px-6 py-4 border-b">
+          <div className="flex-none px-6 py-4 border-b">
             <div className="flex items-center">
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium">Version</Label>
@@ -231,7 +231,7 @@ export function StepEditor({
           </div>
 
           {error && (
-            <div className="px-6 py-4 border-b">
+            <div className="flex-none px-6 py-4 border-b">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
