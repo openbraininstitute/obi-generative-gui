@@ -14,7 +14,7 @@ import { PublicRuntimeConfig } from "@/lib/config.server";
 
 export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
-  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
+  const [selectedComponents, setSelectedComponents] = useState<Array<{ path: string; name: string }>>([]);
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
   const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(true);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
@@ -28,7 +28,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
 
   useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent) {
-      setActiveComponent(selectedComponents[0]);
+      setActiveComponent(selectedComponents[0].path);
     }
   }, [selectedComponents, activeComponent]);
 
@@ -94,15 +94,28 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   API_URL={config.API_URL}
                   selectedComponents={selectedComponents} 
                   activeComponent={activeComponent}
-                  onComponentSelect={(paths) => {
-                    setSelectedComponents(paths);
+                  onComponentSelect={(path) => {
+                    const type = path.slice(1).replace(/Form$/, '');
+                    const count = selectedComponents.filter(c => 
+                      c.path.slice(1).replace(/Form$/, '') === type
+                    ).length;
+                    setSelectedComponents(prev => [...prev, {
+                      path,
+                      name: `${type}_${count}`
+                    }]);
                   }}
                   onActiveComponentChange={setActiveComponent}
                   onComponentRemove={(path) => {
                     if (path === activeComponent) {
-                      setActiveComponent(selectedComponents.find(p => p !== path) || null);
+                      const nextComponent = selectedComponents.find(c => c.path !== path);
+                      setActiveComponent(nextComponent?.path || null);
                     }
-                    setSelectedComponents(prev => prev.filter(p => p !== path));
+                    setSelectedComponents(prev => prev.filter(c => c.path !== path));
+                  }}
+                  onComponentRename={(path, newName) => {
+                    setSelectedComponents(prev => prev.map(c => 
+                      c.path === path ? { ...c, name: newName } : c
+                    ));
                   }}
                 />
               </div>}

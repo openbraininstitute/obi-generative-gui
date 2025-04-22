@@ -35,7 +35,7 @@ export function StepEditor({
 }: { 
   API_URL: string;
   activeComponent: string | null;
-  selectedComponents: string[];
+  selectedComponents: Array<{ path: string; name: string }>;
 }) {
   const [selectedTask, setSelectedTask] = useState<string>("1");
   const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
@@ -113,7 +113,7 @@ export function StepEditor({
     setError(null);
     
     try {
-      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0], data);
+      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0].path, data);
       setResponse(result);
       
       if (!result.ok) {

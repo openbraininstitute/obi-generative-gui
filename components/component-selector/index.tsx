@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils";
 
 interface ComponentSelectorProps {
   className?: string;
-  selectedComponents: string[];
+  selectedComponents: Array<{ path: string; name: string }>;
   activeComponent: string | null;
-  onComponentSelect: (paths: string[]) => void;
+  onComponentSelect: (path: string) => void;
   onComponentRemove: (path: string) => void;
   onActiveComponentChange: (path: string) => void;
+  onComponentRename: (path: string, newName: string) => void;
   API_URL: string;
 }
 
@@ -30,6 +31,8 @@ export function ComponentSelector({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAddingComponent, setIsAddingComponent] = useState(false);
+  const [editingComponent, setEditingComponent] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
     fetchAvailableEndpoints();
@@ -74,24 +77,60 @@ export function ComponentSelector({
       {/* Selected Components Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {selectedComponents.map((path) => (
+          {selectedComponents.map(({ path, name }) => (
             <Button
               key={path}
               variant={activeComponent === path ? "default" : "outline"}
               size="sm"
               className="flex items-center gap-2 group relative pr-8 flex-shrink-0"
-              onClick={() => onActiveComponentChange(path)}
+              onClick={() => {
+                if (editingComponent !== path) {
+                  onActiveComponentChange(path);
+                }
+              }}
             >
-              {getEndpointDisplayName(path)}
-              <div 
-                className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onComponentRemove(path);
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
-              </div>
+              {editingComponent === path ? (
+                <input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onComponentRename(path, editedName);
+                      setEditingComponent(null);
+                    } else if (e.key === 'Escape') {
+                      setEditingComponent(null);
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-transparent border-none focus:outline-none w-24"
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <span 
+                    className="flex flex-col"
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      setEditingComponent(path);
+                      setEditedName(name);
+                    }}
+                  >
+                    <span>{name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {getEndpointDisplayName(path)}
+                    </span>
+                  </span>
+                  <div 
+                    className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onComponentRemove(path);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                  </div>
+                </>
+              )}
             </Button>
           ))}
           <Button
@@ -125,8 +164,7 @@ export function ComponentSelector({
                   key={path}
                   className="flex items-start gap-4 p-4 w-full hover:bg-muted/50 transition-colors text-left group"
                   onClick={() => {
-                    const newPaths = [...selectedComponents, path];
-                    onComponentSelect(newPaths);
+                    onComponentSelect(path);
                     onActiveComponentChange(path);
                     setIsAddingComponent(false);
                   }}
