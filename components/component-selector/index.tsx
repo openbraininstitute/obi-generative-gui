@@ -75,14 +75,14 @@ export function ComponentSelector({
   return (
     <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mx-8", className)}>
       {/* Selected Components Header */}
-      <div className="px-6 py-4 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <div className="px-4 py-2 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2 overflow-x-auto">
           {selectedComponents.map(({ path, name }) => (
             <Button
               key={path}
               variant={activeComponent === path ? "default" : "outline"}
               size="sm"
-              className="flex items-center gap-2 group relative pr-8 flex-shrink-0"
+              className="flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14"
               onClick={() => {
                 if (editingComponent !== path) {
                   onActiveComponentChange(path);
@@ -108,15 +108,15 @@ export function ComponentSelector({
               ) : (
                 <>
                   <span 
-                    className="flex flex-col"
+                    className="flex flex-col items-start"
                     onDoubleClick={(e) => {
                       e.stopPropagation();
                       setEditingComponent(path);
                       setEditedName(name);
                     }}
                   >
-                    <span>{name}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-base font-medium">{name}</span>
+                    <span className="text-sm text-muted-foreground">
                       {getEndpointDisplayName(path)}
                     </span>
                   </span>
@@ -136,7 +136,7 @@ export function ComponentSelector({
           <Button
             variant="outline"
             size="sm"
-            className="flex-shrink-0"
+            className="flex-shrink-0 h-14 text-base"
             onClick={() => setIsAddingComponent(true)}
           >
             Add component +
@@ -152,9 +152,9 @@ export function ComponentSelector({
 
       {/* Components Table */}
       {isAddingComponent && (
-        <div className="p-6">
+        <div className="p-3">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground">
               Loading available components...
             </div>
           ) : (
@@ -162,7 +162,7 @@ export function ComponentSelector({
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
                   key={path}
-                  className="flex items-start gap-4 p-4 w-full hover:bg-muted/50 transition-colors text-left group"
+                  className="flex items-start gap-2 py-2 px-3 w-full hover:bg-muted/50 transition-colors text-left group"
                   onClick={() => {
                     onComponentSelect(path);
                     onActiveComponentChange(path);
@@ -171,13 +171,13 @@ export function ComponentSelector({
                 >
                   <div className="flex-1">
                     <h3 className="font-medium">{getEndpointDisplayName(path)}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       Form component for {getEndpointDisplayName(path).toLowerCase()}
                     </p>
                   </div>
                 </button>
               )) : (
-                <div className="text-center text-muted-foreground py-8">
+                <div className="text-center text-muted-foreground py-4">
                   No components available. Please check your connection to the API server.
                 </div>
               )}
