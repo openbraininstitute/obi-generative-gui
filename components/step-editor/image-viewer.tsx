@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { ZoomIn, ZoomOut } from "lucide-react";
@@ -33,22 +34,17 @@ export function ImageViewer({ src, alt }: ImageViewerProps) {
             className="max-w-full max-h-full object-contain"
           />
         </div>
-      </div>
-      <div className={cn(
-        "flex-none p-4 border-t",
-        isDark ? "bg-background" : "bg-white"
-      )}>
-        <div className="flex items-center gap-4">
-          <ZoomOut className="h-4 w-4 text-muted-foreground" />
+        <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-lg">
+          <ZoomOut className="h-5 w-5 text-muted-foreground" />
           <Slider
             value={[zoom]}
             onValueChange={([value]) => setZoom(value)}
             min={50}
             max={200}
             step={1}
-            className="flex-1"
+            className="w-[60px]"
           />
-          <ZoomIn className="h-4 w-4 text-muted-foreground" />
+          <ZoomIn className="h-5 w-5 text-muted-foreground" />
         </div>
       </div>
     </div>

@@ -2,12 +2,12 @@
 
 import { useForm } from "react-hook-form";
 import { OpenAPIV3 } from "openapi-types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { resolveSchemaRef } from "@/lib/api-client";
 import { useState, useEffect } from "react";
 import { BlockList } from "./block-list";
 import { FormField } from "./form-field";
 import { ImageViewer } from "./image-viewer";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -16,7 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { nanoid } from 'nanoid';
 import { useTheme } from 'next-themes';
-import { FileText } from 'lucide-react';
+import { FileText, Check } from 'lucide-react';
+import { BlockType } from './types';
+import { BlockTypeSelector } from './block-type-selector';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import { LatexPreview } from './latex-preview';
@@ -38,8 +40,8 @@ interface BlockData {
 interface StepEditorFormProps {
   schema: OpenAPIV3.SchemaObject;           // OpenAPI schema for form generation
   spec: OpenAPIV3.Document;                 // Complete OpenAPI specification
+  selectedMethod: string;                   // Selected HTTP method
   onSubmit: (data: any) => void;           // Callback for form submission
-  editorOnRight: boolean;                   // Layout control for editor position
   selectedTab: string;                      // Current active tab
   description: string;                      // LaTeX description content
   onDescriptionChange: (value: string) => void;  // Handler for description updates
@@ -47,20 +49,22 @@ interface StepEditorFormProps {
   files: Record<string, string>;            // Map of file names to contents
   onFileSelect: (file: string) => void;     // Handler for file selection
   onFileChange: (file: string, content: string) => void;  // Handler for file content changes
+  activeComponent: string;                  // Currently active component
 }
 
 export function StepEditorForm({ 
   schema, 
   spec, 
+  selectedMethod,
   onSubmit,
-  editorOnRight,
   selectedTab,
   description,
   onDescriptionChange,
   selectedFile,
   files,
   onFileSelect,
-  onFileChange
+  onFileChange,
+  activeComponent
 }: StepEditorFormProps) {
   // Form handling hooks from react-hook-form
   const { register, handleSubmit, setValue, watch, reset } = useForm();
@@ -70,9 +74,12 @@ export function StepEditorForm({
   const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogSection, setDialogSection] = useState<string>("");
+  const [addingBlockSection, setAddingBlockSection] = useState<string>("");
   const [blocks, setBlocks] = useState<Record<string, BlockData[]>>({});
+  const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
+  const [isAddingBlock, setIsAddingBlock] = useState(false);
+  const [hasSingleBlock, setHasSingleBlock] = useState(false);
   
   // Theme management
   const { theme } = useTheme();
@@ -123,22 +130,32 @@ export function StepEditorForm({
   const getBlockSchema = () => {
     if (!selectedSection || !selectedBlock) return null;
     
+    let description = '';
     if (selectedSection === 'initialize') {
-      return resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
+      const initSchema = resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
+      description = initSchema.description || '';
+      return { schema: initSchema, description };
     }
 
     const sectionSchema = resolveSchema(schema.properties?.[selectedSection] as OpenAPIV3.SchemaObject);
-    if (!sectionSchema.additionalProperties) return null;
+    if (!sectionSchema.additionalProperties) return { schema: null, description: '' };
 
     const blockSchemas = sectionSchema.additionalProperties.anyOf || 
                         [sectionSchema.additionalProperties];
     
     const blockSchema = blockSchemas.find(schema => {
       const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      return resolved.title === selectedBlock || resolved.const === selectedBlock;
+      const matches = resolved.title === selectedBlock || resolved.const === selectedBlock;
+      if (matches) {
+        description = resolved.description || '';
+      }
+      return matches;
     });
 
-    return blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null;
+    return {
+      schema: blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null,
+      description
+    };
   };
 
   // Extract sections from the schema, ensuring 'initialize' is first
@@ -165,6 +182,21 @@ export function StepEditorForm({
     setBlocks(initialBlocks);
   }, [schema]);
 
+  // Determine if form has only a single block
+  useEffect(() => {
+    const hasOnlyInitialize = Object.entries(sections).every(([key, value]) => {
+      if (key === 'type' || key === 'initialize') return true;
+      const sectionSchema = resolveSchema(value as OpenAPIV3.SchemaObject);
+      return !sectionSchema.additionalProperties;
+    });
+    setHasSingleBlock(hasOnlyInitialize);
+    if (hasOnlyInitialize) {
+      setSelectedSection('initialize');
+      setSelectedBlock('Initialize');
+      setIsAddingBlock(false);
+    }
+  }, [sections]);
+
   // Reset form when selection changes
   useEffect(() => {
     if (selectedSection && selectedBlock) {
@@ -175,6 +207,7 @@ export function StepEditorForm({
       } else {
         reset({});
       }
+      setIsAddingBlock(false);
     }
   }, [selectedSection, selectedBlock]);
 
@@ -209,64 +242,56 @@ export function StepEditorForm({
     }
   };
 
+  const getBlockTypes = (section: string) => {
+    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
+    if (!sectionSchema.additionalProperties) return [];
+
+    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                        [sectionSchema.additionalProperties];
+    
+    return blockSchemas.map(schema => {
+      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+      return {
+        title: resolved.title || resolved.const || 'Unnamed Block',
+        description: resolved.description || 'No description available'
+      };
+    });
+  };
+
+  const handleAddBlock = (blockType: BlockType) => {
+    const nextIndex = blocks[dialogSection]?.filter(block => 
+      block.displayName.startsWith(blockType.title.toLowerCase())
+    ).length || 0;
+    
+    const newBlock = {
+      id: nanoid(),
+      type: blockType.title,
+      displayName: `${blockType.title.toLowerCase()}_${nextIndex}`,
+    };
+    
+    setBlocks(prev => ({
+      ...prev,
+      [addingBlockSection]: [...(prev[addingBlockSection] || []), newBlock]
+    }));
+    
+    setSelectedSection(addingBlockSection);
+    setSelectedBlock(blockType.title);
+    setIsAddingBlock(false);
+    setDialogSection("");
+    setAddingBlockSection("");
+  };
+
   // Render the main panels of the editor
   const renderPanels = () => {
-    const panels = [
-      // Left Panel (Block List or File List)
-      <ResizablePanel key="left" defaultSize={23.5} minSize={23.5} maxSize={28}>
-        {selectedTab === "description" ? renderFileList() : (
-          <BlockList
-            sections={sections}
-            blocks={blocks}
-            selectedSection={selectedSection}
-            selectedBlock={selectedBlock}
-            onSectionSelect={(section, block) => {
-              setSelectedSection(section);
-              setSelectedBlock(block);
-            }}
-            onAddBlock={(section) => {
-              setDialogSection(section);
-              setIsDialogOpen(true);
-            }}
-            onUpdateBlockName={(section, blockId, newName) => {
-              if (section === 'initialize') return;
-              setBlocks(prev => ({
-                ...prev,
-                [section]: prev[section]?.map(block => 
-                  block.id === blockId 
-                    ? { ...block, displayName: newName }
-                    : block
-                ) || []
-              }));
-            }}
-            onDeleteBlock={(section, blockId) => {
-              if (section === 'initialize') return;
-              setBlocks(prev => ({
-                ...prev,
-                [section]: prev[section]?.filter(block => block.id !== blockId) || []
-              }));
-              const deletedBlock = blocks[section]?.find(block => block.id === blockId);
-              if (deletedBlock) {
-                const blockKey = `${section}-${deletedBlock.type}`;
-                setFormData(prev => {
-                  const newFormData = { ...prev };
-                  delete newFormData[blockKey];
-                  return newFormData;
-                });
-              }
-              if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
-                setSelectedSection('initialize');
-                setSelectedBlock('Initialize');
-              }
-            }}
-            onGenerate={handleSubmit(handleFormSubmit)}
-          />
-        )}
-      </ResizablePanel>,
-
-      // Center Panel (Form or Editor)
-      <ResizablePanel key="center" defaultSize={30} minSize={20} maxSize={30}>
-        {selectedTab === "description" ? (
+    if (selectedTab === "description") {
+      return [
+        // Left Panel (File List)
+        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={25}>
+          {renderFileList()}
+        </ResizablePanel>,
+        <ResizableHandle key="handle-1" withHandle className="bg-border" />,
+        // Center Panel (Editor)
+        <ResizablePanel key="center" defaultSize={40} minSize={30} maxSize={50}>
           <div className="h-full p-4 bg-background">
             {selectedFile ? (
               <CodeEditor
@@ -290,135 +315,188 @@ export function StepEditorForm({
               </div>
             )}
           </div>
-        ) : (
-          <div className="h-full flex flex-col">
-            {selectedSection && selectedBlock && (
-              <>
-                <div className="flex-none flex items-center px-6 py-4">
-                  <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground">
-                    {selectedBlock}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <form>
-                    <div className="divide-y">
-                      {(() => {
-                        const blockSchema = getBlockSchema();
-                        if (!blockSchema?.properties) return null;
-                        
-                        return Object.entries(blockSchema.properties).map(([name, property]) => (
-                          <FormField
-                            key={name}
-                            name={name}
-                            property={property as OpenAPIV3.SchemaObject}
-                            register={register}
-                            setValue={setValue}
-                            watch={watch}
-                            resolveSchema={resolveSchema}
-                            arrayFields={arrayFields}
-                            setArrayFields={setArrayFields}
-                            setFormData={handleFormDataUpdate}
-                            blocks={blocks}
-                          />
-                        ));
-                      })()}
-                    </div>
-                  </form>
-                </div>
-              </>
+        </ResizablePanel>,
+        <ResizableHandle key="handle-2" withHandle className="bg-border" />,
+        // Right Panel (LaTeX Preview)
+        <ResizablePanel key="right" defaultSize={40} minSize={30} maxSize={50}>
+          <div className="h-full">
+            {selectedFile ? (
+              <LatexPreview content={files[selectedFile] || ''} className="h-full" />
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                Select a file to preview
+              </div>
             )}
+          </div>
+        </ResizablePanel>
+      ];
+    }
+
+    const configPanels = [
+      // Left Panel (Block List) - Only shown when there are multiple blocks
+      !hasSingleBlock ? (
+        <ResizablePanel key="left" defaultSize={20} minSize={15} maxSize={30}>
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              <BlockList
+                sections={sections}
+                blocks={blocks}
+                selectedSection={selectedSection}
+                selectedBlock={selectedBlock}
+                onSectionSelect={(section, block) => {
+                  setSelectedSection(section);
+                  setSelectedBlock(block);
+                  setIsAddingBlock(false);
+                }}
+                onAddBlock={(section) => {
+                  setBlockTypes(getBlockTypes(section));
+                  setAddingBlockSection(section);
+                  setDialogSection(section);
+                  setIsAddingBlock(true);
+                  setSelectedSection(null);
+                  setSelectedBlock(null);
+                }}
+                onUpdateBlockName={(section, blockId, newName) => {
+                  if (section === 'initialize') return;
+                  setBlocks(prev => ({
+                    ...prev,
+                    [section]: prev[section]?.map(block => 
+                      block.id === blockId 
+                        ? { ...block, displayName: newName }
+                        : block
+                    ) || []
+                  }));
+                }}
+                onDeleteBlock={(section, blockId) => {
+                  if (section === 'initialize') return;
+                  setBlocks(prev => ({
+                    ...prev,
+                    [section]: prev[section]?.filter(block => block.id !== blockId) || []
+                  }));
+                  const deletedBlock = blocks[section]?.find(block => block.id === blockId);
+                  if (deletedBlock) {
+                    const blockKey = `${section}-${deletedBlock.type}`;
+                    setFormData(prev => {
+                      const newFormData = { ...prev };
+                      delete newFormData[blockKey];
+                      return newFormData;
+                    });
+                  }
+                  if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
+                    setSelectedSection('initialize');
+                    setSelectedBlock('Initialize');
+                  }
+                }}
+                onGenerate={handleSubmit(handleFormSubmit)}
+                showGenerateButton={!hasSingleBlock}
+              />
+            </div>
+          </div>
+        </ResizablePanel>
+      ) : null,
+
+      // Center Panel (Form or Editor)
+      <ResizablePanel 
+        key="center" 
+        defaultSize={hasSingleBlock ? 40 : 35}
+        minSize={30}
+        maxSize={50}
+      >
+        {isAddingBlock ? (
+          <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
+        ) : selectedSection && selectedBlock && (
+          <div className="h-full flex flex-col">
+            <div className="flex-none flex items-center px-6 py-4 border-b relative group">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-pointer">
+                      {selectedBlock}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{getBlockSchema()?.description || "No description available"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <form className="h-full flex flex-col">
+                <div className="flex-1 divide-y">
+                  {(() => {
+                    const blockSchema = getBlockSchema();
+                    if (!blockSchema?.schema?.properties) return null;
+                    
+                    return Object.entries(blockSchema.schema.properties).map(([name, property]) => (
+                      <FormField
+                        key={name}
+                        name={name}
+                        property={property as OpenAPIV3.SchemaObject}
+                        register={register}
+                        setValue={setValue}
+                        watch={watch}
+                        resolveSchema={resolveSchema}
+                        arrayFields={arrayFields}
+                        setArrayFields={setArrayFields}
+                        setFormData={handleFormDataUpdate}
+                        blocks={blocks}
+                      />
+                    ));
+                  })()}
+                </div>
+                {hasSingleBlock && (
+                  <div className="flex-none p-4 border-t">
+                    <Button 
+                      onClick={handleSubmit(handleFormSubmit)}
+                      className="block"
+                      size="sm"
+                    >
+                      Generate
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </div>
           </div>
         )}
       </ResizablePanel>,
 
       // Right Panel (LaTeX Preview or Image Viewer)
-      <ResizablePanel key="right" defaultSize={30} minSize={20}>
+      <ResizablePanel 
+        key="right" 
+        defaultSize={hasSingleBlock ? 60 : 45} 
+        minSize={30}
+        maxSize={50}
+      >
         <div className="h-full">
-          {selectedTab === "description" && selectedFile ? (
-            <LatexPreview content={files[selectedFile] || ''} className="h-full" />
-          ) : (
-            <ImageViewer 
-              src="/images/Microcircuits.png"
-              alt="Microcircuits visualization"
-            />
-          )}
+          <ImageViewer 
+            src="/images/Microcircuits.png"
+            alt="Microcircuits visualization"
+          />
         </div>
       </ResizablePanel>
     ];
 
     // Add handles between panels
-    const panelsWithHandles = panels.reduce((acc, panel, index) => {
-      if (index === panels.length - 1) return [...acc, panel];
-      return [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
+    const panelsWithHandles = configPanels.reduce((acc, panel, index) => {
+      if (!panel) return acc;
+      return index === configPanels.length - 1 
+        ? [...acc, panel]
+        : [...acc, panel, <ResizableHandle key={`handle-${index}`} withHandle className="bg-border" />];
     }, [] as React.ReactNode[]);
 
-    // Reorder panels based on editorOnRight setting
-    if (editorOnRight && selectedTab !== "description") {
-      const [left, leftHandle, center, rightHandle, right] = panelsWithHandles;
-      return [left, leftHandle, right, rightHandle, center];
-    }
-
-    return panelsWithHandles;
-  };
+    return panelsWithHandles.filter(Boolean);
+  }
 
   return (
-    <div className="h-full">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        {renderPanels()}
+    <div className="h-full overflow-hidden">
+      <ResizablePanelGroup
+        autoSaveId="step-editor-layout"
+        direction="horizontal"
+        className="h-full"
+      >
+        {renderPanels()?.filter(Boolean)}
       </ResizablePanelGroup>
-
-      {/* Block Type Selection Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Block Type</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {(() => {
-              if (!dialogSection) return null;
-              const sectionSchema = resolveSchema(schema.properties?.[dialogSection] as OpenAPIV3.SchemaObject);
-              if (!sectionSchema.additionalProperties) return null;
-
-              const blockSchemas = sectionSchema.additionalProperties.anyOf || 
-                                [sectionSchema.additionalProperties];
-              
-              return blockSchemas.map(schema => {
-                const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-                const blockType = resolved.title || resolved.const || 'Unnamed Block';
-                return (
-                  <Button
-                    key={blockType}
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      const nextIndex = blocks[dialogSection]?.filter(block => 
-                        block.displayName.startsWith(blockType.toLowerCase())
-                      ).length || 0;
-                      
-                      const newBlock = {
-                        id: nanoid(),
-                        type: blockType,
-                        displayName: `${blockType.toLowerCase()}_${nextIndex}`
-                      };
-                      
-                      setBlocks(prev => ({
-                        ...prev,
-                        [dialogSection]: [...(prev[dialogSection] || []), newBlock]
-                      }));
-                      
-                      setSelectedSection(dialogSection);
-                      setSelectedBlock(blockType);
-                      setIsDialogOpen(false);
-                    }}
-                  >
-                    {blockType}
-                  </Button>
-                );
-              });
-            })()}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
