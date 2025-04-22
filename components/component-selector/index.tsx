@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Check } from "lucide-react";
@@ -25,6 +25,7 @@ export function ComponentSelector({
   onComponentSelect,
   onComponentRemove,
   onActiveComponentChange,
+  onComponentRename,
   API_URL
 }: ComponentSelectorProps) {
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
@@ -120,14 +121,26 @@ export function ComponentSelector({
                       {getEndpointDisplayName(path)}
                     </span>
                   </span>
-                  <div 
-                    className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onComponentRemove(path);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                  <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingComponent(path);
+                        setEditedName(name);
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                    </button>
+                    <button
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onComponentRemove(path);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                    </button>
                   </div>
                 </>
               )}
