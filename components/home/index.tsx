@@ -70,10 +70,16 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         <div className="flex-1 p-6 pb-8 overflow-hidden h-full">
           <div className="h-full flex flex-col">
             <div className={cn(
-              isWorkspaceVisible ? "flex-1" : "hidden"
+              "transition-all duration-300 ease-in-out",
+              isWorkspaceVisible 
+                ? "flex-1 opacity-100 transform translate-y-0" 
+                : "h-0 opacity-0 transform -translate-y-4 pointer-events-none overflow-hidden"
             )}>
               <ProjectWorkspace onStepSelect={setSelectedStep} />
-              {selectedStep && <div className="mt-4">
+              {selectedStep && <div className={cn(
+                "mt-4 transition-all duration-300 ease-in-out",
+                selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4"
+              )}>
                 <ComponentSelector
                   API_URL={config.API_URL}
                   selectedComponents={selectedComponents} 
@@ -83,7 +89,12 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               </div>}
             </div>
             {selectedStep && selectedComponents.length > 0 && (
-              <div className="relative">
+              <div className={cn(
+                "relative transition-all duration-300 ease-in-out",
+                selectedStep && selectedComponents.length > 0
+                  ? "opacity-100 transform translate-y-0"
+                  : "opacity-0 transform translate-y-4"
+              )}>
                 <div className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-10">
                   <button
                     className="p-1.5 rounded-full bg-background border shadow-lg hover:bg-muted transition-colors"
