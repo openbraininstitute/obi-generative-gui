@@ -78,9 +78,9 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             )}>
               <ProjectWorkspace onStepSelect={setSelectedStep} />
               {selectedStep && <div className={cn(
-                "mt-6 transition-all duration-300 ease-in-out",
+                "mt-2 transition-all duration-300 ease-in-out",
                 selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4",
-                "space-y-2"
+                "space-y-1"
               )}>
                 <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
                 <ComponentSelector
@@ -111,7 +111,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     />
                   </button>
                 </div>
-                <div className="px-8 overflow-hidden h-[calc(100vh-12rem)] mt-6 space-y-2">
+                <div className="px-8 overflow-hidden h-[calc(100vh-12rem)] mt-2 space-y-2">
                   <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
                   <div className="h-full">
                     <StepEditor 
