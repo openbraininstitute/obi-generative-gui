@@ -97,7 +97,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               )}>
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                   <button
-                    className="p-1.5 rounded-full bg-[#002766] border border-blue-200/30 dark:border-gray-700 shadow-lg hover:bg-[#003694] transition-colors"
+                    className="p-1.5 bg-[#002766] hover:bg-[#003694] transition-colors"
                     onClick={() => setIsWorkspaceVisible(!isWorkspaceVisible)}
                   >
                     <ChevronLeft 
