@@ -23,6 +23,7 @@ interface BlockListProps {
   onUpdateBlockName: (section: string, blockId: string, newName: string) => void;
   onDeleteBlock: (section: string, blockId: string) => void;
   onGenerate: () => void;
+  showGenerateButton: boolean;
 }
 
 function getSectionDescription(section: string, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string {
@@ -40,6 +41,7 @@ export function BlockList({
   onUpdateBlockName,
   onDeleteBlock,
   onGenerate,
+  showGenerateButton,
 }: BlockListProps) {
   const [editingBlock, setEditingBlock] = useState<{ section: string; id: string } | null>(null);
   const [editedName, setEditedName] = useState("");
@@ -97,7 +99,7 @@ export function BlockList({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="text-sm font-medium text-muted-foreground cursor-pointer">
+                        <span className="text-sm font-medium text-muted-foreground cursor-help">
                           {sectionName.toUpperCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>
@@ -150,7 +152,7 @@ export function BlockList({
                         <div className="flex items-center min-w-0">
                           <button
                             className={cn(
-                              "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm cursor-pointer",
+                              "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
                               selectedSection === sectionName && selectedBlock === block.type
                                 ? "text-primary"
                                 : "text-muted-foreground"
@@ -192,15 +194,17 @@ export function BlockList({
           ))}
         </div>
       </div>
-      <div className="flex-none p-4 border-t">
-        <Button 
-          onClick={onGenerate}
-          className="w-full"
-          size="sm"
-        >
-          Generate
-        </Button>
-      </div>
+      {showGenerateButton && (
+        <div className="flex-none p-4 border-t">
+          <Button 
+            onClick={onGenerate}
+            className="w-full"
+            size="sm"
+          >
+            Generate
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

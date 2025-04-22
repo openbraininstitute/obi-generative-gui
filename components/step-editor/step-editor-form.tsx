@@ -387,16 +387,9 @@ export function StepEditorForm({
                     setSelectedBlock('Initialize');
                   }
                 }}
+                onGenerate={handleSubmit(handleFormSubmit)}
+                showGenerateButton={!hasSingleBlock}
               />
-              <div className="p-4 border-t">
-                <Button 
-                  onClick={handleSubmit(handleFormSubmit)}
-                  className="block"
-                  size="sm"
-                >
-                  Generate
-                </Button>
-              </div>
             </div>
           </div>
         </ResizablePanel>
@@ -452,15 +445,15 @@ export function StepEditorForm({
                   })()}
                 </div>
                 {hasSingleBlock && (
-                <div className="flex-none p-4 border-t">
-                  <Button 
-                    onClick={handleSubmit(handleFormSubmit)}
-                    className="block"
-                    size="sm"
-                  >
-                    Generate
-                  </Button>
-                </div>
+                  <div className="flex-none p-4 border-t">
+                    <Button 
+                      onClick={handleSubmit(handleFormSubmit)}
+                      className="block"
+                      size="sm"
+                    >
+                      Generate
+                    </Button>
+                  </div>
                 )}
               </form>
             </div>

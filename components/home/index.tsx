@@ -83,7 +83,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               </div>}
             </div>
             {selectedStep && selectedComponents.length > 0 && (
-              <div className="relative mt-6">
+              <div className="relative">
                 <div className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-10">
                   <button
                     className="p-1.5 rounded-full bg-background border shadow-lg hover:bg-muted transition-colors"
@@ -97,11 +97,13 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     />
                   </button>
                 </div>
-                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden">
-                  <StepEditor 
-                    API_URL={config.API_URL}
-                    selectedComponents={selectedComponents}
-                  />
+                <div className="px-8 h-[calc(100vh-8rem)] overflow-hidden">
+                  <div className="h-full">
+                    <StepEditor 
+                      API_URL={config.API_URL}
+                      selectedComponents={selectedComponents}
+                    />
+                  </div>
                 </div>
               </div>
             )}
