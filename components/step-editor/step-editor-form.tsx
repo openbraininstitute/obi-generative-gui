@@ -42,26 +42,34 @@ const PANEL_SIZES = {
       MAX: 45
     }
   },
-  BLOCK_LIST: {
-    DEFAULT: 20,
-    MIN: 15,
-    MAX: 25
-  },
-  EDITOR: {
-    DEFAULT: {
-      SINGLE: 40,
-      MULTI: 35
+  TWO_PANEL: {
+    EDITOR: {
+      DEFAULT: 35,
+      MIN: 20,
+      MAX: 80
     },
-    MIN: 30,
-    MAX: 45
+    PREVIEW: {
+      DEFAULT: 65,
+      MIN: 20,
+      MAX: 80
+    }
   },
-  PREVIEW: {
-    DEFAULT: {
-      SINGLE: 60,
-      MULTI: 45
+  THREE_PANEL: {
+    BLOCK_LIST: {
+      DEFAULT: 20,
+      MIN: 15,
+      MAX: 25
     },
-    MIN: 30,
-    MAX: 45
+    EDITOR: {
+      DEFAULT: 35,
+      MIN: 30,
+      MAX: 45
+    },
+    PREVIEW: {
+      DEFAULT: 45,
+      MIN: 30,
+      MAX: 45
+    }
   }
 };
 
@@ -397,9 +405,9 @@ export function StepEditorForm({
       !hasSingleBlock ? (
         <ResizablePanel 
           key="left"
-          defaultSize={PANEL_SIZES.BLOCK_LIST.DEFAULT}
-          minSize={PANEL_SIZES.BLOCK_LIST.MIN}
-          maxSize={PANEL_SIZES.BLOCK_LIST.MAX}
+          defaultSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.DEFAULT}
+          minSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.MIN}
+          maxSize={PANEL_SIZES.THREE_PANEL.BLOCK_LIST.MAX}
           collapsible={false}
         >
           <div className="h-full flex flex-col">
@@ -464,9 +472,9 @@ export function StepEditorForm({
       // Center Panel (Form or Editor)
       <ResizablePanel 
         key="center" 
-        defaultSize={hasSingleBlock ? PANEL_SIZES.EDITOR.DEFAULT.SINGLE : PANEL_SIZES.EDITOR.DEFAULT.MULTI}
-        minSize={PANEL_SIZES.EDITOR.MIN}
-        maxSize={PANEL_SIZES.EDITOR.MAX}
+        defaultSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.DEFAULT : PANEL_SIZES.THREE_PANEL.EDITOR.DEFAULT}
+        minSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.MIN : PANEL_SIZES.THREE_PANEL.EDITOR.MIN}
+        maxSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.EDITOR.MAX : PANEL_SIZES.THREE_PANEL.EDITOR.MAX}
         collapsible={false}
       >
         {isAddingBlock ? (
@@ -531,9 +539,9 @@ export function StepEditorForm({
       // Right Panel (LaTeX Preview or Image Viewer)
       <ResizablePanel 
         key="right" 
-        defaultSize={hasSingleBlock ? PANEL_SIZES.PREVIEW.DEFAULT.SINGLE : PANEL_SIZES.PREVIEW.DEFAULT.MULTI}
-        minSize={PANEL_SIZES.PREVIEW.MIN}
-        maxSize={PANEL_SIZES.PREVIEW.MAX}
+        defaultSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.DEFAULT : PANEL_SIZES.THREE_PANEL.PREVIEW.DEFAULT}
+        minSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.MIN : PANEL_SIZES.THREE_PANEL.PREVIEW.MIN}
+        maxSize={hasSingleBlock ? PANEL_SIZES.TWO_PANEL.PREVIEW.MAX : PANEL_SIZES.THREE_PANEL.PREVIEW.MAX}
         collapsible={false}
       >
         <div className="h-full">
@@ -559,7 +567,7 @@ export function StepEditorForm({
   return (
     <div className="h-full overflow-hidden">
       <ResizablePanelGroup
-        key={`${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}`}
+        key={`${selectedTab}-${hasSingleBlock ? 'single' : 'multi'}-layout`}
         autoSaveId={`step-editor-${selectedTab}`}
         direction="horizontal"
         className="h-full"
