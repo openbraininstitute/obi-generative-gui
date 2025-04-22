@@ -95,20 +95,20 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   ? "opacity-100 transform translate-y-0"
                   : "opacity-0 transform translate-y-4"
               )}>
-                <div className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-10">
+                <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                   <button
-                    className="p-1.5 rounded-full bg-background border shadow-lg hover:bg-muted transition-colors"
+                    className="p-1.5 rounded-full bg-[#002766] border border-blue-200/30 dark:border-gray-700 shadow-lg hover:bg-[#003694] transition-colors"
                     onClick={() => setIsWorkspaceVisible(!isWorkspaceVisible)}
                   >
                     <ChevronLeft 
                       className={cn(
-                        "h-4 w-4 transform transition-transform",
+                        "h-4 w-4 transform transition-transform text-white",
                         isWorkspaceVisible ? "-rotate-90" : "rotate-90"
                       )}
                     />
                   </button>
                 </div>
-                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-8">
+                <div className="px-8 h-[calc(100vh-12rem)] overflow-hidden mt-12">
                   <div className="h-full">
                     <StepEditor 
                       API_URL={config.API_URL}
