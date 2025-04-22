@@ -21,6 +21,7 @@ import { BlockType } from './types';
 import { BlockTypeSelector } from './block-type-selector';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
+import { ArtifactsView } from './artifacts-view';
 import { LatexPreview } from './latex-preview';
 
 // Panel size configurations
@@ -333,6 +334,14 @@ export function StepEditorForm({
 
   // Render the main panels of the editor
   const renderPanels = () => {
+    if (selectedTab === "artifacts") {
+      return [
+        <ResizablePanel key="artifacts" defaultSize={100}>
+          <ArtifactsView />
+        </ResizablePanel>
+      ];
+    }
+
     if (selectedTab === "description") {
       return [
         // Left Panel (File List)
