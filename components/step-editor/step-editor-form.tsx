@@ -406,7 +406,7 @@ export function StepEditorForm({
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
         ) : selectedSection && selectedBlock && (
           <div className="h-full flex flex-col">
-            <div className="flex-none flex items-center px-6 py-4 relative group">
+            <div className="flex-none flex items-center px-6 py-4 border-b relative group">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
