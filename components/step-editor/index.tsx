@@ -30,10 +30,12 @@ interface BlockType {
 
 export function StepEditor({ 
   API_URL,
+  activeComponent,
   selectedComponents 
 }: { 
   API_URL: string;
-  selectedComponents: string[];
+  activeComponent: string | null;
+  selectedComponents: Array<{ path: string; name: string }>;
 }) {
   const [selectedTask, setSelectedTask] = useState<string>("1");
   const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
@@ -111,7 +113,7 @@ export function StepEditor({
     setError(null);
     
     try {
-      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0], data);
+      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0].path, data);
       setResponse(result);
       
       if (!result.ok) {
@@ -162,12 +164,12 @@ export function StepEditor({
     setIsAddingBlock(true);
   };
 
-  const selectedOperation = spec && selectedComponents[0] && selectedMethod
-    ? (spec.paths[selectedComponents[0]]?.[selectedMethod.toLowerCase()] as OpenAPIV3.OperationObject)
+  const selectedOperation = spec && activeComponent && selectedMethod
+    ? (spec.paths[activeComponent]?.[selectedMethod.toLowerCase()] as OpenAPIV3.OperationObject)
     : null;
 
-  const schema = spec && selectedComponents[0] && selectedMethod
-    ? getSchemaFromPath(spec, selectedComponents[0], selectedMethod)
+  const schema = spec && activeComponent && selectedMethod
+    ? getSchemaFromPath(spec, activeComponent, selectedMethod)
     : null;
 
   if (loading && !spec) {
@@ -182,7 +184,7 @@ export function StepEditor({
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       {selectedComponents.length > 0 && (
         <>
-          <div className="flex-none px-6 py-4 border-b">
+          <div className="flex-none px-6 py-4 border-b space-y-4">
             <div className="flex items-center">
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium">Version</Label>
@@ -302,7 +304,7 @@ export function StepEditor({
                   onFileSelect={setSelectedFile}
                   onFileChange={handleFileChange}
                   isAddingBlock={isAddingBlock}
-                  activeComponent={selectedComponents[0]}
+                  activeComponent={activeComponent || selectedComponents[0]}
                 />
               )
             )}

@@ -14,7 +14,8 @@ import { PublicRuntimeConfig } from "@/lib/config.server";
 
 export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
-  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
+  const [selectedComponents, setSelectedComponents] = useState<Array<{ path: string; name: string }>>([]);
+  const [activeComponent, setActiveComponent] = useState<string | null>(null);
   const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(true);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
@@ -24,6 +25,12 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
       setIsWorkspaceVisible(false);
     }
   }, [selectedStep, selectedComponents]);
+
+  useEffect(() => {
+    if (selectedComponents.length > 0 && !activeComponent) {
+      setActiveComponent(selectedComponents[0].path);
+    }
+  }, [selectedComponents, activeComponent]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -86,8 +93,30 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 <ComponentSelector
                   API_URL={config.API_URL}
                   selectedComponents={selectedComponents} 
-                  onComponentSelect={(path) => setSelectedComponents(prev => [...prev, path])}
-                  onComponentRemove={(path) => setSelectedComponents(prev => prev.filter(p => p !== path))}
+                  activeComponent={activeComponent}
+                  onComponentSelect={(path) => {
+                    const type = path.slice(1).replace(/Form$/, '');
+                    const count = selectedComponents.filter(c => 
+                      c.path.slice(1).replace(/Form$/, '') === type
+                    ).length;
+                    setSelectedComponents(prev => [...prev, {
+                      path,
+                      name: `${type}_${count}`
+                    }]);
+                  }}
+                  onActiveComponentChange={setActiveComponent}
+                  onComponentRemove={(path) => {
+                    if (path === activeComponent) {
+                      const nextComponent = selectedComponents.find(c => c.path !== path);
+                      setActiveComponent(nextComponent?.path || null);
+                    }
+                    setSelectedComponents(prev => prev.filter(c => c.path !== path));
+                  }}
+                  onComponentRename={(path, newName) => {
+                    setSelectedComponents(prev => prev.map(c => 
+                      c.path === path ? { ...c, name: newName } : c
+                    ));
+                  }}
                 />
               </div>}
             </div>
@@ -121,6 +150,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className="h-[calc(100%-1.75rem)]">
                     <StepEditor 
                       API_URL={config.API_URL}
+                      activeComponent={activeComponent}
                       selectedComponents={selectedComponents}
                     />
                   </div>
