@@ -81,9 +81,14 @@ export function ComponentSelector({
           {selectedComponents.map(({ path, name }) => (
             <Button
               key={path}
-              variant={activeComponent === path ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              className="flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14"
+              className={cn(
+                "flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14",
+                activeComponent === path 
+                  ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700" 
+                  : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
+              )}
               onClick={() => {
                 if (editingComponent !== path) {
                   onActiveComponentChange(path);
@@ -116,8 +121,14 @@ export function ComponentSelector({
                       setEditedName(name);
                     }}
                   >
-                    <span className="text-base font-medium">{name}</span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className={cn(
+                      "text-base font-medium",
+                      activeComponent === path ? "text-[#002766] dark:text-white" : "text-white"
+                    )}>{name}</span>
+                    <span className={cn(
+                      "text-sm",
+                      activeComponent === path ? "text-muted-foreground" : "text-white/70"
+                    )}>
                       {getEndpointDisplayName(path)}
                     </span>
                   </span>
@@ -149,7 +160,7 @@ export function ComponentSelector({
           <Button
             variant="outline"
             size="sm"
-            className="flex-shrink-0 h-14 text-base"
+            className="flex-shrink-0 h-14 text-base bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
             onClick={() => setIsAddingComponent(true)}
           >
             Add component +
