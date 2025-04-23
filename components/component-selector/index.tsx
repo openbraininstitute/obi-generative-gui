@@ -13,8 +13,9 @@ interface ComponentSelectorProps {
   activeComponent: string | null;
   onComponentSelect: (path: string) => void;
   onComponentRemove: (path: string) => void;
-  onActiveComponentChange: (path: string) => void;
+  onActiveComponentChange: (path: string | null) => void;
   onComponentRename: (path: string, newName: string) => void;
+  onAddComponentClick: () => void;
   API_URL: string;
 }
 
@@ -26,18 +27,29 @@ export function ComponentSelector({
   onComponentRemove,
   onActiveComponentChange,
   onComponentRename,
+  onAddComponentClick,
   API_URL
 }: ComponentSelectorProps) {
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAddingComponent, setIsAddingComponent] = useState(false);
+  const [isComponentTableVisible, setIsComponentTableVisible] = useState(false);
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
   const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
     fetchAvailableEndpoints();
   }, []);
+
+  useEffect(() => {
+    if (!isAddingComponent) {
+      setIsComponentTableVisible(false);
+    } else {
+      // Small delay to ensure smooth transition
+      setTimeout(() => setIsComponentTableVisible(true), 50);
+    }
+  }, [isAddingComponent]);
 
   const fetchAvailableEndpoints = async () => {
     try {
@@ -86,12 +98,14 @@ export function ComponentSelector({
               className={cn(
                 "flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14",
                 activeComponent === path 
-                  ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700" 
+                  ? !isAddingComponent 
+                    ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700"
+                    : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
                   : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
               )}
               onClick={() => {
                 if (editingComponent !== path) {
-                  onActiveComponentChange(path);
+                  onActiveComponentChange(isAddingComponent ? null : path);
                   setIsAddingComponent(false);
                 }
               }}
@@ -124,11 +138,11 @@ export function ComponentSelector({
                   >
                     <span className={cn(
                       "text-base font-medium",
-                      activeComponent === path ? "text-[#002766] dark:text-white" : "text-white"
+                      activeComponent === path && !isAddingComponent ? "text-[#002766] dark:text-white" : "text-white"
                     )}>{name}</span>
                     <span className={cn(
                       "text-sm",
-                      activeComponent === path ? "text-muted-foreground" : "text-white/70"
+                      activeComponent === path && !isAddingComponent ? "text-muted-foreground" : "text-white/70"
                     )}>
                       {getEndpointDisplayName(path)}
                     </span>
@@ -161,8 +175,16 @@ export function ComponentSelector({
           <Button
             variant="outline"
             size="sm"
-            className="flex-shrink-0 h-14 text-base bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
-            onClick={() => setIsAddingComponent(prev => !prev)}
+            className={cn(
+              "flex-shrink-0 h-14 text-base",
+              isAddingComponent
+                ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700"
+                : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
+            )}
+            onClick={() => {
+              setIsAddingComponent(prev => !prev);
+              onAddComponentClick();
+            }}
           >
             Add component +
           </Button>
@@ -176,7 +198,7 @@ export function ComponentSelector({
       </div>
 
       {/* Components Table */}
-      {isAddingComponent && (
+      {isComponentTableVisible && (
         <div className="px-8 py-2 w-1/3">
           {loading ? (
             <div className="text-center py-4 text-muted-foreground bg-background rounded-lg">
@@ -192,6 +214,7 @@ export function ComponentSelector({
                     onComponentSelect(path);
                     onActiveComponentChange(path);
                     setIsAddingComponent(false);
+                    setIsComponentTableVisible(false);
                   }}
                 >
                   <div className="flex-1">
