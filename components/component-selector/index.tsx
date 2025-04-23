@@ -149,7 +149,7 @@ export function ComponentSelector({
                       {getEndpointDisplayName(path)}
                     </span>
                   </span>
-                  <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       className="cursor-pointer"
                       onClick={(e) => {
@@ -158,7 +158,7 @@ export function ComponentSelector({
                         setEditedName(name);
                       }}
                     >
-                      <Edit2 className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                      <Edit2 className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
                     </button>
                     <button
                       className="cursor-pointer"
@@ -167,7 +167,7 @@ export function ComponentSelector({
                         onComponentRemove(path);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                      <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80 transition-colors" />
                     </button>
                   </div>
                 </div>
