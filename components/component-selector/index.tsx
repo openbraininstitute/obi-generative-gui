@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComponentSelectorProps {
