@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComponentSelectorProps {
@@ -13,8 +15,9 @@ interface ComponentSelectorProps {
   activeComponent: string | null;
   onComponentSelect: (path: string) => void;
   onComponentRemove: (path: string) => void;
-  onActiveComponentChange: (path: string) => void;
+  onActiveComponentChange: (path: string | null) => void;
   onComponentRename: (path: string, newName: string) => void;
+  onAddComponentClick: () => void;
   API_URL: string;
 }
 
@@ -26,18 +29,29 @@ export function ComponentSelector({
   onComponentRemove,
   onActiveComponentChange,
   onComponentRename,
+  onAddComponentClick,
   API_URL
 }: ComponentSelectorProps) {
   const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAddingComponent, setIsAddingComponent] = useState(false);
+  const [isComponentTableVisible, setIsComponentTableVisible] = useState(false);
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
   const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
     fetchAvailableEndpoints();
   }, []);
+
+  useEffect(() => {
+    if (!isAddingComponent) {
+      setIsComponentTableVisible(false);
+    } else {
+      // Small delay to ensure smooth transition
+      setTimeout(() => setIsComponentTableVisible(true), 50);
+    }
+  }, [isAddingComponent]);
 
   const fetchAvailableEndpoints = async () => {
     try {
@@ -74,19 +88,27 @@ export function ComponentSelector({
   };
 
   return (
-    <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mx-8", className)}>
+    <div className={cn("bg-transparent", className)}>
       {/* Selected Components Header */}
-      <div className="px-4 py-2 border-b flex items-center justify-between">
+      <div className="px-8 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-x-auto">
           {selectedComponents.map(({ path, name }) => (
             <Button
               key={path}
-              variant={activeComponent === path ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              className="flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14"
+              className={cn(
+                "flex items-center gap-2 group relative pr-8 flex-shrink-0 h-14",
+                activeComponent === path 
+                  ? !isAddingComponent 
+                    ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700"
+                    : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
+                  : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
+              )}
               onClick={() => {
                 if (editingComponent !== path) {
-                  onActiveComponentChange(path);
+                  onActiveComponentChange(isAddingComponent ? null : path);
+                  setIsAddingComponent(false);
                 }
               }}
             >
@@ -107,7 +129,7 @@ export function ComponentSelector({
                   autoFocus
                 />
               ) : (
-                <>
+                <div className="bg-transparent">
                   <span 
                     className="flex flex-col items-start"
                     onDoubleClick={(e) => {
@@ -116,12 +138,18 @@ export function ComponentSelector({
                       setEditedName(name);
                     }}
                   >
-                    <span className="text-base font-medium">{name}</span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className={cn(
+                      "text-base font-medium",
+                      activeComponent === path && !isAddingComponent ? "text-[#002766] dark:text-white" : "text-white"
+                    )}>{name}</span>
+                    <span className={cn(
+                      "text-sm",
+                      activeComponent === path && !isAddingComponent ? "text-muted-foreground" : "text-white/70"
+                    )}>
                       {getEndpointDisplayName(path)}
                     </span>
                   </span>
-                  <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       className="cursor-pointer"
                       onClick={(e) => {
@@ -130,7 +158,7 @@ export function ComponentSelector({
                         setEditedName(name);
                       }}
                     >
-                      <Edit2 className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                      <Edit2 className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
                     </button>
                     <button
                       className="cursor-pointer"
@@ -139,18 +167,26 @@ export function ComponentSelector({
                         onComponentRemove(path);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                      <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80 transition-colors" />
                     </button>
                   </div>
-                </>
+                </div>
               )}
             </Button>
           ))}
           <Button
             variant="outline"
             size="sm"
-            className="flex-shrink-0 h-14 text-base"
-            onClick={() => setIsAddingComponent(true)}
+            className={cn(
+              "flex-shrink-0 h-14 text-base",
+              isAddingComponent
+                ? "bg-background text-[#002766] dark:text-white border border-blue-200/30 dark:border-gray-700"
+                : "bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
+            )}
+            onClick={() => {
+              setIsAddingComponent(prev => !prev);
+              onAddComponentClick();
+            }}
           >
             Add component +
           </Button>
@@ -164,22 +200,23 @@ export function ComponentSelector({
       </div>
 
       {/* Components Table */}
-      {isAddingComponent && (
-        <div className="p-3">
+      {isComponentTableVisible && (
+        <div className="px-8 py-2 w-1/3">
           {loading ? (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground bg-background rounded-lg">
               Loading available components...
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y bg-background rounded-lg">
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
                   key={path}
-                  className="flex items-start gap-2 py-2 px-3 w-full hover:bg-muted/50 transition-colors text-left group"
+                  className="flex items-start gap-2 py-2 w-full hover:bg-muted/50 transition-colors text-left group text-foreground px-3"
                   onClick={() => {
                     onComponentSelect(path);
                     onActiveComponentChange(path);
                     setIsAddingComponent(false);
+                    setIsComponentTableVisible(false);
                   }}
                 >
                   <div className="flex-1">
@@ -190,7 +227,7 @@ export function ComponentSelector({
                   </div>
                 </button>
               )) : (
-                <div className="text-center text-muted-foreground py-4">
+                <div className="text-center text-muted-foreground py-4 px-3">
                   No components available. Please check your connection to the API server.
                 </div>
               )}

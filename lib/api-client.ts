@@ -9,6 +9,39 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+// Implement retry logic with exponential backoff
+async function fetchWithRetry(
+  url: string, 
+  options: RequestInit, 
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<Response> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < maxRetries - 1) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError;
+}
+
 export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document> {
   try {
     if (!url) {
@@ -24,7 +57,7 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
     console.log('\n=== Fetching OpenAPI Spec ===');
     console.log('URL:', `${cleanUrl}/openapi.json`);
     
-    const response = await fetch(`${cleanUrl}/openapi.json`, {
+    const response = await fetchWithRetry(`${cleanUrl}/openapi.json`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -87,7 +120,7 @@ export async function callEndpoint(url: string, method: string, path: string, da
     console.log('Request Body:', JSON.stringify(data, null, 2));
     console.log('================\n');
     
-    const response = await fetch(fullUrl, {
+    const response = await fetchWithRetry(fullUrl, {
       method: method.toUpperCase(),
       headers: {
         'Content-Type': 'application/json',

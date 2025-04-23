@@ -16,21 +16,17 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<Array<{ path: string; name: string }>>([]);
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
+  const [isAddingComponent, setIsAddingComponent] = useState(false);
   const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(true);
+  const [isStepEditorVisible, setIsStepEditorVisible] = useState(true);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
 
   useEffect(() => {
-    if (selectedStep && selectedComponents.length > 0) {
-      setIsWorkspaceVisible(false);
-    }
-  }, [selectedStep, selectedComponents]);
-
-  useEffect(() => {
-    if (selectedComponents.length > 0 && !activeComponent) {
+    if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
       setActiveComponent(selectedComponents[0].path);
     }
-  }, [selectedComponents, activeComponent]);
+  }, [selectedComponents, activeComponent, isAddingComponent]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -99,12 +95,18 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     const count = selectedComponents.filter(c => 
                       c.path.slice(1).replace(/Form$/, '') === type
                     ).length;
+                    setIsAddingComponent(false);
+                    setActiveComponent(path);
                     setSelectedComponents(prev => [...prev, {
                       path,
                       name: `${type}_${count}`
                     }]);
+                    setIsStepEditorVisible(true);
                   }}
-                  onActiveComponentChange={setActiveComponent}
+                  onActiveComponentChange={(path: string | null) => {
+                    setActiveComponent(path || null);
+                    setIsStepEditorVisible(!!path);
+                  }}
                   onComponentRemove={(path) => {
                     if (path === activeComponent) {
                       const nextComponent = selectedComponents.find(c => c.path !== path);
@@ -117,20 +119,25 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                       c.path === path ? { ...c, name: newName } : c
                     ));
                   }}
+                  onAddComponentClick={() => {
+                    setIsStepEditorVisible(false);
+                    setIsAddingComponent(true);
+                    setActiveComponent(null);
+                  }}
                 />
               </div>}
             </div>
             {selectedStep && selectedComponents.length > 0 && (
               <div className={cn(
                 "relative transition-all duration-300 ease-in-out",
-                selectedStep && selectedComponents.length > 0
+                selectedStep && selectedComponents.length > 0 && isStepEditorVisible
                   ? "opacity-100 transform translate-y-0"
                   : "opacity-0 transform translate-y-4"
               )}>
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                   <button
                     className="p-1.5 text-white hover:text-white/80 transition-colors"
-                    onClick={() => setIsWorkspaceVisible(!isWorkspaceVisible)}
+                    onClick={() => setIsWorkspaceVisible(prev => !prev)}
                   >
                     <ChevronLeft 
                       className={cn(
@@ -150,7 +157,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className="h-[calc(100%-1.75rem)]">
                     <StepEditor 
                       API_URL={config.API_URL}
-                      activeComponent={activeComponent}
+                      activeComponent={activeComponent || selectedComponents[0]?.path || null}
                       selectedComponents={selectedComponents}
                     />
                   </div>
