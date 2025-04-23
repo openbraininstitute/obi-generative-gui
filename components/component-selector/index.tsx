@@ -74,7 +74,7 @@ export function ComponentSelector({
   };
 
   return (
-    <div className={cn("bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 mx-8", className)}>
+    <div className={cn("bg-transparent rounded-lg border border-[#40A9FF] mx-8", className)}>
       {/* Selected Components Header */}
       <div className="px-4 py-2 border-b flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-x-auto">
@@ -107,7 +107,7 @@ export function ComponentSelector({
                   autoFocus
                 />
               ) : (
-                <>
+                <div className="bg-transparent">
                   <span 
                     className="flex flex-col items-start"
                     onDoubleClick={(e) => {
@@ -142,7 +142,7 @@ export function ComponentSelector({
                       <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
                     </button>
                   </div>
-                </>
+                </div>
               )}
             </Button>
           ))}
@@ -167,7 +167,7 @@ export function ComponentSelector({
       {isAddingComponent && (
         <div className="p-3">
           {loading ? (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground bg-transparent">
               Loading available components...
             </div>
           ) : (
@@ -175,7 +175,7 @@ export function ComponentSelector({
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
                   key={path}
-                  className="flex items-start gap-2 py-2 px-3 w-full hover:bg-muted/50 transition-colors text-left group"
+                  className="flex items-start gap-2 py-2 px-3 w-full hover:bg-muted/50 transition-colors text-left group bg-transparent"
                   onClick={() => {
                     onComponentSelect(path);
                     onActiveComponentChange(path);
@@ -190,7 +190,7 @@ export function ComponentSelector({
                   </div>
                 </button>
               )) : (
-                <div className="text-center text-muted-foreground py-4">
+                <div className="text-center text-muted-foreground py-4 bg-transparent">
                   No components available. Please check your connection to the API server.
                 </div>
               )}
