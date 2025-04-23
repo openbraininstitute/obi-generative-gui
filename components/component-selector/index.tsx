@@ -74,9 +74,9 @@ export function ComponentSelector({
   };
 
   return (
-    <div className={cn("bg-transparent rounded-lg mx-8", className)}>
+    <div className={cn("bg-transparent", className)}>
       {/* Selected Components Header */}
-      <div className="px-4 py-2 flex items-center justify-between">
+      <div className="px-8 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-x-auto">
           {selectedComponents.map(({ path, name }) => (
             <Button
@@ -176,7 +176,7 @@ export function ComponentSelector({
 
       {/* Components Table */}
       {isAddingComponent && (
-        <div className="p-3">
+        <div className="px-8 py-2">
           {loading ? (
             <div className="text-center py-4 text-muted-foreground bg-transparent">
               Loading available components...
@@ -186,7 +186,7 @@ export function ComponentSelector({
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
                   key={path}
-                  className="flex items-start gap-2 py-2 px-3 w-full hover:bg-muted/50 transition-colors text-left group bg-transparent"
+                  className="flex items-start gap-2 py-2 w-full hover:bg-muted/50 transition-colors text-left group bg-transparent text-white"
                   onClick={() => {
                     onComponentSelect(path);
                     onActiveComponentChange(path);
@@ -194,8 +194,8 @@ export function ComponentSelector({
                   }}
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium">{getEndpointDisplayName(path)}</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">
+                    <h3 className="font-medium text-white">{getEndpointDisplayName(path)}</h3>
+                    <p className="text-sm text-white/70 mt-0.5">
                       Form component for {getEndpointDisplayName(path).toLowerCase()}
                     </p>
                   </div>
