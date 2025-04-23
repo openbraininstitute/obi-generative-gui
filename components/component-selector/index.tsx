@@ -176,17 +176,17 @@ export function ComponentSelector({
 
       {/* Components Table */}
       {isAddingComponent && (
-        <div className="px-8 py-2">
+        <div className="px-8 py-2 w-1/3">
           {loading ? (
-            <div className="text-center py-4 text-muted-foreground bg-transparent">
+            <div className="text-center py-4 text-muted-foreground bg-background rounded-lg">
               Loading available components...
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y bg-background rounded-lg">
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
                   key={path}
-                  className="flex items-start gap-2 py-2 w-full hover:bg-muted/50 transition-colors text-left group bg-transparent text-white"
+                  className="flex items-start gap-2 py-2 w-full hover:bg-muted/50 transition-colors text-left group text-foreground px-3"
                   onClick={() => {
                     onComponentSelect(path);
                     onActiveComponentChange(path);
@@ -194,14 +194,14 @@ export function ComponentSelector({
                   }}
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium text-white">{getEndpointDisplayName(path)}</h3>
-                    <p className="text-sm text-white/70 mt-0.5">
+                    <h3 className="font-medium">{getEndpointDisplayName(path)}</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       Form component for {getEndpointDisplayName(path).toLowerCase()}
                     </p>
                   </div>
                 </button>
               )) : (
-                <div className="text-center text-muted-foreground py-4 bg-transparent">
+                <div className="text-center text-muted-foreground py-4 px-3">
                   No components available. Please check your connection to the API server.
                 </div>
               )}
