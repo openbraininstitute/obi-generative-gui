@@ -92,6 +92,7 @@ export function ComponentSelector({
               onClick={() => {
                 if (editingComponent !== path) {
                   onActiveComponentChange(path);
+                  setIsAddingComponent(false);
                 }
               }}
             >
@@ -161,7 +162,7 @@ export function ComponentSelector({
             variant="outline"
             size="sm"
             className="flex-shrink-0 h-14 text-base bg-transparent border border-[#40A9FF] text-white hover:bg-blue-800/30 dark:hover:bg-black/30"
-            onClick={() => setIsAddingComponent(true)}
+            onClick={() => setIsAddingComponent(prev => !prev)}
           >
             Add component +
           </Button>
