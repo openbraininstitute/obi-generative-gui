@@ -87,7 +87,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               {selectedStep && <div className={cn(
                 "mt-2 transition-all duration-300 ease-in-out",
                 selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4",
-                "space-y-1"
+                "space-y-0"
               )}>
                 <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
                 <ComponentSelector

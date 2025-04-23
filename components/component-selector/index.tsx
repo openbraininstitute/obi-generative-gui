@@ -76,7 +76,7 @@ export function ComponentSelector({
   return (
     <div className={cn("bg-transparent rounded-lg mx-8", className)}>
       {/* Selected Components Header */}
-      <div className="px-4 py-2 border-b flex items-center justify-between">
+      <div className="px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2 overflow-x-auto">
           {selectedComponents.map(({ path, name }) => (
             <Button
