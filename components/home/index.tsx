@@ -23,12 +23,6 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
 
   useEffect(() => {
-    if (selectedStep && selectedComponents.length > 0) {
-      setIsWorkspaceVisible(false);
-    }
-  }, [selectedStep, selectedComponents]);
-
-  useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
       setActiveComponent(selectedComponents[0].path);
     }
@@ -143,7 +137,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                   <button
                     className="p-1.5 text-white hover:text-white/80 transition-colors"
-                    onClick={() => setIsWorkspaceVisible(!isWorkspaceVisible)}
+                    onClick={() => setIsWorkspaceVisible(prev => !prev)}
                   >
                     <ChevronLeft 
                       className={cn(
