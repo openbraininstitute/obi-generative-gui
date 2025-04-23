@@ -22,10 +22,9 @@ export function getPublicRuntimeConfig(): PublicRuntimeConfig {
     if (isClient()) {
       throw new Error("getRuntimeConfig() must not be called on the client");
     }
-    const config = {
+    cachedConfig = {
       API_URL: requireEnv("ENTITYCORE_API_URL"),
     };
-    cachedConfig = config;
   }
   return cachedConfig;
 }

@@ -18,6 +18,14 @@ WORKDIR /app
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+ARG APP_NAME
+ARG APP_VERSION
+ARG COMMIT_SHA
+ENV APP_NAME=${APP_NAME}
+ENV APP_VERSION=${APP_VERSION}
+ENV COMMIT_SHA=${COMMIT_SHA}
+
 USER node
 EXPOSE 8000
 ENV PORT=8000
