@@ -23,7 +23,7 @@ export function getPublicRuntimeConfig(): PublicRuntimeConfig {
       throw new Error("getRuntimeConfig() must not be called on the client");
     }
     cachedConfig = {
-      API_URL: requireEnv("ENTITYCORE_URL"),
+      API_URL: requireEnv("OBI_ONE_URL"),
     };
   }
   return cachedConfig;
