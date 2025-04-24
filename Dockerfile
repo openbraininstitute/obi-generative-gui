@@ -11,6 +11,8 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ARG ROOT_PATH
+ENV ROOT_PATH=${ROOT_PATH}
 RUN npm run build
 
 FROM base AS runner
@@ -30,4 +32,5 @@ USER node
 EXPOSE 8000
 ENV PORT=8000
 ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
 CMD ["node", "server.js"]
