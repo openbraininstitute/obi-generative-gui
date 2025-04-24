@@ -9,6 +9,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  basePath: process.env.ROOT_PATH,
 };
 
 module.exports = nextConfig;

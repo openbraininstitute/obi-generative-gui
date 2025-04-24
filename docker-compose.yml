@@ -9,6 +9,7 @@ services:
         - APP_NAME
         - APP_VERSION
         - COMMIT_SHA
+        - ROOT_PATH
       tags:
         - "${IMAGE_NAME}:${IMAGE_TAG_ALIAS}"
     ports:
