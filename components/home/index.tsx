@@ -9,6 +9,7 @@ import { ProjectWorkspace } from "@/components/project-workspace";
 import { ComponentSelector } from "@/components/component-selector";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
+import { ExploreWindow } from "@/components/explore-window";
 import { cn } from "@/lib/utils";
 import { PublicRuntimeConfig } from "@/lib/config.server";
 
@@ -72,103 +73,113 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         )}
 
         {/* Right Side - Project Workspace and Step Editor */}
-        <div className={cn(
-          "flex-1 p-6 pb-6 overflow-hidden h-full transition-transform duration-500 ease-in-out",
-          isExploring && !isAIAgentOnRight ? "translate-x-full" : "",
-          isExploring && isAIAgentOnRight ? "-translate-x-full" : ""
-        )}>
-          <div className="h-full flex flex-col">
-            <div className={cn(
-              "transition-all duration-300 ease-in-out",
-              isWorkspaceVisible 
-                ? "flex-1 opacity-100 transform translate-y-0 mb-2" 
-                : "h-0 opacity-0 transform -translate-y-4 pointer-events-none overflow-hidden"
-            )}>
-              <ProjectWorkspace onStepSelect={setSelectedStep} />
-              {selectedStep && <div className={cn(
-                "mt-2 transition-all duration-300 ease-in-out",
-                selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4",
-                "space-y-1"
-              )}>
-                <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
-                <ComponentSelector
-                  API_URL={config.API_URL}
-                  selectedComponents={selectedComponents} 
-                  activeComponent={activeComponent}
-                  onComponentSelect={(path) => {
-                    const type = path.slice(1).replace(/Form$/, '');
-                    const count = selectedComponents.filter(c => 
-                      c.path.slice(1).replace(/Form$/, '') === type
-                    ).length;
-                    setIsAddingComponent(false);
-                    setActiveComponent(path);
-                    setSelectedComponents(prev => [...prev, {
-                      path,
-                      name: `${type}_${count}`
-                    }]);
-                    setIsStepEditorVisible(true);
-                  }}
-                  onActiveComponentChange={(path: string | null) => {
-                    setActiveComponent(path || null);
-                    setIsStepEditorVisible(!!path);
-                  }}
-                  onComponentRemove={(path) => {
-                    if (path === activeComponent) {
-                      const nextComponent = selectedComponents.find(c => c.path !== path);
-                      setActiveComponent(nextComponent?.path || null);
-                    }
-                    setSelectedComponents(prev => prev.filter(c => c.path !== path));
-                  }}
-                  onComponentRename={(path, newName) => {
-                    setSelectedComponents(prev => prev.map(c => 
-                      c.path === path ? { ...c, name: newName } : c
-                    ));
-                  }}
-                  onAddComponentClick={() => {
-                    setIsStepEditorVisible(false);
-                    setIsAddingComponent(true);
-                    setActiveComponent(null);
-                  }}
-                />
-              </div>}
-            </div>
-            {selectedStep && selectedComponents.length > 0 && (
+        <div className="flex-1 relative overflow-hidden">
+          <div className={cn(
+            "absolute inset-0 p-6 pb-6 overflow-hidden transition-transform duration-500 ease-in-out",
+            isExploring && !isAIAgentOnRight ? "translate-x-full" : "",
+            isExploring && isAIAgentOnRight ? "-translate-x-full" : ""
+          )}>
+            <div className="h-full flex flex-col">
               <div className={cn(
-                "relative transition-all duration-300 ease-in-out",
-                selectedStep && selectedComponents.length > 0 && isStepEditorVisible
-                  ? "opacity-100 transform translate-y-0"
-                  : "opacity-0 transform translate-y-4"
+                "transition-all duration-300 ease-in-out",
+                isWorkspaceVisible 
+                  ? "flex-1 opacity-100 transform translate-y-0 mb-2" 
+                  : "h-0 opacity-0 transform -translate-y-4 pointer-events-none overflow-hidden"
               )}>
-                <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
-                  <button
-                    className="p-1.5 text-white hover:text-white/80 transition-colors"
-                    onClick={() => setIsWorkspaceVisible(prev => !prev)}
-                  >
-                    <ChevronLeft 
-                      className={cn(
-                        "h-4 w-4 transform transition-transform",
-                        isWorkspaceVisible ? "rotate-90" : "-rotate-90"
-                      )}
-                    />
-                  </button>
-                </div>
-                <div className={cn(
-                  "px-8 overflow-hidden space-y-2",
-                  isWorkspaceVisible 
-                    ? "h-[calc(100vh-20rem)]" 
-                    : "h-[calc(100vh-8rem)]"
+                <ProjectWorkspace onStepSelect={setSelectedStep} />
+                {selectedStep && <div className={cn(
+                  "mt-2 transition-all duration-300 ease-in-out",
+                  selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4",
+                  "space-y-1"
                 )}>
-                  <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
-                  <div className="h-[calc(100%-1.75rem)]">
-                    <StepEditor 
-                      API_URL={config.API_URL}
-                      activeComponent={activeComponent || selectedComponents[0]?.path || null}
-                      selectedComponents={selectedComponents}
-                    />
+                  <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
+                  <ComponentSelector
+                    API_URL={config.API_URL}
+                    selectedComponents={selectedComponents} 
+                    activeComponent={activeComponent}
+                    onComponentSelect={(path) => {
+                      const type = path.slice(1).replace(/Form$/, '');
+                      const count = selectedComponents.filter(c => 
+                        c.path.slice(1).replace(/Form$/, '') === type
+                      ).length;
+                      setIsAddingComponent(false);
+                      setActiveComponent(path);
+                      setSelectedComponents(prev => [...prev, {
+                        path,
+                        name: `${type}_${count}`
+                      }]);
+                      setIsStepEditorVisible(true);
+                    }}
+                    onActiveComponentChange={(path: string | null) => {
+                      setActiveComponent(path || null);
+                      setIsStepEditorVisible(!!path);
+                    }}
+                    onComponentRemove={(path) => {
+                      if (path === activeComponent) {
+                        const nextComponent = selectedComponents.find(c => c.path !== path);
+                        setActiveComponent(nextComponent?.path || null);
+                      }
+                      setSelectedComponents(prev => prev.filter(c => c.path !== path));
+                    }}
+                    onComponentRename={(path, newName) => {
+                      setSelectedComponents(prev => prev.map(c => 
+                        c.path === path ? { ...c, name: newName } : c
+                      ));
+                    }}
+                    onAddComponentClick={() => {
+                      setIsStepEditorVisible(false);
+                      setIsAddingComponent(true);
+                      setActiveComponent(null);
+                    }}
+                  />
+                </div>}
+              </div>
+              {selectedStep && selectedComponents.length > 0 && (
+                <div className={cn(
+                  "relative transition-all duration-300 ease-in-out",
+                  selectedStep && selectedComponents.length > 0 && isStepEditorVisible
+                    ? "opacity-100 transform translate-y-0"
+                    : "opacity-0 transform translate-y-4"
+                )}>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
+                    <button
+                      className="p-1.5 text-white hover:text-white/80 transition-colors"
+                      onClick={() => setIsWorkspaceVisible(prev => !prev)}
+                    >
+                      <ChevronLeft 
+                        className={cn(
+                          "h-4 w-4 transform transition-transform",
+                          isWorkspaceVisible ? "rotate-90" : "-rotate-90"
+                        )}
+                      />
+                    </button>
+                  </div>
+                  <div className={cn(
+                    "px-8 overflow-hidden space-y-2",
+                    isWorkspaceVisible 
+                      ? "h-[calc(100vh-20rem)]" 
+                      : "h-[calc(100vh-8rem)]"
+                  )}>
+                    <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
+                    <div className="h-[calc(100%-1.75rem)]">
+                      <StepEditor 
+                        API_URL={config.API_URL}
+                        activeComponent={activeComponent || selectedComponents[0]?.path || null}
+                        selectedComponents={selectedComponents}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+          <div className={cn(
+            "absolute inset-0 transition-transform duration-500 ease-in-out",
+            !isExploring && !isAIAgentOnRight ? "-translate-x-full" : "",
+            !isExploring && isAIAgentOnRight ? "translate-x-full" : "",
+            isExploring ? "translate-x-0" : ""
+          )}>
+            <ExploreWindow />
           </div>
         </div>
 
