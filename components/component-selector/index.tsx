@@ -5,10 +5,11 @@ import { Trash2 } from "lucide-react";
 import { Edit2 } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { fetchOpenAPISpec, getGeneratedEndpoints } from "@/lib/api-client";
+import { Button } from "@/components/ui/button"; 
+import { fetchOpenAPISpec } from "@/lib/api-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { OpenAPIV3 } from "openapi-types";
 
 interface ComponentSelectorProps {
   className?: string;
@@ -22,6 +23,12 @@ interface ComponentSelectorProps {
   API_URL: string;
 }
 
+interface EndpointInfo {
+  path: string;
+  summary: string;
+  description: string;
+}
+
 export function ComponentSelector({
   className,
   selectedComponents,
@@ -33,7 +40,7 @@ export function ComponentSelector({
   onAddComponentClick,
   API_URL
 }: ComponentSelectorProps) {
-  const [availableEndpoints, setAvailableEndpoints] = useState<string[]>([]);
+  const [availableEndpoints, setAvailableEndpoints] = useState<EndpointInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isAddingComponent, setIsAddingComponent] = useState(false);
@@ -43,7 +50,19 @@ export function ComponentSelector({
 
   useEffect(() => {
     fetchOpenAPISpec(API_URL).then(spec => {
-      const endpoints = getGeneratedEndpoints(spec);
+      const endpoints = Object.entries(spec.paths)
+        .filter(([_, pathItem]) => {
+          const postOperation = (pathItem as OpenAPIV3.PathItemObject).post as OpenAPIV3.OperationObject;
+          return postOperation?.tags?.includes('generated');
+        })
+        .map(([path, pathItem]) => {
+          const postOperation = (pathItem as OpenAPIV3.PathItemObject).post as OpenAPIV3.OperationObject;
+          return {
+            path,
+            summary: postOperation.summary || 'No summary available',
+            description: postOperation.description || 'No description available'
+          };
+        });
       setAvailableEndpoints(endpoints);
       setError(null);
     }).catch(error => {
@@ -60,14 +79,6 @@ export function ComponentSelector({
       setTimeout(() => setIsComponentTableVisible(true), 50);
     }
   }, [isAddingComponent]);
-
-  const getEndpointDisplayName = (path: string) => {
-    return path
-      .replace(/Form$/, '')
-      .split(/(?=[A-Z])/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  };
 
   return (
     <div className={cn("bg-transparent", className)}>
@@ -125,10 +136,10 @@ export function ComponentSelector({
                       activeComponent === path && !isAddingComponent ? "text-[#002766] dark:text-white" : "text-white"
                     )}>{name}</span>
                     <span className={cn(
-                      "text-sm",
+                      "text-xs",
                       activeComponent === path && !isAddingComponent ? "text-muted-foreground" : "text-white/70"
                     )}>
-                      {getEndpointDisplayName(path)}
+                      {availableEndpoints.find(e => e.path === path)?.summary || ''}
                     </span>
                   </span>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -192,19 +203,19 @@ export function ComponentSelector({
             <div className="divide-y bg-background rounded-lg">
               {availableEndpoints.length > 0 ? availableEndpoints.map((path) => (
                 <button
-                  key={path}
+                  key={path.path}
                   className="flex items-start gap-2 py-2 w-full hover:bg-muted/50 transition-colors text-left group text-foreground px-3"
                   onClick={() => {
-                    onComponentSelect(path);
-                    onActiveComponentChange(path);
+                    onComponentSelect(path.path);
+                    onActiveComponentChange(path.path);
                     setIsAddingComponent(false);
                     setIsComponentTableVisible(false);
                   }}
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium">{getEndpointDisplayName(path)}</h3>
+                    <h3 className="font-medium">{path.summary}</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                      Form component for {getEndpointDisplayName(path).toLowerCase()}
+                      {path.description}
                     </p>
                   </div>
                 </button>
