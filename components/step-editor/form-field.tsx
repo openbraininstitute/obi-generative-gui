@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PlusCircle, X } from "lucide-react";
 import { UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
 interface BlockData {
   id: string;
@@ -45,6 +46,38 @@ export function FormField({
 
   const resolvedProperty = resolveSchema(property);
   const currentValue = watch(name);
+
+  const hasFromIDType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
+    const resolved = resolveSchema(property);
+    
+    // Check if the schema reference contains FromID
+    if ('$ref' in property && property.$ref.includes('FromID')) {
+      return true;
+    }
+    
+    // Check if the title or type contains FromID
+    if (resolved.title?.includes('FromID')) {
+      return true;
+    }
+    
+    // Check array items
+    if (resolved.type === 'array' && resolved.items) {
+      return hasFromIDType(resolved.items as OpenAPIV3.SchemaObject);
+    }
+    
+    // Check anyOf schemas
+    if (resolved.anyOf) {
+      return resolved.anyOf.some(schema => 
+        hasFromIDType(schema as OpenAPIV3.SchemaObject)
+      );
+    }
+    
+    return false;
+  };
+
+  const isFromIDType = (property: OpenAPIV3.SchemaObject): boolean => {
+    return hasFromIDType(property);
+  };
 
   const isArrayType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
     const resolvedProperty = resolveSchema(property);
@@ -111,7 +144,10 @@ export function FormField({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild className="cursor-pointer">
-              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+              <Label className={cn(
+                "text-sm w-[65%]",
+                isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+              )}>{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -245,7 +281,10 @@ export function FormField({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild className="cursor-pointer">
-              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+              <Label className={cn(
+                "text-sm w-[65%]",
+                isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+              )}>{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -287,7 +326,10 @@ export function FormField({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild className="cursor-pointer">
-              <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+              <Label className={cn(
+                "text-sm w-[65%]",
+                isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+              )}>{name}</Label>
             </TooltipTrigger>
             <TooltipContent>
               <p>{resolvedProperty.description || 'No description available'}</p>
@@ -348,7 +390,10 @@ export function FormField({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild className="cursor-pointer">
-                  <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+                  <Label className={cn(
+                    "text-sm w-[65%]",
+                    isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+                  )}>{name}</Label>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{resolvedProperty.description || 'No description available'}</p>
@@ -383,7 +428,10 @@ export function FormField({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild className="cursor-pointer">
-                <Label className="text-sm text-muted-foreground w-[65%]">{name}</Label>
+                <Label className={cn(
+                  "text-sm w-[65%]",
+                  isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+                )}>{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
@@ -412,7 +460,10 @@ export function FormField({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild className="cursor-pointer">
-                <Label className="text-sm text-muted-foreground w-[35%]">{name}</Label>
+                <Label className={cn(
+                  "text-sm w-[35%]",
+                  isFromIDType(resolvedProperty) ? "text-red-500" : "text-muted-foreground"
+                )}>{name}</Label>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{resolvedProperty.description || 'No description available'}</p>
