@@ -22,19 +22,25 @@ export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAge
   const handleSend = () => {
     if (!input.trim()) return;
 
-    const command = input.trim().toLowerCase();
-    if (command === 'explore') {
-      onExplore?.();
-    }
-    if (command === 'do') {
-      onExplore?.(false);
-    }
-
     const newMessage: Message = {
       id: Date.now().toString(),
       content: input,
       isUser: true
     };
+
+    const command = input.trim().toLowerCase();
+    if (command === 'explore') {
+      onExplore?.();
+      setMessages(prev => [...prev, newMessage]);
+      setInput('');
+      return;
+    }
+    if (command === 'do') {
+      onExplore?.(false);
+      setMessages(prev => [...prev, newMessage]);
+      setInput('');
+      return;
+    }
 
     setMessages(prev => [...prev, newMessage]);
     setInput('');
@@ -43,7 +49,7 @@ export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAge
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm analyzing your request and will assist you shortly.",
+        content: "Let me help you with that.",
         isUser: false
       };
       setMessages(prev => [...prev, aiResponse]);
@@ -71,7 +77,7 @@ export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAge
               id="ai-position"
               checked={isAIAgentOnRight}
               onCheckedChange={onPositionChange}
-              className="data-[state=checked]:bg-gray-700 dark:data-[state=checked]:bg-gray-300 data-[state=unchecked]:bg-gray-700 dark:data-[state=unchecked]:bg-gray-300"
+              className="data-[state=checked]:bg-gray-600 dark:data-[state=checked]:bg-gray-300 data-[state=unchecked]:bg-gray-600 dark:data-[state=unchecked]:bg-gray-300"
             />
           </div>
         </div>
