@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { LibraryWorkspace } from "@/components/library-workspace";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { PaperWorkspace } from "@/components/paper-workspace";
@@ -48,6 +49,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <SelectContent>
               <SelectItem value="workspace">Workspace</SelectItem>
               <SelectItem value="paper">Paper</SelectItem>
+              <SelectItem value="library">Library</SelectItem>
             </SelectContent>
           </Select>
           <ThemeToggle />
@@ -95,8 +97,10 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               )}>
                 {selectedView === "workspace" ? (
                   <ProjectWorkspace onStepSelect={setSelectedStep} />
-                ) : (
+                ) : selectedView === "paper" ? (
                   <PaperWorkspace onSectionSelect={setSelectedStep} />
+                ) : (
+                  <LibraryWorkspace />
                 )}
                 {selectedStep && selectedView === "workspace" && <div className={cn(
                   "mt-2 transition-all duration-300 ease-in-out space-y-1",
