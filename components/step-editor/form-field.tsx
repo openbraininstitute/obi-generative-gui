@@ -50,13 +50,11 @@ export function FormField({
   const hasFromIDType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean => {
     const resolved = resolveSchema(property);
     
-    // Check if the schema reference contains FromID
-    if ('$ref' in property && property.$ref.includes('FromID')) {
+    if ('$ref' in property && property.$ref.match(/[A-Z][a-zA-Z]*FromID/)) {
       return true;
     }
     
-    // Check if the title or type contains FromID
-    if (resolved.title?.includes('FromID')) {
+    if (resolved.title?.match(/[A-Z][a-zA-Z]*FromID/)) {
       return true;
     }
     
@@ -73,6 +71,21 @@ export function FormField({
     }
     
     return false;
+  };
+
+  const getFromIDType = (property: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string => {
+    const resolved = resolveSchema(property);
+    let match;
+    
+    if ('$ref' in property) {
+      match = property.$ref.match(/([A-Z][a-zA-Z]*)FromID/);
+    }
+    
+    if (!match && resolved.title) {
+      match = resolved.title.match(/([A-Z][a-zA-Z]*)FromID/);
+    }
+    
+    return match ? match[1] : 'Item';
   };
 
   const isFromIDType = (property: OpenAPIV3.SchemaObject): boolean => {
@@ -181,6 +194,25 @@ export function FormField({
                         {block.displayName}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              ) : isFromIDType(resolvedProperty) ? (
+                <Select
+                  value={values[index]}
+                  onValueChange={(value) => {
+                    const newValues = [...values];
+                    newValues[index] = value;
+                    setValue(name, newValues);
+                    setFormData({ [name]: newValues });
+                  }}
+                >
+                  <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                    <SelectValue placeholder={`Select ${getFromIDType(itemSchema)}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">A</SelectItem>
+                    <SelectItem value="B">B</SelectItem>
+                    <SelectItem value="C">C</SelectItem>
                   </SelectContent>
                 </Select>
               ) : type === 'number' || type === 'integer' ? (
@@ -417,6 +449,41 @@ export function FormField({
                       {option}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+      }
+      if (isFromIDType(resolvedProperty)) {
+        const type = getFromIDType(resolvedProperty);
+        return (
+          <div className="flex items-center px-3 py-1.5 hover:bg-muted/60 dark:hover:bg-muted/40">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild className="cursor-pointer">
+                  <Label className="text-sm w-[65%] text-red-500">{name}</Label>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{resolvedProperty.description || 'No description available'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className="w-[35%]">
+              <Select
+                value={currentValue}
+                onValueChange={(value) => {
+                  setValue(name, value);
+                  setFormData({ [name]: value });
+                }}
+              >
+                <SelectTrigger className="h-6 text-sm bg-muted/70 dark:bg-muted/40">
+                  <SelectValue placeholder={`Select ${type}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">A</SelectItem>
+                  <SelectItem value="B">B</SelectItem>
+                  <SelectItem value="C">C</SelectItem>
                 </SelectContent>
               </Select>
             </div>
