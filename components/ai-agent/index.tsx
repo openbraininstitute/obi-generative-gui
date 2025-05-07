@@ -66,11 +66,12 @@ export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAge
           <h2 className="text-lg font-semibold">SimAI</h2>
           </div>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="ai-position" className="text-muted-foreground text-sm">Right</Label>
+            <Label htmlFor="ai-position" className="text-sm">L/R</Label>
             <Switch
               id="ai-position"
               checked={isAIAgentOnRight}
               onCheckedChange={onPositionChange}
+              className="data-[state=checked]:bg-gray-700 dark:data-[state=checked]:bg-gray-300 data-[state=unchecked]:bg-gray-700 dark:data-[state=unchecked]:bg-gray-300"
             />
           </div>
         </div>
