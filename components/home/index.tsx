@@ -15,6 +15,8 @@ import { StepEditor } from "@/components/step-editor";
 import { ExploreWindow } from "@/components/explore-window";
 import { cn } from "@/lib/utils";
 import { PublicRuntimeConfig } from "@/lib/config.server";
+import { OpenAPIV3 } from "openapi-types";
+import { fetchOpenAPISpec } from "@/lib/api-client";
 
 export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
@@ -27,12 +29,24 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
   const [isExploring, setIsExploring] = useState(false);
   const [selectedView, setSelectedView] = useState("workspace");
+  const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
       setActiveComponent(selectedComponents[0].path);
     }
   }, [selectedComponents, activeComponent, isAddingComponent]);
+
+  useEffect(() => {
+    fetchOpenAPISpec(config.API_URL).then(spec => {
+      setSpec(spec);
+      setError(null);
+    }).catch(error => {
+      setError(error instanceof Error ? error.message : 'Failed to fetch OpenAPI spec');
+      setSpec(null);
+    });
+  }, [config.API_URL]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -109,6 +123,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
                   <ComponentSelector
                     API_URL={config.API_URL}
+                    spec={spec}
                     selectedComponents={selectedComponents} 
                     activeComponent={activeComponent}
                     onComponentSelect={(path) => {
@@ -120,7 +135,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                       setActiveComponent(path);
                       setSelectedComponents(prev => [...prev, {
                         path,
-                        name: `${type}_${count}`
+                        name: spec?.paths[path]?.post?.summary ? `${spec.paths[path].post.summary}_${count}` : `${type}_${count}`
                       }]);
                       setIsStepEditorVisible(true);
                     }}

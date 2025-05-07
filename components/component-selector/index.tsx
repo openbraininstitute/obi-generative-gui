@@ -21,6 +21,7 @@ interface ComponentSelectorProps {
   onComponentRename: (path: string, newName: string) => void;
   onAddComponentClick: () => void;
   API_URL: string;
+  spec: OpenAPIV3.Document | null;
 }
 
 interface EndpointInfo {
@@ -38,7 +39,8 @@ export function ComponentSelector({
   onActiveComponentChange,
   onComponentRename,
   onAddComponentClick,
-  API_URL
+  API_URL,
+  spec
 }: ComponentSelectorProps) {
   const [availableEndpoints, setAvailableEndpoints] = useState<EndpointInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function ComponentSelector({
   const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
-    fetchOpenAPISpec(API_URL).then(spec => {
+    if (spec) {
       const endpoints = Object.entries(spec.paths)
         .filter(([_, pathItem]) => {
           const postOperation = (pathItem as OpenAPIV3.PathItemObject).post as OpenAPIV3.OperationObject;
@@ -65,10 +67,7 @@ export function ComponentSelector({
         });
       setAvailableEndpoints(endpoints);
       setError(null);
-    }).catch(error => {
-      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
-      setAvailableEndpoints([]);
-    });
+    }
   }, [API_URL]);
 
   useEffect(() => {
