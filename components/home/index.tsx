@@ -86,9 +86,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         {/* Right Side - Project Workspace and Step Editor */}
         <div className="flex-1 relative overflow-hidden">
           <div className={cn(
-            "absolute inset-0 p-6 pb-6 overflow-hidden transition-transform duration-500 ease-in-out",
-            isExploring && !isAIAgentOnRight ? "translate-x-full" : "",
-            isExploring && isAIAgentOnRight ? "-translate-x-full" : ""
+            "absolute inset-0 p-6 transition-all duration-500 ease-in-out",
+            isExploring ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"
           )}>
             <div className="h-full flex flex-col">
               <div className={cn(
@@ -185,10 +184,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             </div>
           </div>
           <div className={cn(
-            "absolute inset-0 transition-transform duration-500 ease-in-out",
-            !isExploring && !isAIAgentOnRight ? "-translate-x-full" : "",
-            !isExploring && isAIAgentOnRight ? "translate-x-full" : "",
-            isExploring ? "translate-x-0" : ""
+            "absolute inset-0 transition-transform duration-500 ease-in-out p-6",
+            !isExploring ? "-translate-x-full opacity-0" : "translate-x-0 opacity-100"
           )}>
             <ExploreWindow />
           </div>
