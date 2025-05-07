@@ -98,10 +98,9 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 ) : (
                   <PaperWorkspace onSectionSelect={setSelectedStep} />
                 )}
-                {selectedStep && <div className={cn(
-                  "mt-2 transition-all duration-300 ease-in-out",
-                  selectedStep ? "opacity-100" : "opacity-0",
-                  "space-y-1"
+                {selectedStep && selectedView === "workspace" && <div className={cn(
+                  "mt-2 transition-all duration-300 ease-in-out space-y-1",
+                  selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4"
                 )}>
                   <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
                   <ComponentSelector
@@ -145,11 +144,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   />
                 </div>}
               </div>
-              {selectedStep && selectedComponents.length > 0 && (
+              {selectedStep && selectedComponents.length > 0 && selectedView === "workspace" && (
                 <div className={cn(
                   "relative transition-all duration-300 ease-in-out",
                   selectedStep && selectedComponents.length > 0 && isStepEditorVisible
-                    ? selectedView === "workspace" ? "opacity-100" : "opacity-0 pointer-events-none"
+                    ? "opacity-100"
                     : "opacity-0"
                 )}>
                   <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
@@ -168,8 +167,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
-                      ? selectedView === "workspace" ? "h-[calc(100vh-20rem)]" : "h-0"
-                      : selectedView === "workspace" ? "h-[calc(100vh-8rem)]" : "h-0"
+                      ? "h-[calc(100vh-20rem)]"
+                      : "h-[calc(100vh-8rem)]"
                   )}>
                     <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
                     <div className="h-[calc(100%-1.75rem)]">
