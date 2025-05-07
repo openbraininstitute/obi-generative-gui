@@ -120,7 +120,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   "mt-2 transition-all duration-300 ease-in-out space-y-1",
                   selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4"
                 )}>
-                  <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
+                  <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW STEPS</h2>
                   <ComponentSelector
                     API_URL={config.API_URL}
                     spec={spec}
@@ -189,7 +189,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                       ? "h-[calc(100vh-20rem)]"
                       : "h-[calc(100vh-8rem)]"
                   )}>
-                    <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
+                    <h2 className="text-sm text-[#40A9FF] font-medium">STEP</h2>
                     <div className="h-[calc(100%-1.75rem)]">
                       <StepEditor 
                         API_URL={config.API_URL}

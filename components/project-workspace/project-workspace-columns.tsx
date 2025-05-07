@@ -260,7 +260,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-4 gap-4">
         <div className="space-y-2">
-          <ColumnHeader title="STAGE" />
+          <ColumnHeader title="PROJECT LEVEL 1" />
           <Droppable droppableId="modelingLevels">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -294,7 +294,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
         </div>
 
         <div className="space-y-2">
-          <ColumnHeader title="SUB-STAGE" />
+          <ColumnHeader title="PROJECT LEVEL 2" />
           <Droppable droppableId="stages">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -328,7 +328,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
         </div>
 
         <div className="space-y-2">
-          <ColumnHeader title="STEP-TYPE" />
+          <ColumnHeader title="PROJECT LEVEL 3" />
           <Droppable droppableId="stepTypes">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -362,7 +362,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
         </div>
 
         <div className="space-y-2">
-          <ColumnHeader title="STEP" />
+          <ColumnHeader title="WORKFLOW" />
           <Droppable droppableId="steps">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
