@@ -167,7 +167,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
-                      ? "h-[calc(100vh-8rem)]" 
+                      ? "h-[calc(100vh-20rem)]" 
                       : "h-[calc(100vh-8rem)]"
                   )}>
                     <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
