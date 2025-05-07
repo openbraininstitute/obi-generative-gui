@@ -45,11 +45,12 @@ export function ComponentSelector({
     fetchOpenAPISpec(API_URL).then(spec => {
       const endpoints = getGeneratedEndpoints(spec);
       setAvailableEndpoints(endpoints);
+      setError(null);
     }).catch(error => {
       setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
       setAvailableEndpoints([]);
     });
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => {
     if (!isAddingComponent) {

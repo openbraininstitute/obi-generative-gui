@@ -61,7 +61,6 @@ export function StepEditor({
 
   useEffect(() => {
     loadSpec();
-    fetchAvailableEndpoints();
   }, []);
 
   useEffect(() => {
@@ -69,27 +68,6 @@ export function StepEditor({
       setSelectedFile('Method.tex');
     }
   }, [selectedTab]);
-
-  const fetchAvailableEndpoints = async () => {
-    try {
-      const response = await fetch(`${API_URL}/forms`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch available endpoints');
-      }
-      const data = await response.json();
-      
-      if (data && Array.isArray(data.forms)) {
-        const formattedEndpoints = data.forms.map((endpoint: string) => `/${endpoint}`);
-        setAvailableEndpoints(formattedEndpoints);
-      } else {
-        setError('Invalid response format from /forms endpoint');
-        setAvailableEndpoints([]);
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
-      setAvailableEndpoints([]);
-    }
-  };
 
   const loadSpec = async () => {
     setLoading(true);
