@@ -24,9 +24,11 @@ export function AIAgent({ onExplore }: AIAgentProps) {
   const handleSend = () => {
     if (!input.trim()) return;
 
-    // Check if the input is "Explore"
-    if (input.trim().toLowerCase() === 'explore') {
+    const command = input.trim().toLowerCase();
+    if (command === 'explore') {
       onExplore?.();
+    } else if (command === 'do') {
+      onExplore?.(false);
     }
 
     const newMessage: Message = {

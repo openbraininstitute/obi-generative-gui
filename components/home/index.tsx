@@ -59,7 +59,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent onExplore={() => setIsExploring(true)} />
+                <AIAgent onExplore={(explore = true) => setIsExploring(explore)} />
               </div>
             </div>
             <ChevronLeft 
@@ -189,7 +189,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent onExplore={() => setIsExploring(true)} />
+                <AIAgent onExplore={(explore = true) => setIsExploring(explore)} />
               </div>
             </div>
             <ChevronLeft 
