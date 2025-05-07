@@ -34,9 +34,9 @@ export function ExploreWindow() {
 
   return (
     <div className={cn(
-      "h-full p-6 bg-background rounded-lg shadow-2xl border-2 border-blue-200/30 dark:border-gray-700 m-6"
+      "h-[calc(100%-3rem)] bg-background rounded-lg shadow-2xl border-2 border-blue-200/30 dark:border-gray-700 mx-6 mt-6"
     )}>
-      <div className="h-full">
+      <div className="h-full p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-semibold">Brain stem</h2>
