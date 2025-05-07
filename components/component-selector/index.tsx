@@ -117,8 +117,9 @@ export function ComponentSelector({
                     }
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-transparent border-none focus:outline-none w-24"
+                  className="bg-transparent border-none focus:outline-none min-w-[50px] w-full"
                   autoFocus
+                  style={{ width: `${editedName.length}ch` }}
                 />
               ) : (
                 <div className="bg-transparent">
