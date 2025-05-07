@@ -6,6 +6,7 @@ import { Edit2 } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fetchOpenAPISpec, getGeneratedEndpoints } from "@/lib/api-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +42,13 @@ export function ComponentSelector({
   const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
-    fetchAvailableEndpoints();
+    fetchOpenAPISpec(API_URL).then(spec => {
+      const endpoints = getGeneratedEndpoints(spec);
+      setAvailableEndpoints(endpoints);
+    }).catch(error => {
+      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
+      setAvailableEndpoints([]);
+    });
   }, []);
 
   useEffect(() => {
@@ -53,34 +60,8 @@ export function ComponentSelector({
     }
   }, [isAddingComponent]);
 
-  const fetchAvailableEndpoints = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(`${API_URL}/forms`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch available endpoints');
-      }
-      const data = await response.json();
-      
-      if (data && Array.isArray(data.forms)) {
-        const formattedEndpoints = data.forms.map((endpoint: string) => `/${endpoint}`);
-        setAvailableEndpoints(formattedEndpoints);
-      } else {
-        setError('Invalid response format from /forms endpoint');
-        setAvailableEndpoints([]);
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch available endpoints');
-      setAvailableEndpoints([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getEndpointDisplayName = (path: string) => {
     return path
-      .slice(1)
       .replace(/Form$/, '')
       .split(/(?=[A-Z])/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())

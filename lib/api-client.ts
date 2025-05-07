@@ -101,6 +101,22 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPIV3.Document>
   }
 }
 
+export function getGeneratedEndpoints(spec: OpenAPIV3.Document): string[] {
+  const endpoints: string[] = [];
+  
+  for (const [path, pathItem] of Object.entries(spec.paths)) {
+    const postOperation = pathItem.post as OpenAPIV3.OperationObject;
+    if (!postOperation) continue;
+    
+    const tags = postOperation.tags || [];
+    if (tags.includes('generated')) {
+      endpoints.push(path);
+    }
+  }
+  
+  return endpoints;
+}
+
 export async function callEndpoint(url: string, method: string, path: string, data?: any) {
   try {
     if (!url) {
