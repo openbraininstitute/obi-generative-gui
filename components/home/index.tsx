@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
+import { PaperWorkspace } from "@/components/paper-workspace";
 import { ComponentSelector } from "@/components/component-selector";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
@@ -92,7 +93,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   ? "flex-1 opacity-100 mb-2" 
                   : "h-0 opacity-0 pointer-events-none overflow-hidden"
               )}>
-                <ProjectWorkspace onStepSelect={setSelectedStep} />
+                {selectedView === "workspace" ? (
+                  <ProjectWorkspace onStepSelect={setSelectedStep} />
+                ) : (
+                  <PaperWorkspace onSectionSelect={setSelectedStep} />
+                )}
                 {selectedStep && <div className={cn(
                   "mt-2 transition-all duration-300 ease-in-out",
                   selectedStep ? "opacity-100" : "opacity-0",
@@ -144,7 +149,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 <div className={cn(
                   "relative transition-all duration-300 ease-in-out",
                   selectedStep && selectedComponents.length > 0 && isStepEditorVisible
-                    ? "opacity-100"
+                    ? selectedView === "workspace" ? "opacity-100" : "opacity-0 pointer-events-none"
                     : "opacity-0"
                 )}>
                   <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
@@ -163,8 +168,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
-                      ? "h-[calc(100vh-20rem)]" 
-                      : "h-[calc(100vh-8rem)]"
+                      ? selectedView === "workspace" ? "h-[calc(100vh-20rem)]" : "h-0"
+                      : selectedView === "workspace" ? "h-[calc(100vh-8rem)]" : "h-0"
                   )}>
                     <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
                     <div className="h-[calc(100%-1.75rem)]">
