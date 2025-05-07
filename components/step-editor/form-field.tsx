@@ -28,6 +28,7 @@ interface FormFieldProps {
   setArrayFields: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
   blocks: Record<string, BlockData[]>;
+  onFromIDSelect?: (name: string, type: string) => void;
 }
 
 export function FormField({
@@ -41,6 +42,7 @@ export function FormField({
   setArrayFields,
   setFormData,
   blocks,
+  onFromIDSelect,
 }: FormFieldProps) {
   if (name === 'type') return null;
 
@@ -197,24 +199,14 @@ export function FormField({
                   </SelectContent>
                 </Select>
               ) : isFromIDType(resolvedProperty) ? (
-                <Select
-                  value={values[index]}
-                  onValueChange={(value) => {
-                    const newValues = [...values];
-                    newValues[index] = value;
-                    setValue(name, newValues);
-                    setFormData({ [name]: newValues });
-                  }}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-6 text-sm w-full"
+                  onClick={() => onFromIDSelect?.(name, getFromIDType(itemSchema))}
                 >
-                  <SelectTrigger className="flex-1 h-6 text-sm bg-muted/70 dark:bg-muted/40">
-                    <SelectValue placeholder={`Select ${getFromIDType(itemSchema)}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="A">A</SelectItem>
-                    <SelectItem value="B">B</SelectItem>
-                    <SelectItem value="C">C</SelectItem>
-                  </SelectContent>
-                </Select>
+                  {values[index] ? `${getFromIDType(itemSchema)} ${values[index]}` : `Select ${getFromIDType(itemSchema)}`}
+                </Button>
               ) : type === 'number' || type === 'integer' ? (
                 <Input
                   type="number"
@@ -470,22 +462,18 @@ export function FormField({
               </Tooltip>
             </TooltipProvider>
             <div className="w-[35%]">
-              <Select
-                value={currentValue}
-                onValueChange={(value) => {
-                  setValue(name, value);
-                  setFormData({ [name]: value });
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-sm w-full"
+                onClick={() => {
+                  setValue(name, 'A');
+                  setFormData({ [name]: 'A' });
+                  onFromIDSelect?.(name, type);
                 }}
               >
-                <SelectTrigger className="h-6 text-sm bg-muted/70 dark:bg-muted/40">
-                  <SelectValue placeholder={`Select ${type}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">A</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                  <SelectItem value="C">C</SelectItem>
-                </SelectContent>
-              </Select>
+                {currentValue ? `${type} ${currentValue}` : `Select ${type}`}
+              </Button>
             </div>
           </div>
         );

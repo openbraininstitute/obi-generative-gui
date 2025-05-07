@@ -21,6 +21,7 @@ import { BlockType } from './types';
 import { BlockTypeSelector } from './block-type-selector';
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic';
+import { FromIDSelector } from './fromid-selector';
 import { ArtifactsView } from './artifacts-view';
 import { LatexPreview } from './latex-preview';
 
@@ -131,6 +132,7 @@ export function StepEditorForm({
   const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
   const [isAddingBlock, setIsAddingBlock] = useState(false);
   const [hasSingleBlock, setHasSingleBlock] = useState(false);
+  const [selectedFromIDField, setSelectedFromIDField] = useState<{ name: string; type: string } | null>(null);
   
   // Theme management
   const { theme } = useTheme();
@@ -524,6 +526,7 @@ export function StepEditorForm({
                         setArrayFields={setArrayFields}
                         setFormData={handleFormDataUpdate}
                         blocks={blocks}
+                        onFromIDSelect={(name, type) => setSelectedFromIDField({ name, type })}
                       />
                     ));
                   })()}
@@ -554,10 +557,23 @@ export function StepEditorForm({
         collapsible={false}
       >
         <div className="h-full">
-          <ImageViewer 
-            src="/images/Microcircuits.png"
-            alt="Microcircuits visualization"
-          />
+          {selectedFromIDField ? (
+            <FromIDSelector
+              type={selectedFromIDField.type}
+              value={watch(selectedFromIDField.name)}
+              onChange={(value) => {
+                const name = selectedFromIDField.name;
+                setValue(name, value);
+                setFormData(prev => ({ ...prev, [name]: value }));
+                setSelectedFromIDField(null);
+              }}
+            />
+          ) : (
+            <ImageViewer 
+              src="/images/Microcircuits.png"
+              alt="Microcircuits visualization"
+            />
+          )}
         </div>
       </ResizablePanel>
     ];
