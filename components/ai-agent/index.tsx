@@ -93,7 +93,7 @@ export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAge
               <div
                 className={`max-w-[80%] rounded-lg p-3 ${
                   message.isUser
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-gray-600 dark:bg-gray-700 text-white'
                     : 'bg-muted'
                 }`}
               >
