@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Message, AIAgentProps } from './types';
 
-export function AIAgent({ onExplore }: AIAgentProps) {
+export function AIAgent({ onExplore, isAIAgentOnRight, onPositionChange }: AIAgentProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -58,9 +60,19 @@ export function AIAgent({ onExplore }: AIAgentProps) {
   return (
     <div className="flex flex-col h-full bg-background rounded-lg">
       <div className="flex-none px-6 py-4 border-b">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
           <Bot className="w-6 h-6 text-blue-500" />
           <h2 className="text-lg font-semibold">SimAI</h2>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="ai-position" className="text-muted-foreground text-sm">Right</Label>
+            <Switch
+              id="ai-position"
+              checked={isAIAgentOnRight}
+              onCheckedChange={onPositionChange}
+            />
+          </div>
         </div>
       </div>
 

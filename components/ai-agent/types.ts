@@ -6,4 +6,6 @@ export interface Message {
 
 export interface AIAgentProps {
 onExplore: (explore?: boolean) => void;
+isAIAgentOnRight: boolean;
+onPositionChange: (checked: boolean) => void;
 }

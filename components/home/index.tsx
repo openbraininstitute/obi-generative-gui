@@ -40,14 +40,6 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           <h1 className="text-white font-semibold text-lg">Open Brain Platform</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="ai-position" className="text-white">SimAI Position</Label>
-            <Switch
-              id="ai-position"
-              checked={isAIAgentOnRight}
-              onCheckedChange={setIsAIAgentOnRight}
-            />
-          </div>
           <Select value={selectedView} onValueChange={setSelectedView}>
             <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
               <SelectValue placeholder="Select view" />
@@ -70,7 +62,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent onExplore={(explore = true) => setIsExploring(explore)} />
+                <AIAgent 
+                  onExplore={(explore = true) => setIsExploring(explore)}
+                  isAIAgentOnRight={isAIAgentOnRight}
+                  onPositionChange={setIsAIAgentOnRight}
+                />
               </div>
             </div>
             <ChevronLeft 
@@ -167,7 +163,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
-                      ? "h-[calc(100vh-18rem)]" 
+                      ? "h-[calc(100vh-20rem)]" 
                       : "h-[calc(100vh-8rem)]"
                   )}>
                     <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
@@ -197,7 +193,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent onExplore={(explore = true) => setIsExploring(explore)} />
+                <AIAgent 
+                  onExplore={(explore = true) => setIsExploring(explore)}
+                  isAIAgentOnRight={isAIAgentOnRight}
+                  onPositionChange={setIsAIAgentOnRight}
+                />
               </div>
             </div>
             <ChevronLeft 
