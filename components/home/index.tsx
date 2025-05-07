@@ -135,7 +135,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                       setActiveComponent(path);
                       setSelectedComponents(prev => [...prev, {
                         path,
-                        name: spec?.paths[path]?.post?.summary ? `${spec.paths[path].post.summary}_${count}` : `${type}_${count}`
+                        name: spec?.paths[path]?.post?.summary ? `${spec.paths[path].post.summary} ${count}` : `${type} ${count}`
                       }]);
                       setIsStepEditorVisible(true);
                     }}
