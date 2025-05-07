@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { ComponentSelector } from "@/components/component-selector";
 import { AIAgent } from "@/components/ai-agent";
@@ -23,6 +24,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
   const [isExploring, setIsExploring] = useState(false);
+  const [selectedView, setSelectedView] = useState("workspace");
 
   useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
@@ -46,6 +48,15 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               onCheckedChange={setIsAIAgentOnRight}
             />
           </div>
+          <Select value={selectedView} onValueChange={setSelectedView}>
+            <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
+              <SelectValue placeholder="Select view" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="workspace">Workspace</SelectItem>
+              <SelectItem value="paper">Paper</SelectItem>
+            </SelectContent>
+          </Select>
           <ThemeToggle />
         </div>
       </header>
