@@ -5,11 +5,11 @@ import { Trash2 } from "lucide-react";
 import { Edit2 } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { Check } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button"; 
 import { fetchOpenAPISpec } from "@/lib/api-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { OpenAPIV3 } from "openapi-types";
 
 interface ComponentSelectorProps {
   className?: string;
@@ -134,12 +134,18 @@ export function ComponentSelector({
                     <span className={cn(
                       "text-base font-medium",
                       activeComponent === path && !isAddingComponent ? "text-[#002766] dark:text-white" : "text-white"
-                    )}>{name}</span>
-                    <span className={cn(
-                      "text-xs",
-                      activeComponent === path && !isAddingComponent ? "text-muted-foreground" : "text-white/70"
                     )}>
-                      {availableEndpoints.find(e => e.path === path)?.summary || ''}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>{name}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="font-medium">{availableEndpoints.find(e => e.path === path)?.summary}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{availableEndpoints.find(e => e.path === path)?.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </span>
                   </span>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -213,10 +219,16 @@ export function ComponentSelector({
                   }}
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium">{path.summary}</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {path.description}
-                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="font-medium">{path.summary}</h3>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{path.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </button>
               )) : (
