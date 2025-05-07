@@ -5,11 +5,7 @@ import { Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Message } from './types';
-
-export interface AIAgentProps {
-  onExplore?: () => void;
-}
+import { Message, AIAgentProps } from './types';
 
 export function AIAgent({ onExplore }: AIAgentProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -27,7 +23,8 @@ export function AIAgent({ onExplore }: AIAgentProps) {
     const command = input.trim().toLowerCase();
     if (command === 'explore') {
       onExplore?.();
-    } else if (command === 'do') {
+    }
+    if (command === 'do') {
       onExplore?.(false);
     }
 
