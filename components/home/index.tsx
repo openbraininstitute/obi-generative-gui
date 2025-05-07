@@ -62,7 +62,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 bg-[#002766] flex overflow-hidden">
+      <div className="flex-1 bg-[#002766] flex overflow-hidden pt-8">
         {!isAIAgentOnRight && (
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]"
@@ -93,13 +93,13 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               <div className={cn(
                 "transition-all duration-300 ease-in-out",
                 isWorkspaceVisible 
-                  ? "flex-1 opacity-100 transform translate-y-0 mb-2" 
-                  : "h-0 opacity-0 transform -translate-y-4 pointer-events-none overflow-hidden"
+                  ? "flex-1 opacity-100 mb-2" 
+                  : "h-0 opacity-0 pointer-events-none overflow-hidden"
               )}>
                 <ProjectWorkspace onStepSelect={setSelectedStep} />
                 {selectedStep && <div className={cn(
                   "mt-2 transition-all duration-300 ease-in-out",
-                  selectedStep ? "opacity-100 transform translate-y-0" : "opacity-0 transform -translate-y-4",
+                  selectedStep ? "opacity-100" : "opacity-0",
                   "space-y-1"
                 )}>
                   <h2 className="text-sm text-[#40A9FF] font-medium px-8">WORKFLOW</h2>
@@ -148,8 +148,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                 <div className={cn(
                   "relative transition-all duration-300 ease-in-out",
                   selectedStep && selectedComponents.length > 0 && isStepEditorVisible
-                    ? "opacity-100 transform translate-y-0"
-                    : "opacity-0 transform translate-y-4"
+                    ? "opacity-100"
+                    : "opacity-0"
                 )}>
                   <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
                     <button
@@ -167,7 +167,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
-                      ? "h-[calc(100vh-20rem)]" 
+                      ? "h-[calc(100vh-8rem)]" 
                       : "h-[calc(100vh-8rem)]"
                   )}>
                     <h2 className="text-sm text-[#40A9FF] font-medium">COMPONENT</h2>
