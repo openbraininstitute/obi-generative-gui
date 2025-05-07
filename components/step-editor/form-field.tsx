@@ -466,11 +466,7 @@ export function FormField({
                 variant="outline"
                 size="sm"
                 className="h-6 text-sm w-full"
-                onClick={() => {
-                  setValue(name, 'A');
-                  setFormData({ [name]: 'A' });
-                  onFromIDSelect?.(name, type);
-                }}
+                onClick={() => onFromIDSelect?.(name, type)}
               >
                 {currentValue ? `${type} ${currentValue}` : `Select ${type}`}
               </Button>
