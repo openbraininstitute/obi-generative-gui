@@ -21,6 +21,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [isStepEditorVisible, setIsStepEditorVisible] = useState(true);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
+  const [isExploring, setIsExploring] = useState(false);
 
   useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
@@ -57,7 +58,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent />
+                <AIAgent onExplore={() => setIsExploring(true)} />
               </div>
             </div>
             <ChevronLeft 
@@ -71,7 +72,11 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         )}
 
         {/* Right Side - Project Workspace and Step Editor */}
-        <div className="flex-1 p-6 pb-6 overflow-hidden h-full">
+        <div className={cn(
+          "flex-1 p-6 pb-6 overflow-hidden h-full transition-transform duration-500 ease-in-out",
+          isExploring && !isAIAgentOnRight ? "translate-x-full" : "",
+          isExploring && isAIAgentOnRight ? "-translate-x-full" : ""
+        )}>
           <div className="h-full flex flex-col">
             <div className={cn(
               "transition-all duration-300 ease-in-out",
@@ -173,7 +178,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <div className={cn("absolute inset-0 p-6 transition-all duration-300",
               isAIAgentCollapsed ? "opacity-0 pointer-events-none" : "opacity-100")}>
               <div className="h-full rounded-lg shadow-2xl overflow-hidden border-2 border-blue-200/30 dark:border-gray-700 bg-background">
-                <AIAgent />
+                <AIAgent onExplore={() => setIsExploring(true)} />
               </div>
             </div>
             <ChevronLeft 

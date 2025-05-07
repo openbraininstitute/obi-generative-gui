@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Message } from './types';
 
-export function AIAgent() {
+export interface AIAgentProps {
+  onExplore?: () => void;
+}
+
+export function AIAgent({ onExplore }: AIAgentProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -19,6 +23,11 @@ export function AIAgent() {
 
   const handleSend = () => {
     if (!input.trim()) return;
+
+    // Check if the input is "Explore"
+    if (input.trim().toLowerCase() === 'explore') {
+      onExplore?.();
+    }
 
     const newMessage: Message = {
       id: Date.now().toString(),
