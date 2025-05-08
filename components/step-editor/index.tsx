@@ -6,17 +6,13 @@ import { StepEditorForm } from "./step-editor-form";
 import { OpenAPIV3 } from "openapi-types";
 import { AlertCircle, Plus, Settings, FileText, Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { latexExamples } from "@/lib/latex-examples";
 import dynamic from 'next/dynamic';
+import {useSession} from "next-auth/react";
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -37,6 +33,7 @@ export function StepEditor({
   activeComponent: string | null;
   selectedComponents: Array<{ path: string; name: string }>;
 }) {
+  const {data: session} = useSession();
   const [selectedTask, setSelectedTask] = useState<string>("1");
   const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
@@ -60,8 +57,9 @@ export function StepEditor({
   };
 
   useEffect(() => {
+    if (!session) return;
     loadSpec();
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (selectedTab === "description" && !selectedFile) {
@@ -89,9 +87,13 @@ export function StepEditor({
   const handleSubmit = async (data: any) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0].path, data);
+      const token = session!.accessToken;
+      const headers = {'Authorization': `Bearer ${token}`};
+      const result = await callEndpoint(
+          API_URL, selectedMethod, selectedComponents[0].path, data, headers
+      );
       setResponse(result);
       
       if (!result.ok) {
