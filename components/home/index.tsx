@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ProjectWorkspace } from "@/components/project-workspace";
 import { PaperWorkspace } from "@/components/paper-workspace";
 import { ComponentSelector } from "@/components/component-selector";
+import { LabsProjectsView } from "@/components/labs-projects";
 import { AIAgent } from "@/components/ai-agent";
 import { StepEditor } from "@/components/step-editor";
 import { ExploreWindow } from "@/components/explore-window";
@@ -63,6 +64,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             <SelectContent>
               <SelectItem value="workspace">Workspace</SelectItem>
               <SelectItem value="explore">Explore</SelectItem>
+              <SelectItem value="labs">Labs/Projects</SelectItem>
               <SelectItem value="paper">Paper</SelectItem>
               <SelectItem value="library">Library</SelectItem>
             </SelectContent>
@@ -116,6 +118,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <PaperWorkspace onSectionSelect={setSelectedStep} />
                 ) : selectedView === "explore" ? (
                   <ExploreWindow />
+                ) : selectedView === "labs" ? (
+                  <LabsProjectsView />
                 ) : (
                   <LibraryWorkspace />
                 )}
