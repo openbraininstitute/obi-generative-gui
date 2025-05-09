@@ -117,7 +117,7 @@ export function getGeneratedEndpoints(spec: OpenAPIV3.Document): string[] {
   return endpoints;
 }
 
-export async function callEndpoint(url: string, method: string, path: string, data?: any) {
+export async function callEndpoint(url: string, method: string, path: string, data?: any, headers?: any) {
   try {
     if (!url) {
       throw new Error('Please provide a FastAPI server URL');
@@ -135,14 +135,14 @@ export async function callEndpoint(url: string, method: string, path: string, da
     console.log('Method:', method.toUpperCase());
     console.log('Request Body:', JSON.stringify(data, null, 2));
     console.log('================\n');
-    
+
     const response = await fetchWithRetry(fullUrl, {
       method: method.toUpperCase(),
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        ...headers,
       },
-      credentials: 'include',
       body: data ? JSON.stringify(data) : undefined
     });
 
