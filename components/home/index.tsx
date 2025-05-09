@@ -62,6 +62,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="workspace">Workspace</SelectItem>
+              <SelectItem value="explore">Explore</SelectItem>
               <SelectItem value="paper">Paper</SelectItem>
               <SelectItem value="library">Library</SelectItem>
             </SelectContent>
@@ -113,6 +114,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                   <ProjectWorkspace onStepSelect={setSelectedStep} />
                 ) : selectedView === "paper" ? (
                   <PaperWorkspace onSectionSelect={setSelectedStep} />
+                ) : selectedView === "explore" ? (
+                  <ExploreWindow />
                 ) : (
                   <LibraryWorkspace />
                 )}
