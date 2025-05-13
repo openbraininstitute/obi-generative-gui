@@ -225,22 +225,53 @@ export function StepEditorForm({
   // Initialize blocks state when schema changes
   useEffect(() => {
     const initialBlocks: Record<string, BlockData[]> = {};
-    Object.keys(sections).forEach(section => {
+    
+    // Initialize blocks for the initialize section
+    initialBlocks['initialize'] = [{ id: 'initialize', type: 'Initialize', displayName: 'Initialize' }];
+    
+    // Process other sections
+    Object.entries(sections).forEach(([section, schema]) => {
       if (section === 'initialize') {
-        initialBlocks[section] = [{ id: 'initialize', type: 'Initialize', displayName: 'Initialize' }];
+        return;
+      }
+      
+      if (section === 'type') {
+        return;
+      }
+      
+      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+      
+      // Handle root block parameters (anyOf without additionalProperties)
+      if (resolved.anyOf && !resolved.additionalProperties) {
+        // Don't create an entry for root block parameters
+        return;
+      }
+      
+      // Handle dictionary blocks
+      if (resolved.additionalProperties) {
+        initialBlocks[section] = [];
       } else {
         initialBlocks[section] = [];
       }
     });
+    
     setBlocks(initialBlocks);
   }, [schema]);
 
   // Determine if form has only a single block
   useEffect(() => {
     const hasOnlyInitialize = Object.entries(sections).every(([key, value]) => {
-      if (key === 'type' || key === 'initialize') return true;
+      if (key === 'type') return true;
+      
       const sectionSchema = resolveSchema(value as OpenAPIV3.SchemaObject);
-      return !sectionSchema.additionalProperties;
+      
+      // Check if it's a block dictionary
+      if (sectionSchema.additionalProperties) return false;
+      
+      // Check if it's a root block parameter
+      if (sectionSchema.anyOf) return false;
+      
+      return true;
     });
     setHasSingleBlock(hasOnlyInitialize);
     if (hasOnlyInitialize) {
@@ -253,7 +284,8 @@ export function StepEditorForm({
   // Reset form when selection changes
   useEffect(() => {
     if (selectedSection && selectedBlock) {
-      const blockKey = `${selectedSection}-${selectedBlock}`;
+      // For root block parameters, use just the section name as the key
+      const blockKey = selectedSection === selectedBlock ? selectedSection : `${selectedSection}-${selectedBlock}`;
       const savedData = formData[blockKey];
       if (savedData) {
         reset(savedData);
@@ -287,7 +319,8 @@ export function StepEditorForm({
   // Update form data state
   const handleFormDataUpdate = (newData: any) => {
     if (selectedSection && selectedBlock) {
-      const blockKey = `${selectedSection}-${selectedBlock}`;
+      // For root block parameters, use just the section name as the key
+      const blockKey = selectedSection === selectedBlock ? selectedSection : `${selectedSection}-${selectedBlock}`;
       setFormData(prev => ({
         ...prev,
         [blockKey]: { ...prev[blockKey], ...newData }
@@ -297,18 +330,33 @@ export function StepEditorForm({
 
   const getBlockTypes = (section: string) => {
     const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
-    if (!sectionSchema.additionalProperties) return [];
-
-    const blockSchemas = sectionSchema.additionalProperties.anyOf || 
-                        [sectionSchema.additionalProperties];
     
-    return blockSchemas.map(schema => {
-      const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      return {
-        title: resolved.title || resolved.const || 'Unnamed Block',
-        description: resolved.description || 'No description available'
-      };
-    });
+    // Handle both dictionary blocks and root block parameters
+    if (sectionSchema.additionalProperties) {
+      const blockSchemas = sectionSchema.additionalProperties.anyOf || 
+                          [sectionSchema.additionalProperties];
+      
+      return blockSchemas.map(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        return {
+          title: resolved.title || resolved.const || 'Unnamed Block',
+          description: resolved.description || 'No description available'
+        };
+      });
+    }
+
+    // Handle root block parameters
+    if (sectionSchema.anyOf) {
+      return sectionSchema.anyOf.map(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        return {
+          title: resolved.title || resolved.const || 'Unnamed Block',
+          description: resolved.description || 'No description available'
+        };
+      });
+    }
+
+    return [];
   };
 
   const handleAddBlock = (blockType: BlockType) => {
@@ -424,6 +472,7 @@ export function StepEditorForm({
           <div className="h-full flex flex-col">
             <div className="h-full overflow-y-auto">
               <BlockList
+                spec={spec}
                 sections={sections}
                 blocks={blocks}
                 selectedSection={selectedSection}

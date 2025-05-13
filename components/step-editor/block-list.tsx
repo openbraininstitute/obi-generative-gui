@@ -4,8 +4,9 @@ import { OpenAPIV3 } from "openapi-types";
 import { Button } from "@/components/ui/button";
 import { Edit2, PlusCircle, Check, X, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { resolveSchemaRef } from "@/lib/api-client";
 
 interface BlockData {
   id: string;
@@ -13,7 +14,13 @@ interface BlockData {
   displayName: string;
 }
 
+interface BlockParameter {
+  name: string;
+  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+}
+
 interface BlockListProps {
+  spec: OpenAPIV3.Document;
   sections: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>;
   blocks: Record<string, BlockData[]>;
   selectedSection: string | null;
@@ -24,6 +31,17 @@ interface BlockListProps {
   onDeleteBlock: (section: string, blockId: string) => void;
   onGenerate: () => void;
   showGenerateButton: boolean;
+  onBlocksInit?: (section: string, blockTypes: BlockData[]) => void;
+}
+
+function resolveSchema(spec: OpenAPIV3.Document, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined): OpenAPIV3.SchemaObject {
+  if (!schema) {
+    return { type: 'object', properties: {} };
+  }
+  if ('$ref' in schema) {
+    return resolveSchemaRef(spec, schema.$ref);
+  }
+  return schema;
 }
 
 function getSectionDescription(section: string, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): string {
@@ -31,7 +49,20 @@ function getSectionDescription(section: string, schema: OpenAPIV3.SchemaObject |
   return schema.description || 'No description available';
 }
 
+function isBlockParameter(spec: OpenAPIV3.Document, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean {
+  const resolved = resolveSchema(spec, schema);
+  return resolved.anyOf !== undefined && !resolved.additionalProperties;
+}
+
+function getBlockParameters(sections: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>): BlockParameter[] {
+  return Object.entries(sections)
+    .filter(([name, schema]) => name !== 'initialize' && name !== 'type')
+    .map(([name, schema]) => ({ name, schema }))
+    .filter(param => isBlockParameter(this.spec, param.schema));
+}
+
 export function BlockList({
+  spec,
   sections,
   blocks,
   selectedSection,
@@ -41,10 +72,12 @@ export function BlockList({
   onUpdateBlockName,
   onDeleteBlock,
   onGenerate,
-  showGenerateButton,
+  showGenerateButton
 }: BlockListProps) {
   const [editingBlock, setEditingBlock] = useState<{ section: string; id: string } | null>(null);
   const [editedName, setEditedName] = useState("");
+
+  const blockParameters = getBlockParameters.bind({ spec })(sections);
 
   const handleStartEdit = (e: React.MouseEvent, section: string, block: BlockData) => {
     e.stopPropagation();
@@ -92,15 +125,42 @@ export function BlockList({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {Object.entries(sections).map(([sectionName]) => (
-            sectionName !== 'initialize' && (
+          {/* Block Parameters */}
+          {blockParameters.map(({ name }) => (
+            <div key={name} className="mt-4">
+              <div className="flex items-center justify-between px-3 mb-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        className={cn(
+                          "text-sm font-medium cursor-pointer w-full text-left",
+                          selectedSection === name ? "text-primary" : "text-muted-foreground"
+                        )}
+                        onClick={() => onSectionSelect(name, name)}
+                      >
+                        {name.toLowerCase().replace(/_/g, ' ')}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{getSectionDescription(name, sections[name])}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          ))}
+          
+          {/* Dictionary Blocks */}
+          {Object.entries(sections).map(([sectionName, schema]) => (
+            sectionName !== 'initialize' && !isBlockParameter(spec, schema) && (
               <div key={sectionName} className="mt-4">
                 <div className="flex items-center justify-between px-3 mb-1">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="text-sm font-medium text-muted-foreground cursor-pointer">
-                          {sectionName.toUpperCase().replace(/_/g, ' ')}
+                          {sectionName.toLowerCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
