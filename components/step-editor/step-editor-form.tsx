@@ -191,8 +191,25 @@ export function StepEditorForm({
     }
 
     const sectionSchema = resolveSchema(schema.properties?.[selectedSection] as OpenAPIV3.SchemaObject);
-    if (!sectionSchema.additionalProperties) return { schema: null, description: '' };
+    
+    // Handle root block parameters
+    if (sectionSchema.anyOf) {
+      const blockSchema = sectionSchema.anyOf.find(schema => {
+        const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
+        const matches = resolved.title === selectedBlock || resolved.const === selectedBlock;
+        if (matches) {
+          description = resolved.description || '';
+        }
+        return matches;
+      });
+      return {
+        schema: blockSchema ? resolveSchema(blockSchema as OpenAPIV3.SchemaObject) : null,
+        description
+      };
+    }
 
+    // Handle dictionary blocks
+    if (!sectionSchema.additionalProperties) return { schema: null, description: '' };
     const blockSchemas = sectionSchema.additionalProperties.anyOf || 
                         [sectionSchema.additionalProperties];
     
@@ -360,6 +377,16 @@ export function StepEditorForm({
   };
 
   const handleAddBlock = (blockType: BlockType) => {
+    // For root block parameters, just set the selected block
+    if (addingBlockSection === selectedSection) {
+      setSelectedBlock(blockType.title);
+      setIsAddingBlock(false);
+      setDialogSection("");
+      setAddingBlockSection("");
+      return;
+    }
+
+    // For dictionary blocks, create a new named block
     const nextIndex = blocks[dialogSection]?.filter(block => 
       block.displayName.startsWith(blockType.title.toLowerCase())
     ).length || 0;

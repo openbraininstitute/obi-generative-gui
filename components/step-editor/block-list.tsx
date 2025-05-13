@@ -51,7 +51,7 @@ function getSectionDescription(section: string, schema: OpenAPIV3.SchemaObject |
 
 function isBlockParameter(spec: OpenAPIV3.Document, schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject): boolean {
   const resolved = resolveSchema(spec, schema);
-  return resolved.anyOf !== undefined && !resolved.additionalProperties;
+  return resolved.anyOf !== undefined;
 }
 
 function getBlockParameters(sections: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>): BlockParameter[] {
@@ -132,21 +132,28 @@ export function BlockList({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
+                      <div
                         className={cn(
-                          "text-sm font-medium cursor-pointer w-full text-left",
+                          "text-sm font-medium text-muted-foreground cursor-pointer",
                           selectedSection === name ? "text-primary" : "text-muted-foreground"
                         )}
-                        onClick={() => onSectionSelect(name, name)}
                       >
                         {name.toLowerCase().replace(/_/g, ' ')}
-                      </button>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{getSectionDescription(name, sections[name])}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 flex-shrink-0"
+                  onClick={() => onAddBlock(name)}
+                >
+                  <PlusCircle className="h-3 w-3" />
+                </Button>
               </div>
             </div>
           ))}
