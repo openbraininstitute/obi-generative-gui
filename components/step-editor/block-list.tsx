@@ -138,7 +138,7 @@ export function BlockList({
                           selectedSection === name ? "text-primary" : "text-muted-foreground"
                         )}
                       >
-                        {name.toLowerCase().replace(/_/g, ' ')}
+                        {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/_/g, ' ')}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -167,7 +167,7 @@ export function BlockList({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="text-sm font-medium text-muted-foreground cursor-pointer">
-                          {sectionName.toLowerCase().replace(/_/g, ' ')}
+                          {sectionName.toUpperCase().replace(/_/g, ' ')}
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
