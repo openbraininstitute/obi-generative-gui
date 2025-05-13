@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// Core React hooks for state management and side effects
+import { useState, useEffect } from "react"; 
+
+// UI components and icons
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+
+// Workspace components for different views
 import { LibraryWorkspace } from "@/components/library-workspace";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectWorkspace } from "@/components/project-workspace";
@@ -19,26 +24,37 @@ import { PublicRuntimeConfig } from "@/lib/config.server";
 import { OpenAPIV3 } from "openapi-types";
 import { fetchOpenAPISpec } from "@/lib/api-client";
 
+/**
+ * Main home component that serves as the application's root layout
+ * Manages the overall application state and view switching
+ */
 export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
+  // State for workflow and step management
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<Array<{ path: string; name: string }>>([]);
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
   const [isAddingComponent, setIsAddingComponent] = useState(false);
+
+  // UI visibility states
   const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(true);
   const [isStepEditorVisible, setIsStepEditorVisible] = useState(true);
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
   const [isExploring, setIsExploring] = useState(false);
+
+  // View selection and API state
   const [selectedView, setSelectedView] = useState("workspace");
   const [spec, setSpec] = useState<OpenAPIV3.Document | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-select first component when components are added
   useEffect(() => {
     if (selectedComponents.length > 0 && !activeComponent && !isAddingComponent) {
       setActiveComponent(selectedComponents[0].path);
     }
   }, [selectedComponents, activeComponent, isAddingComponent]);
 
+  // Fetch OpenAPI specification on component mount
   useEffect(() => {
     fetchOpenAPISpec(config.API_URL).then(spec => {
       setSpec(spec);
@@ -51,11 +67,13 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Top navigation bar */}
       {/* Top Bar */}
       <header className="bg-[#002B69] p-4 flex items-center justify-between border-b border-blue-900">
         <div className="flex items-center space-x-4">
           <h1 className="text-white font-semibold text-lg">Open Brain Platform</h1>
         </div>
+        {/* View selector and theme toggle */}
         <div className="flex items-center space-x-4">
           <Select value={selectedView} onValueChange={setSelectedView}>
             <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
@@ -73,8 +91,10 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         </div>
       </header>
 
+      {/* Main content area with AI agent and workspace */}
       {/* Main Content Area */}
       <div className="flex-1 bg-[#002766] flex overflow-hidden pt-8">
+        {/* Left-side AI agent panel */}
         {!isAIAgentOnRight && (
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]"
@@ -99,8 +119,10 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           </div>
         )}
 
+        {/* Central workspace area */}
         {/* Right Side - Project Workspace and Step Editor */}
         <div className="flex-1 relative overflow-hidden">
+          {/* Main workspace content with transition animations */}
           <div className={cn(
             "absolute inset-0 transition-transform duration-500 ease-in-out",
             isExploring ? "translate-x-full pointer-events-none" : "translate-x-0"
@@ -109,7 +131,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
               <div className={cn(
                 "transition-all duration-300 ease-in-out",
                 isWorkspaceVisible 
-                  ? "flex-1 opacity-100 mb-2" 
+                  ? "flex-0 opacity-100 mb-1" 
                   : "h-0 opacity-0 pointer-events-none overflow-hidden"
               )}>
                 {selectedView === "workspace" ? (
@@ -217,6 +239,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
           </div>
         </div>
 
+        {/* Right-side AI agent panel (when enabled) */}
         {isAIAgentOnRight && (
           <div className={cn("relative transition-all duration-300 ease-in-out h-full",
             isAIAgentCollapsed ? "w-0" : "w-[400px]")}>
