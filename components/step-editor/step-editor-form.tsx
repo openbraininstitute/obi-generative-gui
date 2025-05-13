@@ -539,14 +539,19 @@ export function StepEditorForm({
       >
         {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
-        ) : selectedSection && selectedBlock && (
+        ) : selectedSection && (
           <div className="h-full flex flex-col">
             <div className="flex-none flex items-center px-6 py-4 border-b relative group">
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger asChild onClick={() => {
+                    if (selectedSection === selectedBlock) {
+                      setBlockTypes(getBlockTypes(selectedSection));
+                      setIsAddingBlock(true);
+                    }
+                  }}>
                     <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-pointer">
-                      {selectedBlock}
+                      {selectedSection === selectedBlock ? "Select" : selectedBlock}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -556,9 +561,12 @@ export function StepEditorForm({
               </TooltipProvider>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <form className="h-full flex flex-col">
+              {isAddingBlock ? (
+                <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
+              ) : (
+                <form className="h-full flex flex-col">
                 <div className="flex-1 divide-y">
-                  {(() => {
+                  {selectedBlock && (() => {
                     const blockSchema = getBlockSchema();
                     if (!blockSchema?.schema?.properties) return null;
                     
@@ -592,6 +600,7 @@ export function StepEditorForm({
                   </div>
                 )}
               </form>
+              )}
             </div>
           </div>
         )}
