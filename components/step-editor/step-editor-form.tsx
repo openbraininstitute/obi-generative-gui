@@ -655,7 +655,7 @@ export function StepEditorForm({
             />
           ) : (
             <ImageViewer 
-              src="/images/Microcircuits.png"
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/Microcircuits.png`}
               alt="Microcircuits visualization"
             />
           )}

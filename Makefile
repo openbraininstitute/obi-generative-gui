@@ -7,9 +7,8 @@ export COMMIT_SHA := $(shell git rev-parse HEAD)
 export IMAGE_NAME ?= $(APP_NAME)
 export IMAGE_TAG := $(APP_VERSION)
 export IMAGE_TAG_ALIAS := latest
-ifeq ($(ENVIRONMENT), prod)
-	export ROOT_PATH := /app/obi-generative-gui
-else
+export ROOT_PATH := /app/obi-generative-gui
+ifneq ($(ENVIRONMENT), prod)
 	export IMAGE_TAG := $(IMAGE_TAG)-$(ENVIRONMENT)
 	export IMAGE_TAG_ALIAS := $(IMAGE_TAG_ALIAS)-$(ENVIRONMENT)
 endif
