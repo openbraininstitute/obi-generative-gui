@@ -165,36 +165,38 @@ export function StepEditor({
       {selectedComponents.length > 0 && (
         <>
           <div className="flex-none px-6 py-4 border-b space-y-4">
-            <div className="flex items-center">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Version</Label>
-                <div className="w-[48px]">
-                  <Select
-                    value={selectedTask}
-                    onValueChange={setSelectedTask}
+            <div className="flex items-center justify-between">
+              {!isCNSMode && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium">Version</Label>
+                  <div className="w-[48px]">
+                    <Select
+                      value={selectedTask}
+                      onValueChange={setSelectedTask}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tasks.map((task) => (
+                          <SelectItem key={task.id} value={task.id}>
+                            {task.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleAddVersion}
+                    className="hover:bg-muted h-7 w-7"
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tasks.map((task) => (
-                        <SelectItem key={task.id} value={task.id}>
-                          {task.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleAddVersion}
-                  className="hover:bg-muted h-7 w-7"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="ml-8">
+              )}
+              <div className={cn(!isCNSMode && "ml-8")}>
                 <Tabs value={selectedTab} onValueChange={setSelectedTab}>
                   <TabsList className={cn("grid w-full", isCNSMode ? "grid-cols-2" : "grid-cols-3")}>
                     <TabsTrigger value="configure">Configure</TabsTrigger>
