@@ -195,15 +195,9 @@ export function StepEditor({
               <div className="ml-8">
                 <Tabs value={selectedTab} onValueChange={setSelectedTab}>
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="configure">
-                      Configure
-                    </TabsTrigger>
-                    <TabsTrigger value="artifacts">
-                      Artifacts
-                    </TabsTrigger>
-                    <TabsTrigger value="description">
-                      Description
-                    </TabsTrigger>
+                    <TabsTrigger value="configure">Configure</TabsTrigger>
+                    <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
+                    <TabsTrigger value="description">Description</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
