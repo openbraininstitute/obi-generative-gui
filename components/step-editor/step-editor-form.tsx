@@ -102,6 +102,7 @@ interface StepEditorFormProps {
   onFileSelect: (file: string) => void;     // Handler for file selection
   onFileChange: (file: string, content: string) => void;  // Handler for file content changes
   activeComponent: string;                  // Currently active component
+  isCNSMode: boolean;                       // Whether CNS mode is enabled
 }
 
 export function StepEditorForm({ 
@@ -116,7 +117,8 @@ export function StepEditorForm({
   files,
   onFileSelect,
   onFileChange,
-  activeComponent
+  activeComponent,
+  isCNSMode
 }: StepEditorFormProps) {
   // Form handling hooks from react-hook-form
   const { register, handleSubmit, setValue, watch, reset } = useForm();

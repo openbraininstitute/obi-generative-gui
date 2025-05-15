@@ -226,6 +226,8 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                       setIsAddingComponent(true);
                       setActiveComponent(null);
                     }}
+                    selectedComponents={selectedComponents}
+                    isCNSMode={isCNSMode}
                   />
                 </div>}
               </div>
@@ -261,6 +263,7 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                         API_URL={config.API_URL}
                         activeComponent={activeComponent || selectedComponents[0]?.path || null}
                         selectedComponents={selectedComponents}
+                        isCNSMode={isCNSMode}
                       />
                     </div>
                   </div>

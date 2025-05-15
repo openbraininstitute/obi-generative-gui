@@ -31,11 +31,13 @@ interface BlockType {
 export function StepEditor({ 
   API_URL,
   activeComponent,
-  selectedComponents 
+  selectedComponents,
+  isCNSMode
 }: { 
   API_URL: string;
   activeComponent: string | null;
   selectedComponents: Array<{ path: string; name: string }>;
+  isCNSMode: boolean;
 }) {
   const [selectedTask, setSelectedTask] = useState<string>("1");
   const [tasks, setTasks] = useState([{ id: '1', name: '1' }]);
@@ -194,10 +196,10 @@ export function StepEditor({
               </div>
               <div className="ml-8">
                 <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className={cn("grid w-full", isCNSMode ? "grid-cols-2" : "grid-cols-3")}>
                     <TabsTrigger value="configure">Configure</TabsTrigger>
-                    <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
-                    <TabsTrigger value="description">Description</TabsTrigger>
+                    <TabsTrigger value="artifacts">Coordinates</TabsTrigger>
+                    {!isCNSMode && <TabsTrigger value="description">Description</TabsTrigger>}
                   </TabsList>
                 </Tabs>
               </div>
@@ -277,6 +279,7 @@ export function StepEditor({
                   onFileChange={handleFileChange}
                   isAddingBlock={isAddingBlock}
                   activeComponent={activeComponent || selectedComponents[0]}
+                  isCNSMode={isCNSMode}
                 />
               )
             )}
