@@ -24,11 +24,7 @@ import { PublicRuntimeConfig } from "@/lib/config.server";
 import { OpenAPIV3 } from "openapi-types";
 import { fetchOpenAPISpec } from "@/lib/api-client";
 
-/**
- * Main home component that serves as the application's root layout
- * Manages the overall application state and view switching
- */
-export default function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
+function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
   // State for workflow and step management
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<Array<{ path: string; name: string }>>([]);
@@ -238,26 +234,28 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
                     ? "opacity-100"
                     : "opacity-0"
                 )}>
-                  <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
-                    <button
-                      className="p-1.5 text-white hover:text-white/80 transition-colors"
-                      onClick={() => setIsWorkspaceVisible(prev => !prev)}
-                    >
-                      <ChevronLeft 
-                        className={cn(
-                          "h-4 w-4 transform transition-transform",
-                          isWorkspaceVisible ? "rotate-90" : "-rotate-90"
-                        )}
-                      />
-                    </button>
-                  </div>
+                  {!isCNSMode && (
+                    <div className="absolute left-1/2 transform -translate-x-1/2 top-2 z-10">
+                      <button
+                        className="p-1.5 text-white hover:text-white/80 transition-colors"
+                        onClick={() => setIsWorkspaceVisible(prev => !prev)}
+                      >
+                        <ChevronLeft 
+                          className={cn(
+                            "h-4 w-4 transform transition-transform",
+                            isWorkspaceVisible ? "rotate-90" : "-rotate-90"
+                          )}
+                        />
+                      </button>
+                    </div>
+                  )}
                   <div className={cn(
                     "px-8 overflow-hidden space-y-2",
                     isWorkspaceVisible 
                       ? "h-[calc(100vh-20rem)]"
                       : "h-[calc(100vh-8rem)]"
                   )}>
-                    <h2 className="text-sm text-[#40A9FF] font-medium">STEP</h2>
+                    {!isCNSMode && <h2 className="text-sm text-[#40A9FF] font-medium">STEP</h2>}
                     <div className="h-[calc(100%-1.75rem)]">
                       <StepEditor 
                         API_URL={config.API_URL}
@@ -307,3 +305,5 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
     </div>
   );
 }
+
+export default HomeComponent;
