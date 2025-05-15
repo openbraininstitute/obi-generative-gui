@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 // UI components and icons
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/ui/label"; 
 import { Switch } from "@/components/ui/switch";
 
 // Workspace components for different views
@@ -41,6 +41,10 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
   const [isAIAgentCollapsed, setIsAIAgentCollapsed] = useState(false);
   const [isAIAgentOnRight, setIsAIAgentOnRight] = useState(false);
   const [isExploring, setIsExploring] = useState(false);
+  const [isCNSMode, setIsCNSMode] = useState(false);
+  const [selectedModelingLevel, setSelectedModelingLevel] = useState('');
+  const [selectedStage, setSelectedStage] = useState('');
+  const [selectedStepType, setSelectedStepType] = useState('');
 
   // View selection and API state
   const [selectedView, setSelectedView] = useState("workspace");
@@ -65,6 +69,30 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
     });
   }, [config.API_URL]);
 
+  useEffect(() => {
+    if (isCNSMode) {
+      // First select the workflow path
+      setSelectedView('workspace');
+      setSelectedStep('Circuit Activity');
+      
+      // Clear existing components and select SimulationsForm
+      setTimeout(() => {
+        setSelectedComponents([{
+          path: '/SimulationsForm',
+          name: 'Simulations'
+        }]);
+        setActiveComponent('/generated/simulations-generate-grid');
+        setIsWorkspaceVisible(false);
+        setIsAIAgentCollapsed(true);
+      }, 100);
+    } else {
+      setIsWorkspaceVisible(true);
+      setSelectedComponents([]);
+      setActiveComponent(null);
+      setIsAIAgentCollapsed(false);
+    }
+  }, [isCNSMode]);
+
   return (
     <div className="h-screen flex flex-col">
       {/* Top navigation bar */}
@@ -75,6 +103,15 @@ export default function HomeComponent({ config }: { config: PublicRuntimeConfig 
         </div>
         {/* View selector and theme toggle */}
         <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="cns-mode" className="text-white">CNS</Label>
+            <Switch
+              id="cns-mode"
+              checked={isCNSMode}
+              onCheckedChange={setIsCNSMode}
+              className="data-[state=checked]:bg-blue-400"
+            />
+          </div>
           <Select value={selectedView} onValueChange={setSelectedView}>
             <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
               <SelectValue placeholder="Select view" />
