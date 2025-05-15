@@ -109,20 +109,22 @@ function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
             />
           </div>
           {!isCNSMode && (
-            <Select value={selectedView} onValueChange={setSelectedView}>
-              <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
-                <SelectValue placeholder="Select view" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="workspace">Workspace</SelectItem>
-                <SelectItem value="explore">Explore</SelectItem>
-                <SelectItem value="labs">Labs/Projects</SelectItem>
-                <SelectItem value="paper">Paper</SelectItem>
-                <SelectItem value="library">Library</SelectItem>
-              </SelectContent>
-            </Select>
+            <>
+              <Select value={selectedView} onValueChange={setSelectedView}>
+                <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
+                  <SelectValue placeholder="Select view" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="workspace">Workspace</SelectItem>
+                  <SelectItem value="explore">Explore</SelectItem>
+                  <SelectItem value="labs">Labs/Projects</SelectItem>
+                  <SelectItem value="paper">Paper</SelectItem>
+                  <SelectItem value="library">Library</SelectItem>
+                </SelectContent>
+              </Select>
+              <ThemeToggle isCNSMode={false} />
+            </>
           )}
-          <ThemeToggle />
         </div>
       </header>
 

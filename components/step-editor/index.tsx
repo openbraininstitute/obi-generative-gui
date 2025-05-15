@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { latexExamples } from "@/lib/latex-examples";
@@ -164,7 +165,7 @@ export function StepEditor({
     <div className="bg-background rounded-lg shadow-lg border-2 border-blue-200/30 dark:border-gray-700 h-full flex flex-col">
       {selectedComponents.length > 0 && (
         <>
-          <div className="flex-none px-6 py-4 border-b space-y-4">
+          <div className="flex-none px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               {!isCNSMode && (
                 <div className="flex items-center gap-2">
@@ -196,7 +197,7 @@ export function StepEditor({
                   </Button>
                 </div>
               )}
-              <div className={cn(!isCNSMode && "ml-8")}>
+              <div className={cn("flex items-center gap-4", !isCNSMode && "ml-8", "flex-1")}>
                 <Tabs value={selectedTab} onValueChange={setSelectedTab}>
                   <TabsList className={cn("grid w-full", isCNSMode ? "grid-cols-2" : "grid-cols-3")}>
                     <TabsTrigger value="configure">Configure</TabsTrigger>
@@ -205,6 +206,7 @@ export function StepEditor({
                   </TabsList>
                 </Tabs>
               </div>
+              {isCNSMode && <ThemeToggle isCNSMode={true} />}
             </div>
           </div>
 
