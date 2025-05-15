@@ -108,18 +108,20 @@ function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
               className="data-[state=checked]:bg-blue-400"
             />
           </div>
-          <Select value={selectedView} onValueChange={setSelectedView}>
-            <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
-              <SelectValue placeholder="Select view" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="workspace">Workspace</SelectItem>
-              <SelectItem value="explore">Explore</SelectItem>
-              <SelectItem value="labs">Labs/Projects</SelectItem>
-              <SelectItem value="paper">Paper</SelectItem>
-              <SelectItem value="library">Library</SelectItem>
-            </SelectContent>
-          </Select>
+          {!isCNSMode && (
+            <Select value={selectedView} onValueChange={setSelectedView}>
+              <SelectTrigger className="w-[140px] bg-[#003A8C] border-blue-800 text-white">
+                <SelectValue placeholder="Select view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="workspace">Workspace</SelectItem>
+                <SelectItem value="explore">Explore</SelectItem>
+                <SelectItem value="labs">Labs/Projects</SelectItem>
+                <SelectItem value="paper">Paper</SelectItem>
+                <SelectItem value="library">Library</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           <ThemeToggle />
         </div>
       </header>
@@ -142,13 +144,15 @@ function HomeComponent({ config }: { config: PublicRuntimeConfig }) {
                 />
               </div>
             </div>
-            <ChevronLeft 
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200 z-50",
-                isAIAgentCollapsed ? "-right-8 rotate-180" : "-right-3"
-              )}
-              onClick={() => setIsAIAgentCollapsed(!isAIAgentCollapsed)}
-            />
+            {!isCNSMode && (
+              <ChevronLeft 
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-white hover:text-white/80 transition-all duration-200 z-50",
+                  isAIAgentCollapsed ? "-right-8 rotate-180" : "-right-3"
+                )}
+                onClick={() => setIsAIAgentCollapsed(!isAIAgentCollapsed)}
+              />
+            )}
           </div>
         )}
 
