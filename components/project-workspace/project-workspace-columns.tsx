@@ -11,6 +11,11 @@ interface ProjectWorkspaceColumnsProps {
   onStepSelect: (step: string | null) => void;
 }
 
+interface SelectedBlockInfo {
+  section: string;
+  blockId: string;
+}
+
 export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumnsProps) {
   const {
     selectedModelingLevel,
@@ -26,6 +31,7 @@ export function ProjectWorkspaceColumns({ onStepSelect }: ProjectWorkspaceColumn
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAddingTo, setIsAddingTo] = useState<'level' | 'stage' | 'stepType' | 'step' | null>(null);
   const [newItemName, setNewItemName] = useState('');
+  const [selectedBlockInfo, setSelectedBlockInfo] = useState<SelectedBlockInfo | null>(null);
 
   useEffect(() => {
     onStepSelect(selectedStep);

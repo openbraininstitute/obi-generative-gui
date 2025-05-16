@@ -123,9 +123,12 @@ export function StepEditorForm({
   // Form handling hooks from react-hook-form
   const { register, handleSubmit, setValue, watch, reset } = useForm();
   
-  // State management for various form aspects
-  const [selectedSection, setSelectedSection] = useState<string | null>("initialize");
-  const [selectedBlock, setSelectedBlock] = useState<string | null>("Initialize");
+  // State management for block selection and form data
+  const [selectedBlockInfo, setSelectedBlockInfo] = useState<{ section: string; blockId: string; blockType: string } | null>({
+    section: 'initialize',
+    blockId: 'initialize',
+    blockType: 'Initialize'
+  });
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>({});
   const [arrayFields, setArrayFields] = useState<Record<string, number>>({});
   const [dialogSection, setDialogSection] = useState<string>("");
@@ -183,22 +186,23 @@ export function StepEditorForm({
 
   // Gets the schema for the currently selected block
   const getBlockSchema = () => {
-    if (!selectedSection || !selectedBlock) return null;
+    if (!selectedBlockInfo) return null;
+    const { section, blockType } = selectedBlockInfo;
     
     let description = '';
-    if (selectedSection === 'initialize') {
+    if (section === 'initialize') {
       const initSchema = resolveSchema(schema.properties?.initialize as OpenAPIV3.SchemaObject);
       description = initSchema.description || '';
       return { schema: initSchema, description };
     }
 
-    const sectionSchema = resolveSchema(schema.properties?.[selectedSection] as OpenAPIV3.SchemaObject);
+    const sectionSchema = resolveSchema(schema.properties?.[section] as OpenAPIV3.SchemaObject);
     
     // Handle root block parameters
     if (sectionSchema.anyOf) {
       const blockSchema = sectionSchema.anyOf.find(schema => {
         const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-        const matches = resolved.title === selectedBlock || resolved.const === selectedBlock;
+        const matches = resolved.title === blockType || resolved.const === blockType;
         if (matches) {
           description = resolved.description || '';
         }
@@ -217,7 +221,7 @@ export function StepEditorForm({
     
     const blockSchema = blockSchemas.find(schema => {
       const resolved = resolveSchema(schema as OpenAPIV3.SchemaObject);
-      const matches = resolved.title === selectedBlock || resolved.const === selectedBlock;
+      const matches = resolved.title === blockType || resolved.const === blockType;
       if (matches) {
         description = resolved.description || '';
       }
@@ -294,30 +298,39 @@ export function StepEditorForm({
     });
     setHasSingleBlock(hasOnlyInitialize);
     if (hasOnlyInitialize) {
-      setSelectedSection('initialize');
-      setSelectedBlock('Initialize');
+      setSelectedBlockInfo({
+        section: 'initialize',
+        blockId: 'initialize',
+        blockType: 'Initialize'
+      });
       setIsAddingBlock(false);
     }
   }, [sections]);
 
   // Reset form when selection changes
   useEffect(() => {
-    if (selectedSection && selectedBlock) {
-      // For root block parameters, use just the section name as the key
-      const blockKey = selectedSection === selectedBlock ? selectedSection : `${selectedSection}-${selectedBlock}`;
+    if (selectedBlockInfo) {
+      const { section, blockId, blockType } = selectedBlockInfo;
+      const blockKey = `${section}-${blockId}`;
+      
       const savedData = formData[blockKey];
       if (savedData) {
+        // Add the block ID to the form data for reference
+        savedData._blockId = blockId;
         reset(savedData);
       } else {
-        reset({});
+        reset({ _blockId: blockId });
       }
       setIsAddingBlock(false);
     }
-  }, [selectedSection, selectedBlock]);
+  }, [selectedBlockInfo]);
 
   // Process and submit form data
   const handleFormSubmit = (data: any) => {
     const processedData = Object.entries(data).reduce((acc, [key, value]) => {
+      // Skip the internal block ID field
+      if (key === '_blockId') return acc;
+
       if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
         const values = Object.entries(value)
           .sort(([a], [b]) => parseInt(a) - parseInt(b))
@@ -337,9 +350,9 @@ export function StepEditorForm({
 
   // Update form data state
   const handleFormDataUpdate = (newData: any) => {
-    if (selectedSection && selectedBlock) {
-      // For root block parameters, use just the section name as the key
-      const blockKey = selectedSection === selectedBlock ? selectedSection : `${selectedSection}-${selectedBlock}`;
+    if (selectedBlockInfo) {
+      const { section, blockId } = selectedBlockInfo;
+      const blockKey = `${section}-${blockId}`;
       setFormData(prev => ({
         ...prev,
         [blockKey]: { ...prev[blockKey], ...newData }
@@ -380,8 +393,12 @@ export function StepEditorForm({
 
   const handleAddBlock = (blockType: BlockType) => {
     // For root block parameters, just set the selected block
-    if (addingBlockSection === selectedSection) {
-      setSelectedBlock(blockType.title);
+    if (addingBlockSection === selectedBlockInfo?.section) {
+      setSelectedBlockInfo({
+        section: addingBlockSection,
+        blockId: blockType.title,
+        blockType: blockType.title
+      });
       setIsAddingBlock(false);
       setDialogSection("");
       setAddingBlockSection("");
@@ -404,8 +421,11 @@ export function StepEditorForm({
       [addingBlockSection]: [...(prev[addingBlockSection] || []), newBlock]
     }));
     
-    setSelectedSection(addingBlockSection);
-    setSelectedBlock(blockType.title);
+    setSelectedBlockInfo({
+      section: addingBlockSection,
+      blockId: newBlock.id,
+      blockType: blockType.title
+    });
     setIsAddingBlock(false);
     setDialogSection("");
     setAddingBlockSection("");
@@ -504,11 +524,9 @@ export function StepEditorForm({
                 spec={spec}
                 sections={sections}
                 blocks={blocks}
-                selectedSection={selectedSection}
-                selectedBlock={selectedBlock}
-                onSectionSelect={(section, block) => {
-                  setSelectedSection(section);
-                  setSelectedBlock(block);
+                selectedBlockInfo={selectedBlockInfo}
+                onBlockSelect={(section, blockId, blockType) => {
+                  setSelectedBlockInfo({ section, blockId, blockType });
                   setIsAddingBlock(false);
                 }}
                 onAddBlock={(section) => {
@@ -516,8 +534,7 @@ export function StepEditorForm({
                   setAddingBlockSection(section);
                   setDialogSection(section);
                   setIsAddingBlock(true);
-                  setSelectedSection(null);
-                  setSelectedBlock(null);
+                  setSelectedBlockInfo(null);
                 }}
                 onUpdateBlockName={(section, blockId, newName) => {
                   if (section === 'initialize') return;
@@ -534,20 +551,23 @@ export function StepEditorForm({
                   if (section === 'initialize') return;
                   setBlocks(prev => ({
                     ...prev,
-                    [section]: prev[section]?.filter(block => block.id !== blockId) || []
+                    [section]: prev[section]?.filter(block => block.id !== blockId) || [],
                   }));
                   const deletedBlock = blocks[section]?.find(block => block.id === blockId);
                   if (deletedBlock) {
-                    const blockKey = `${section}-${deletedBlock.type}`;
+                    const blockKey = `${section}-${deletedBlock.id}`;
                     setFormData(prev => {
                       const newFormData = { ...prev };
                       delete newFormData[blockKey];
                       return newFormData;
                     });
                   }
-                  if (selectedSection === section && blocks[section]?.find(block => block.id === blockId)?.type === selectedBlock) {
-                    setSelectedSection('initialize');
-                    setSelectedBlock('Initialize');
+                  if (selectedBlockInfo?.section === section && selectedBlockInfo?.blockId === blockId) {
+                    setSelectedBlockInfo({
+                      section: 'initialize',
+                      blockId: 'initialize',
+                      blockType: 'Initialize'
+                    });
                   }
                 }}
                 onGenerate={handleSubmit(handleFormSubmit)}
@@ -568,19 +588,19 @@ export function StepEditorForm({
       >
         {isAddingBlock ? (
           <BlockTypeSelector blockTypes={blockTypes} onSelect={handleAddBlock} />
-        ) : selectedSection && (
+        ) : selectedBlockInfo && (
           <div className="h-full flex flex-col">
             <div className="flex-none flex items-center px-6 py-4 border-b relative group">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild onClick={() => {
-                    if (selectedSection === selectedBlock) {
-                      setBlockTypes(getBlockTypes(selectedSection));
+                    if (selectedBlockInfo?.section === selectedBlockInfo?.blockType) {
+                      setBlockTypes(getBlockTypes(selectedBlockInfo.section));
                       setIsAddingBlock(true);
                     }
                   }}>
                     <div className="text-sm px-2 py-1 rounded-md border text-muted-foreground cursor-pointer">
-                      {selectedSection === selectedBlock ? "Select" : selectedBlock}
+                      {selectedBlockInfo?.section === selectedBlockInfo?.blockType ? "Select" : selectedBlockInfo?.blockType}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -595,7 +615,7 @@ export function StepEditorForm({
               ) : (
                 <form className="h-full flex flex-col">
                 <div className="flex-1 divide-y">
-                  {selectedBlock && (() => {
+                  {selectedBlockInfo && (() => {
                     const blockSchema = getBlockSchema();
                     if (!blockSchema?.schema?.properties) return null;
                     

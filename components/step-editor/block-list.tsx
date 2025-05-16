@@ -23,9 +23,8 @@ interface BlockListProps {
   spec: OpenAPIV3.Document;
   sections: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>;
   blocks: Record<string, BlockData[]>;
-  selectedSection: string | null;
-  selectedBlock: string | null;
-  onSectionSelect: (section: string, block: string) => void;
+  selectedBlockInfo: { section: string; blockId: string } | null;
+  onBlockSelect: (section: string, blockId: string, blockType: string) => void;
   onAddBlock: (section: string) => void;
   onUpdateBlockName: (section: string, blockId: string, newName: string) => void;
   onDeleteBlock: (section: string, blockId: string) => void;
@@ -65,9 +64,8 @@ export function BlockList({
   spec,
   sections,
   blocks,
-  selectedSection,
-  selectedBlock,
-  onSectionSelect,
+  selectedBlockInfo,
+  onBlockSelect,
   onAddBlock,
   onUpdateBlockName,
   onDeleteBlock,
@@ -111,11 +109,11 @@ export function BlockList({
                 <button
                   className={cn(
                     "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
-                    selectedSection === 'initialize'
+                    selectedBlockInfo?.section === 'initialize'
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
-                  onClick={() => onSectionSelect('initialize', 'Initialize')}
+                  onClick={() => onBlockSelect('initialize', 'Initialize', 'Initialize')}
                 >
                   Initialize
                 </button>
@@ -135,7 +133,7 @@ export function BlockList({
                       <div
                         className={cn(
                           "text-sm font-medium text-muted-foreground cursor-pointer",
-                          selectedSection === name ? "text-primary" : "text-muted-foreground"
+                          selectedBlockInfo?.section === name ? "text-primary" : "text-muted-foreground"
                         )}
                       >
                         {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/_/g, ' ')}
@@ -220,18 +218,18 @@ export function BlockList({
                           <button
                             className={cn(
                               "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
-                              selectedSection === sectionName && selectedBlock === block.type
+                              selectedBlockInfo?.section === sectionName && selectedBlockInfo?.blockId === block.id
                                 ? "text-primary"
                                 : "text-muted-foreground"
                             )}
-                            onClick={() => onSectionSelect(sectionName, block.type)}
+                            onClick={() => onBlockSelect(sectionName, block.id, block.type)}
                             title={block.displayName}
                           >
                             <span className="block truncate">
                               {block.displayName}
                             </span>
                           </button>
-                          {selectedSection === sectionName && selectedBlock === block.type && (
+                          {selectedBlockInfo?.section === sectionName && selectedBlockInfo?.blockId === block.id && (
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                               <Button
                                 variant="ghost"

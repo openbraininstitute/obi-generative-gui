@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 
@@ -12,6 +12,12 @@ interface ImageViewerProps {
 export function ImageViewer({ src, alt }: ImageViewerProps) {
   const { theme } = useTheme();
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.5;
+    }
+  }, []);
 
   const isDark = theme === 'dark';
 
