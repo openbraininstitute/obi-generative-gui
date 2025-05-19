@@ -108,7 +108,7 @@ export function ArtifactsView() {
       <ScrollArea className="p-4">
         <div className="space-y-6">
           <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">INPUT</h2>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">INPUT FILES</h2>
             <div className="space-y-1">
               {selectedSimulation?.files.filter(file => file.name !== 'output.h5').map((file) => (
                 <button
@@ -126,7 +126,7 @@ export function ArtifactsView() {
             </div>
           </div>
           <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">OUTPUT</h2>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">OUTPUT FILES</h2>
             <div className="space-y-1">
               {selectedSimulation?.files.filter(file => file.name === 'output.h5').map((file) => (
                 <button
