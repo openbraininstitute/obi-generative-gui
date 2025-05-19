@@ -298,39 +298,49 @@ export function ArtifactsView() {
       <ScrollArea className="p-4">
         <div className="space-y-6">
           <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">INPUT FILES</h2>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">
+              INPUT FILES
+            </h2>
             <div className="space-y-1">
               {selectedSimulation?.files
                 .filter(file => file.type === 'input')
                 .map(renderFileButton)}
             </div>
           </div>
-          <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">OUTPUT FILES</h2>
-            <div className="space-y-1">
-              {selectedSimulation?.files
-                .filter(file => file.type === 'output')
-                .map(renderFileButton)}
-            </div>
-          </div>
-          <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">SUMMARY PLOTS</h2>
-            <div className="space-y-1">
-              <button
-                onClick={() => {
-                  setSelectedPlot('spike-raster');
-                  setSelectedFile(null);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-muted text-left",
-                  selectedPlot === 'spike-raster' ? "bg-muted" : "text-muted-foreground"
-                )}
-              >
-                <BarChart className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">Spike Raster</span>
-              </button>
-            </div>
-          </div>
+          {selectedSimulation?.status === 'Complete' && (
+            <>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-4">
+                  OUTPUT FILES
+                </h2>
+                <div className="space-y-1">
+                  {selectedSimulation?.files
+                    .filter(file => file.type === 'output')
+                    .map(renderFileButton)}
+                </div>
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-4">
+                  SUMMARY PLOTS
+                </h2>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      setSelectedPlot('spike-raster');
+                      setSelectedFile(null);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-muted text-left",
+                      selectedPlot === 'spike-raster' ? "bg-muted" : "text-muted-foreground"
+                    )}
+                  >
+                    <BarChart className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Spike Raster</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         {!selectedSimulation && (
           <div className="flex items-center justify-center h-[calc(100%-2rem)] text-sm text-muted-foreground">
@@ -343,19 +353,16 @@ export function ArtifactsView() {
       <div className="p-4">
         {selectedPlot === 'spike-raster' && (
           <div className="flex items-center justify-between mb-4">
-            <Select 
-            value={selectedNeuronSet} 
-            onValueChange={setSelectedNeuronSet}
-            >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select neuron set" />
-            </SelectTrigger>
-            <SelectContent>
-              {NEURON_SETS.map(set => (
-                <SelectItem key={set.id} value={set.id}>{set.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select value={selectedNeuronSet} onValueChange={setSelectedNeuronSet}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select neuron set" />
+              </SelectTrigger>
+              <SelectContent>
+                {NEURON_SETS.map(set => (
+                  <SelectItem key={set.id} value={set.id}>{set.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
         {selectedSimulation && (selectedFile || selectedPlot) ? (
