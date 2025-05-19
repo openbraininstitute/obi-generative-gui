@@ -19,7 +19,7 @@ const CodeEditor = dynamic(
 interface Simulation {
   id: string;
   name: string;
-  status: 'Generating' | 'Ready';
+  status: 'Generating' | 'Ready' | 'Queuing' | 'Running' | 'Complete';
   files: {
     name: string;
     content: string;
@@ -222,6 +222,9 @@ export function ArtifactsView() {
               <span className={cn(
                 "ml-auto text-xs px-1.5 py-0.5 rounded-full",
                 sim.status === 'Generating' ? "bg-muted text-muted-foreground" :
+                sim.status === 'Queuing' ? "bg-yellow-500/20 text-yellow-500" :
+                sim.status === 'Running' ? "bg-orange-500/20 text-orange-500" :
+                sim.status === 'Complete' ? "bg-green-500/20 text-green-500" :
                 "bg-blue-500/20 text-blue-500"
               )}>
                 {sim.status}
@@ -239,7 +242,37 @@ export function ArtifactsView() {
                 className="h-8"
                 style={{ backgroundColor: '#22c55e', color: 'white' }}
                 onClick={() => {
-                  // Handle launch
+                  const selectedIds = Array.from(selectedSimulations);
+                  
+                  // Set initial Queuing status
+                  setSimulations(prev => prev.map(sim => {
+                    if (selectedSimulations.has(sim.id)) {
+                      return { ...sim, status: 'Queuing' };
+                    }
+                    return sim;
+                  }));
+                  
+                  // After 2 seconds, change to Running
+                  setTimeout(() => {
+                    setSimulations(prev => prev.map(sim => {
+                      if (selectedIds.includes(sim.id)) {
+                        return { ...sim, status: 'Running' };
+                      }
+                      return sim;
+                    }));
+                    
+                    // After 3 more seconds, change to Complete
+                    setTimeout(() => {
+                      setSimulations(prev => prev.map(sim => {
+                        if (selectedIds.includes(sim.id)) {
+                          return { ...sim, status: 'Complete' };
+                        }
+                        return sim;
+                      }));
+                    }, 3000);
+                  }, 2000);
+                  
+                  setSelectedSimulations(new Set());
                 }}
               >
                 <Play className="h-3 w-3 mr-1" />
