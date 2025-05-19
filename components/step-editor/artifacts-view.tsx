@@ -139,16 +139,16 @@ export function ArtifactsView() {
   }, [simulations, selectedSimulation]);
 
   useEffect(() => {
-    // Wait 2 seconds before starting transitions
+    // Wait 1.5 seconds before starting transitions
     const timeout = setTimeout(() => {
       simulations.forEach((sim, index) => {
         setTimeout(() => {
           setSimulations(prev => prev.map((s, i) => 
             i === index ? { ...s, status: 'Ready' } : s
           ));
-        }, index * 250); // Transition each simulation 500ms after the previous one
+        }, index * 250); // Transition each simulation 250ms after the previous one
       });
-    }, 2000);
+    }, 1500);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -273,7 +273,7 @@ export function ArtifactsView() {
                     return sim;
                   }));
                   
-                  // After 2 seconds, change to Running
+                  // After 1 seconds, change to Running
                   setTimeout(() => {
                     setSimulations(prev => prev.map(sim => {
                       if (selectedIds.includes(sim.id)) {
@@ -282,7 +282,7 @@ export function ArtifactsView() {
                       return sim;
                     }));
                     
-                    // After 3 more seconds, change to Complete
+                    // After 1.5 more seconds, change to Complete
                     setTimeout(() => {
                       setSimulations(prev => prev.map(sim => {
                         if (selectedIds.includes(sim.id)) {
@@ -295,8 +295,8 @@ export function ArtifactsView() {
                         }
                         return sim;
                       }));
-                    }, 3000);
-                  }, 2000);
+                    }, 1500);
+                  }, 1000);
                   
                   setSelectedSimulations(new Set());
                 }}
