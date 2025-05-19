@@ -169,7 +169,7 @@ export function ArtifactsView() {
             >
               <Checkbox
                 checked={selectedSimulations.has(sim.id)}
-                className="h-3 w-3 flex-shrink-0"
+                className="h-2.5 w-2.5 flex-shrink-0 border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedSimulations(prev => {
