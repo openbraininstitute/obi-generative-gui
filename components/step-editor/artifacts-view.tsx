@@ -229,10 +229,10 @@ export function ArtifactsView() {
       <div className="p-4">
         {selectedPlot === 'spike-raster' && (
           <div className="flex items-center justify-between mb-4">
-          <Select 
+            <Select 
             value={selectedNeuronSet} 
             onValueChange={setSelectedNeuronSet}
-          >
+            >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select neuron set" />
             </SelectTrigger>
@@ -245,7 +245,7 @@ export function ArtifactsView() {
           </div>
         )}
         {selectedSimulation && (selectedFile || selectedPlot) ? (
-          <div className="h-[calc(100%-2rem)]">
+          <div className="h-[calc(100%-4rem)]">
             {selectedFile ? (
               <CodeEditor
                 value={selectedSimulation.files.find(f => f.name === selectedFile)?.content || ''}
@@ -261,7 +261,7 @@ export function ArtifactsView() {
               />
             ) : selectedPlot === 'spike-raster' ? (
               <div className="h-full flex items-center justify-center relative">
-                <div className="w-full h-full bg-black/5 dark:bg-white/5 rounded-lg p-8">
+                <div className="w-full h-full bg-black/5 dark:bg-white/5 rounded-lg p-4">
                   <div className="w-full h-full relative overflow-hidden">
                     <div className="absolute inset-0">
                       {spikes.map((spike, i) => (
