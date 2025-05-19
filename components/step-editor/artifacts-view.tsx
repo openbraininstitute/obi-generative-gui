@@ -203,7 +203,8 @@ export function ArtifactsView() {
             {simulations.some(sim => sim.status === 'Complete') && (
               <Button
                 size="sm" 
-                className="h-8 bg-orange-500 text-white hover:bg-orange-600"
+                variant="secondary"
+                className="h-8"
               >
                 Analyze
               </Button>
