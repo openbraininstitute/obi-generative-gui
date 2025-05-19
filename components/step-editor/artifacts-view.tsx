@@ -314,9 +314,7 @@ export function ArtifactsView() {
       <ScrollArea className="p-4">
         <div className="space-y-6">
           <div>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">
-              INPUT FILES
-            </h2>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">INPUT FILES</h2>
             <div className="space-y-1">
               {selectedSimulation?.files
                 .filter(file => file.type === 'input')
@@ -326,9 +324,7 @@ export function ArtifactsView() {
           {selectedSimulation?.status === 'Complete' && (
             <>
               <div>
-                <h2 className="text-sm font-medium text-muted-foreground mb-4">
-                  OUTPUT FILES
-                </h2>
+                <h2 className="text-sm font-medium text-muted-foreground mb-4">OUTPUT FILES</h2>
                 <div className="space-y-1">
                   {selectedSimulation?.files
                     .filter(file => file.type === 'output')
@@ -336,9 +332,7 @@ export function ArtifactsView() {
                 </div>
               </div>
               <div>
-                <h2 className="text-sm font-medium text-muted-foreground mb-4">
-                  SUMMARY PLOTS
-                </h2>
+                <h2 className="text-sm font-medium text-muted-foreground mb-4">SUMMARY PLOTS</h2>
                 <div className="space-y-1">
                   <button
                     onClick={() => {
@@ -367,7 +361,7 @@ export function ArtifactsView() {
 
       {/* File Content */}
       <div className="p-4">
-        {selectedPlot === 'spike-raster' && (
+        {selectedPlot === 'spike-raster' && selectedSimulation?.status === 'Complete' && (
           <div className="flex items-center justify-between mb-4">
             <Select value={selectedNeuronSet} onValueChange={setSelectedNeuronSet}>
               <SelectTrigger className="w-[200px]">
@@ -396,7 +390,7 @@ export function ArtifactsView() {
                   height: '100%'
                 }}
               />
-            ) : selectedPlot === 'spike-raster' ? (
+            ) : selectedPlot === 'spike-raster' && selectedSimulation?.status === 'Complete' ? (
               <div className="h-full flex items-center justify-center relative">
                 <div className="w-full h-full bg-black/5 dark:bg-white/5 rounded-lg p-4">
                   <div className="w-full h-full relative overflow-hidden">
