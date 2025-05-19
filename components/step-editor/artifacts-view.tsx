@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { FileText, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,7 +18,7 @@ const CodeEditor = dynamic(
 interface Simulation {
   id: string;
   name: string;
-  status: 'completed' | 'running' | 'failed';
+  status: 'Generating' | 'Ready';
   files: {
     name: string;
     content: string;
@@ -69,7 +72,7 @@ const MOCK_CAMPAIGN: SimulationCampaign = {
   simulations: Array.from({ length: 12 }, (_, i) => ({
     id: `sim-${i + 1}`,
     name: `Simulation ${i + 1}`,
-    status: i < 8 ? 'completed' : i < 10 ? 'running' : 'failed',
+    status: 'Generating',
     files: [
       {
         name: 'simulation_config.json',
@@ -121,6 +124,22 @@ export function ArtifactsView() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [selectedNeuronSet, setSelectedNeuronSet] = useState<string>('all');
+  const [simulations, setSimulations] = useState(MOCK_CAMPAIGN.simulations);
+
+  useEffect(() => {
+    // Wait 2 seconds before starting transitions
+    const timeout = setTimeout(() => {
+      simulations.forEach((sim, index) => {
+        setTimeout(() => {
+          setSimulations(prev => prev.map((s, i) => 
+            i === index ? { ...s, status: 'Ready' } : s
+          ));
+        }, index * 250); // Transition each simulation 500ms after the previous one
+      });
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   const generateSpikes = () => {
     const activeNeurons = NEURON_SETS.find(set => set.id === selectedNeuronSet)?.neurons || [];
@@ -169,7 +188,7 @@ export function ArtifactsView() {
           <h2 className="text-sm font-medium text-muted-foreground">SIMULATIONS</h2>
         </div>
         <div className="space-y-1">
-          {MOCK_CAMPAIGN.simulations.map((sim) => (
+          {simulations.map((sim) => (
             <button
               key={sim.id}
               onClick={() => {
@@ -200,9 +219,8 @@ export function ArtifactsView() {
               <span className="truncate">{sim.name}</span>
               <span className={cn(
                 "ml-auto text-xs px-1.5 py-0.5 rounded-full",
-                sim.status === 'completed' ? "bg-green-500/20 text-green-500" :
-                sim.status === 'running' ? "bg-blue-500/20 text-blue-500" :
-                "bg-red-500/20 text-red-500"
+                sim.status === 'Generating' ? "bg-muted text-muted-foreground" :
+                "bg-blue-500/20 text-blue-500"
               )}>
                 {sim.status}
               </span>
