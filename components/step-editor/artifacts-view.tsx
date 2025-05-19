@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FileText, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Activity, BarChart } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -116,6 +117,7 @@ const MOCK_CAMPAIGN: SimulationCampaign = {
 
 export function ArtifactsView() {
   const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(MOCK_CAMPAIGN.simulations[0]);
+  const [selectedSimulations, setSelectedSimulations] = useState<Set<string>>(new Set([MOCK_CAMPAIGN.simulations[0].id]));
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [selectedNeuronSet, setSelectedNeuronSet] = useState<string>('all');
@@ -165,7 +167,22 @@ export function ArtifactsView() {
                 selectedSimulation?.id === sim.id ? "bg-muted" : "text-muted-foreground"
               )}
             >
-              <FolderOpen className="h-4 w-4 flex-shrink-0" />
+              <Checkbox
+                checked={selectedSimulations.has(sim.id)}
+                className="h-3 w-3 flex-shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedSimulations(prev => {
+                    const next = new Set(prev);
+                    if (next.has(sim.id)) {
+                      next.delete(sim.id);
+                    } else {
+                      next.add(sim.id);
+                    }
+                    return next;
+                  });
+                }}
+              />
               <span className="truncate">{sim.name}</span>
               <span className={cn(
                 "ml-auto text-xs px-1.5 py-0.5 rounded-full",
