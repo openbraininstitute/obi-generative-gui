@@ -68,7 +68,7 @@ const MOCK_CAMPAIGN: SimulationCampaign = {
 };
 
 export function ArtifactsView() {
-  const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(null);
+  const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(MOCK_CAMPAIGN.simulations[0]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   return (
@@ -106,24 +106,45 @@ export function ArtifactsView() {
 
       {/* Files List */}
       <ScrollArea className="p-4">
-        <h2 className="text-sm font-medium text-muted-foreground mb-4">FILES</h2>
-        {selectedSimulation ? (
-          <div className="space-y-1">
-            {selectedSimulation.files.map((file) => (
-              <button
-                key={file.name}
-                onClick={() => setSelectedFile(file.name)}
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-muted text-left",
-                  selectedFile === file.name ? "bg-muted" : "text-muted-foreground"
-                )}
-              >
-                <FileText className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{file.name}</span>
-              </button>
-            ))}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">INPUT</h2>
+            <div className="space-y-1">
+              {selectedSimulation?.files.filter(file => file.name !== 'output.h5').map((file) => (
+                <button
+                  key={file.name}
+                  onClick={() => setSelectedFile(file.name)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-muted text-left",
+                    selectedFile === file.name ? "bg-muted" : "text-muted-foreground"
+                  )}
+                >
+                  <FileText className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{file.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">OUTPUT</h2>
+            <div className="space-y-1">
+              {selectedSimulation?.files.filter(file => file.name === 'output.h5').map((file) => (
+                <button
+                  key={file.name}
+                  onClick={() => setSelectedFile(file.name)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-muted text-left",
+                    selectedFile === file.name ? "bg-muted" : "text-muted-foreground"
+                  )}
+                >
+                  <FileText className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{file.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        {!selectedSimulation && (
           <div className="flex items-center justify-center h-[calc(100%-2rem)] text-sm text-muted-foreground">
             Select a simulation to view files
           </div>
