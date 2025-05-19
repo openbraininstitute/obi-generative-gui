@@ -5,9 +5,10 @@ import { useEffect } from 'react';
 import { FileText, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, BarChart } from 'lucide-react';
+import { Activity, BarChart, Play, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const CodeEditor = dynamic(
@@ -119,8 +120,8 @@ const MOCK_CAMPAIGN: SimulationCampaign = {
 };
 
 export function ArtifactsView() {
-  const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(MOCK_CAMPAIGN.simulations[0]);
-  const [selectedSimulations, setSelectedSimulations] = useState<Set<string>>(new Set([MOCK_CAMPAIGN.simulations[0].id]));
+  const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(null);
+  const [selectedSimulations, setSelectedSimulations] = useState<Set<string>>(new Set());
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [selectedNeuronSet, setSelectedNeuronSet] = useState<string>('all');
@@ -171,7 +172,8 @@ export function ArtifactsView() {
   return (
     <div className="grid grid-cols-[250px_300px_1fr] h-full divide-x">
       {/* Simulations List */}
-      <ScrollArea className="p-4">
+      <div className="flex flex-col h-full">
+        <ScrollArea className="flex-1 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Checkbox
             checked={selectedSimulations.size === MOCK_CAMPAIGN.simulations.length}
@@ -227,7 +229,37 @@ export function ArtifactsView() {
             </button>
           ))}
         </div>
-      </ScrollArea>
+        </ScrollArea>
+        {selectedSimulations.size > 0 && (
+          <div className="flex-none p-4 border-t space-x-2">
+            <div className="flex justify-end gap-2">
+              <Button 
+                size="sm"
+                variant="default"
+                className="h-8"
+                style={{ backgroundColor: '#22c55e', color: 'white' }}
+                onClick={() => {
+                  // Handle launch
+                }}
+              >
+                <Play className="h-3 w-3 mr-1" />
+                Launch
+              </Button>
+              <Button 
+                size="sm"
+                variant="destructive"
+                className="h-8"
+                onClick={() => {
+                  // Handle delete
+                }}
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Files List */}
       <ScrollArea className="p-4">
