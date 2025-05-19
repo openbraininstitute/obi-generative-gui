@@ -342,10 +342,7 @@ export function StepEditorForm({
       return acc;
     }, {} as any);
 
-    onSubmit({
-      ...processedData,
-      type: selectedBlock
-    });
+    onSubmit(processedData);
   };
 
   // Update form data state

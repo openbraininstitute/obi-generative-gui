@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchOpenAPISpec, getSchemaFromPath, callEndpoint } from "@/lib/api-client";
 import { StepEditorForm } from "./step-editor-form";
+import { useRouter } from "next/navigation";
 import { OpenAPIV3 } from "openapi-types";
 import { AlertCircle, Plus, Settings, FileText, Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -54,6 +55,7 @@ export function StepEditor({
   const [addingBlockSection, setAddingBlockSection] = useState<string>("");
   const [blockTypes, setBlockTypes] = useState<BlockType[]>([]);
   const [files, setFiles] = useState<Record<string, string>>(latexExamples);
+  const router = useRouter();
 
   const handleAddVersion = () => {
     const nextVersion = tasks.length + 1;
@@ -90,21 +92,7 @@ export function StepEditor({
   };
 
   const handleSubmit = async (data: any) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const result = await callEndpoint(API_URL, selectedMethod, selectedComponents[0].path, data);
-      setResponse(result);
-      
-      if (!result.ok) {
-        setError(`API Error: ${result.data?.detail || 'Unknown error occurred'}`);
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to call endpoint');
-    } finally {
-      setLoading(false);
-    }
+    setSelectedTab("artifacts");
   };
 
   const handleFileChange = (file: string, content: string) => {
@@ -235,7 +223,7 @@ export function StepEditor({
                     onAddBlock={handleAddBlock}
                     onUpdateBlockName={handleUpdateBlockName}
                     onDeleteBlock={handleDeleteBlock}
-                    onGenerate={handleSubmit(handleFormSubmit)}
+                    onGenerate={() => handleSubmit({})}
                   />
                 </div>
                 <div className="p-6">
