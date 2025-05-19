@@ -198,7 +198,17 @@ export function ArtifactsView() {
               });
             }}
           />
-          <h2 className="text-sm font-medium text-muted-foreground">SIMULATIONS</h2>
+          <div className="flex items-center justify-between w-full">
+            <h2 className="text-sm font-medium text-muted-foreground">SIMULATIONS</h2>
+            {simulations.some(sim => sim.status === 'Complete') && (
+              <Button
+                size="sm" 
+                className="h-8 bg-orange-500 text-white hover:bg-orange-600"
+              >
+                Analyze
+              </Button>
+            )}
+          </div>
         </div>
         <div className="space-y-1">
           {simulations.map((sim) => (
