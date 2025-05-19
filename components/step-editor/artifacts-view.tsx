@@ -125,7 +125,18 @@ export function ArtifactsView() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [selectedNeuronSet, setSelectedNeuronSet] = useState<string>('all');
-  const [simulations, setSimulations] = useState(MOCK_CAMPAIGN.simulations);
+  const [simulations, setSimulations] = useState<Simulation[]>(MOCK_CAMPAIGN.simulations);
+
+  // Update middle panel when selected simulation completes
+  useEffect(() => {
+    if (selectedSimulation) {
+      const updatedSim = simulations.find(sim => sim.id === selectedSimulation.id);
+      if (updatedSim?.status === 'Complete') {
+        setSelectedPlot('spike-raster');
+        setSelectedFile(null);
+      }
+    }
+  }, [simulations, selectedSimulation]);
 
   useEffect(() => {
     // Wait 2 seconds before starting transitions
@@ -265,7 +276,12 @@ export function ArtifactsView() {
                     setTimeout(() => {
                       setSimulations(prev => prev.map(sim => {
                         if (selectedIds.includes(sim.id)) {
-                          return { ...sim, status: 'Complete' };
+                          const completedSim = { ...sim, status: 'Complete' };
+                          // If this is the selected simulation, update selectedSimulation
+                          if (selectedSimulation?.id === sim.id) {
+                            setSelectedSimulation(completedSim);
+                          }
+                          return completedSim;
                         }
                         return sim;
                       }));
