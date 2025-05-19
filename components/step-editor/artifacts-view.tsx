@@ -153,7 +153,21 @@ export function ArtifactsView() {
     <div className="grid grid-cols-[250px_300px_1fr] h-full divide-x">
       {/* Simulations List */}
       <ScrollArea className="p-4">
-        <h2 className="text-sm font-medium text-muted-foreground mb-4">SIMULATIONS</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <Checkbox
+            checked={selectedSimulations.size === MOCK_CAMPAIGN.simulations.length}
+            className="h-2.5 w-2.5 flex-shrink-0 border data-[state=checked]:bg-muted-foreground data-[state=checked]:border-muted-foreground"
+            onClick={() => {
+              setSelectedSimulations(prev => {
+                if (prev.size === MOCK_CAMPAIGN.simulations.length) {
+                  return new Set();
+                }
+                return new Set(MOCK_CAMPAIGN.simulations.map(sim => sim.id));
+              });
+            }}
+          />
+          <h2 className="text-sm font-medium text-muted-foreground">SIMULATIONS</h2>
+        </div>
         <div className="space-y-1">
           {MOCK_CAMPAIGN.simulations.map((sim) => (
             <button
