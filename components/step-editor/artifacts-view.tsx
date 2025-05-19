@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, BarChart, Play, Trash2 } from 'lucide-react';
+import { Download, BarChart, Play, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const CodeEditor = dynamic(
@@ -302,8 +302,17 @@ export function ArtifactsView() {
                   setSelectedSimulations(new Set());
                 }}
               >
-                <Play className="h-3 w-3 mr-1" />
-                Launch
+                <Play className="h-4 w-4" />
+              </Button>
+              <Button 
+                size="sm"
+                variant="outline"
+                className="h-8"
+                onClick={() => {
+                  // Handle download
+                }}
+              >
+                <Download className="h-4 w-4" />
               </Button>
               <Button 
                 size="sm"
@@ -313,8 +322,7 @@ export function ArtifactsView() {
                   // Handle delete
                 }}
               >
-                <Trash2 className="h-3 w-3 mr-1" />
-                Delete
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
