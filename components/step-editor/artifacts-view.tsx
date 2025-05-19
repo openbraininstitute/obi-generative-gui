@@ -262,7 +262,7 @@ export function ArtifactsView() {
                 size="sm"
                 variant="default"
                 className="h-8"
-                style={{ backgroundColor: '#22c55e', color: 'white' }}
+                style={{ backgroundColor: '#22c55e', color: 'white', width: '80px' }}
                 onClick={() => {
                   const selectedIds = Array.from(selectedSimulations);
                   
@@ -302,7 +302,7 @@ export function ArtifactsView() {
                   setSelectedSimulations(new Set());
                 }}
               >
-                <Play className="h-4 w-4" />
+                Launch
               </Button>
               <Button 
                 size="sm"
