@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { useEffect } from 'react';
-import { FileText, FolderOpen } from 'lucide-react';
+import { FileText, FolderOpen, Download, BarChart, Play, Trash2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, BarChart, Play, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -122,6 +123,7 @@ const MOCK_CAMPAIGN: SimulationCampaign = {
 export function ArtifactsView() {
   const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(null);
   const [selectedSimulations, setSelectedSimulations] = useState<Set<string>>(new Set());
+  const [showDialog, setShowDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
   const [selectedNeuronSet, setSelectedNeuronSet] = useState<string>('all');
@@ -201,13 +203,32 @@ export function ArtifactsView() {
           <div className="flex items-center justify-between w-full">
             <h2 className="text-sm font-medium text-muted-foreground">SIMULATIONS</h2>
             {simulations.some(sim => sim.status === 'Complete') && (
-              <Button
-                size="sm" 
-                variant="secondary"
-                className="h-8"
-              >
-                Analyze
-              </Button>
+              <>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="h-8"
+                        onClick={() => setShowDialog(true)}
+                      >
+                        Analyze
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">For CNS this will launch a Jupyter Notebook</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Dialog open={showDialog} onOpenChange={setShowDialog}>
+                  <DialogContent className="sm:max-w-md">
+                    <div className="flex flex-col gap-4 py-4">
+                      <p className="text-sm">For CNS this will launch a Jupyter Notebook</p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
           </div>
         </div>
