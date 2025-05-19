@@ -1,12 +1,12 @@
 "use client";
 
-import { OpenAPIV3 } from "openapi-types";
+import { OpenAPIV3 } from "openapi-types"; 
+import { ChevronRight, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Edit2, PlusCircle, Check, X, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { resolveSchemaRef } from "@/lib/api-client";
+import { useState } from "react";
 
 interface BlockData {
   id: string;
@@ -72,198 +72,129 @@ export function BlockList({
   onGenerate,
   showGenerateButton
 }: BlockListProps) {
-  const [editingBlock, setEditingBlock] = useState<{ section: string; id: string } | null>(null);
-  const [editedName, setEditedName] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['initialize']));
 
   const blockParameters = getBlockParameters.bind({ spec })(sections);
 
-  const handleStartEdit = (e: React.MouseEvent, section: string, block: BlockData) => {
-    e.stopPropagation();
-    setEditingBlock({ section, id: block.id });
-    setEditedName(block.displayName);
-  };
-
-  const handleSaveEdit = (e: React.MouseEvent, section: string, blockId: string) => {
-    e.stopPropagation();
-    onUpdateBlockName(section, blockId, editedName);
-    setEditingBlock(null);
-  };
-
-  const handleCancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingBlock(null);
-  };
-
-  const handleDelete = (e: React.MouseEvent, section: string, blockId: string) => {
-    e.stopPropagation();
-    onDeleteBlock(section, blockId);
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
   };
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="space-y-1 p-4">
+        <div className="p-1">
+          {/* Initialization Section */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
-                  className={cn(
-                    "w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
-                    selectedBlockInfo?.section === 'initialize'
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                  onClick={() => onBlockSelect('initialize', 'Initialize', 'Initialize')}
-                >
-                  Initialize
-                </button>
+                <div className="mb-1">
+                  <button
+                    className={cn(
+                      "w-full text-left px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-900/50 rounded-sm transition-colors",
+                      selectedBlockInfo?.section === 'initialize'
+                        ? "text-primary"
+                        : "text-foreground hover:bg-gray-100 dark:hover:bg-gray-900/80"
+                    )}
+                    onClick={() => onBlockSelect('initialize', 'Initialize', 'Initialize')}
+                  >
+                    Initialization
+                  </button>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{getSectionDescription('initialize', sections.initialize)}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {/* Block Parameters */}
-          {blockParameters.map(({ name }) => (
-            <div key={name} className="mt-4">
-              <div className="flex items-center justify-between px-3 mb-1">
+
+          {/* Other Sections */}
+          <div>
+            {Object.entries(sections).map(([sectionName, schema]) => (
+              sectionName !== 'initialize' && sectionName !== 'type' && (
+              <div key={sectionName}>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div
+                      <button
+                        onClick={() => toggleSection(sectionName)}
                         className={cn(
-                          "text-sm font-medium text-muted-foreground cursor-pointer",
-                          selectedBlockInfo?.section === name ? "text-primary" : "text-muted-foreground"
+                          "w-full flex items-center px-3 py-1.5 text-sm font-medium transition-colors",
+                          expandedSections.has(sectionName) ? "bg-gray-50 dark:bg-gray-900/50" : "hover:bg-gray-50 dark:hover:bg-gray-900/50"
                         )}
                       >
-                        {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/_/g, ' ')}
-                      </div>
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 transition-transform",
+                              !expandedSections.has(sectionName) && "-rotate-90"
+                            )}
+                          />
+                          <span className="text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 px-1.5 rounded">
+                            {blocks[sectionName]?.length || 0}
+                          </span>
+                          <span>{sectionName.charAt(0).toUpperCase() + sectionName.slice(1).toLowerCase().replace(/_/g, ' ')}</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddBlock(sectionName);
+                            }}
+                            className={cn(
+                              "h-6 w-6 flex items-center justify-center",
+                              "text-muted-foreground hover:text-primary",
+                              "transition-colors"
+                            )}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{getSectionDescription(name, sections[name])}</p>
+                      <p>{getSectionDescription(sectionName, schema)}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 flex-shrink-0"
-                  onClick={() => onAddBlock(name)}
-                >
-                  <PlusCircle className="h-3 w-3" />
-                </Button>
+
+                {expandedSections.has(sectionName) && (
+                  <div className="pl-6 pr-2">
+                    {blocks[sectionName]?.map((block) => (
+                      <div
+                        key={block.id}
+                        className={cn(
+                          "w-full text-left px-3 py-1 text-sm transition-colors",
+                          selectedBlockInfo?.section === sectionName && selectedBlockInfo?.blockId === block.id
+                            ? "text-primary bg-gray-50 dark:bg-gray-900/50"
+                            : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                        )}
+                        onClick={() => onBlockSelect(sectionName, block.id, block.type)}
+                      >
+                        {block.displayName}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-          
-          {/* Dictionary Blocks */}
-          {Object.entries(sections).map(([sectionName, schema]) => (
-            sectionName !== 'initialize' && !isBlockParameter(spec, schema) && (
-              <div key={sectionName} className="mt-4">
-                <div className="flex items-center justify-between px-3 mb-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-sm font-medium text-muted-foreground cursor-pointer">
-                          {sectionName.toUpperCase().replace(/_/g, ' ')}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{getSectionDescription(sectionName, sections[sectionName])}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5 flex-shrink-0"
-                    onClick={() => onAddBlock(sectionName)}
-                  >
-                    <PlusCircle className="h-3 w-3" />
-                  </Button>
-                </div>
-                <div className="space-y-1 pl-4">
-                  {(blocks[sectionName] || []).map((block) => (
-                    <div key={block.id} className="group">
-                      {editingBlock?.section === sectionName && editingBlock?.id === block.id ? (
-                        <div className="flex items-center gap-1 px-3 py-1">
-                          <input
-                            value={editedName}
-                            onChange={(e) => setEditedName(e.target.value)}
-                            className="h-6 text-sm flex-1 px-2 rounded border"
-                            onClick={(e) => e.stopPropagation()}
-                            autoFocus
-                          />
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={(e) => handleSaveEdit(e, sectionName, block.id)}
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={handleCancelEdit}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center min-w-0">
-                          <button
-                            className={cn(
-                              "flex-1 min-w-0 text-left px-3 py-1.5 text-sm transition-colors hover:bg-muted rounded-sm",
-                              selectedBlockInfo?.section === sectionName && selectedBlockInfo?.blockId === block.id
-                                ? "text-primary"
-                                : "text-muted-foreground"
-                            )}
-                            onClick={() => onBlockSelect(sectionName, block.id, block.type)}
-                            title={block.displayName}
-                          >
-                            <span className="block truncate">
-                              {block.displayName}
-                            </span>
-                          </button>
-                          {selectedBlockInfo?.section === sectionName && selectedBlockInfo?.blockId === block.id && (
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={(e) => handleStartEdit(e, sectionName, block)}
-                              >
-                                <Edit2 className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={(e) => handleDelete(e, sectionName, block.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          ))}
+              )
+            ))}
+          </div>
         </div>
       </div>
       {showGenerateButton && (
-        <div className="flex-none p-4 border-t">
+        <div className="flex-none p-3 border-t">
           <Button 
             onClick={onGenerate}
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             size="sm"
           >
             Generate
